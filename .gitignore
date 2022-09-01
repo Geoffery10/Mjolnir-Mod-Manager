@@ -3,6 +3,7 @@ shaderpacks/
 mods/
 config/
 fabric-installer.exe
+install/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
