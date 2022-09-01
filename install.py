@@ -356,4 +356,7 @@ if __name__ == '__main__':
     check_install_integrity()
 
     print(Fore.MAGENTA + '\nAll Done! Thank you for using my modpack installer!')
+    print(Fore.GREEN + 'Press Enter to exit...')
+    # Wait for user to close with enter key
+    input()
 
