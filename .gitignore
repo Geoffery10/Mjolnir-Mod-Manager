@@ -1,3 +1,9 @@
+# Game Files to Ingore
+shaderpacks/
+mods/
+config/
+fabric-installer.exe
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
