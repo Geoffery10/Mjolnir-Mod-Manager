@@ -10,15 +10,22 @@ import datetime
 import subprocess
 import colorama
 from colorama import Fore, Back, Style
+import urllib.request
+import json
 
 PACK_NAME = ''
+PACK_VERSION = ''
 CURRENT_VERSION = ''
 GAME = ''
 GAME_VERSION = ''
-FABRIC_VERSION = ''
+MOD_LOADER = ''
+MOD_LOADER_VERSION = ''
 APPDATA_PATH = os.getenv('APPDATA')
 PATH = ''
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+URL=''
+PACK = {}
+FILES = []
 
 # Color Presets
 # ERROR_COLOR = Back.RED + Fore.WHITE
@@ -26,38 +33,117 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 def get_dotenv():
     load_dotenv()
-    global PACK_NAME
     global CURRENT_VERSION
+    global URL
+    CURRENT_VERSION = os.getenv('CURRENT_VERSION')
+    URL = os.getenv('URL')
+
+def get_json():
+    global CURRENT_VERSION
+    global URL
+    print(Fore.GREEN + 'Getting Packs from Internet...')
+    response = urllib.request.urlopen(URL)
+    # Check if response is valid
+    if response.status == 200:
+        data = json.loads(response.read())
+        print(Fore.GREEN + f'Packs v{data["CURRENT_VERSION"]} received!')
+
+        packs = []
+        for pack in data['PACKS']:
+            packs.append(pack)
+        select_pack(packs)
+    else:
+        print(Back.RED + 'Invalid response from server!')
+        exit()
+
+def select_pack(packs):
+
     global GAME
     global GAME_VERSION
-    PACK_NAME = os.getenv('PACK_NAME')
-    CURRENT_VERSION = os.getenv('CURRENT_VERSION')
-    GAME = os.getenv('GAME')
-    GAME_VERSION = os.getenv('GAME_VERSION')
-    if GAME == 'Minecraft':
-        global FABRIC_VERSION
-        FABRIC_VERSION = os.getenv('FABRIC_VERSION')
+    global MOD_LOADER
+    global MOD_LOADER_VERSION
+    global PACK_NAME
+    global PACK_VERSION
+    global PACK
+    print(Fore.YELLOW + 'Which pack would you like to install?')
+    for i in range(len(packs)):  # Alternate between Fore.MAGENTA and Fore.WHITE
+        if i % 2 == 0:
+            print(Fore.MAGENTA + 
+                f"\t{i+1}. {packs[i]['PACK_NAME']} - {packs[i]['GAME']} [{packs[i]['GAME_VERSION']}]")
+        else:
+            print(Fore.WHITE + 
+                f"\t{i+1}. {packs[i]['PACK_NAME']} - {packs[i]['GAME']} [{packs[i]['GAME_VERSION']}]")
+    choice = input()
+    try:
+        choice = int(choice)
+        if choice > len(packs) or choice < 1:
+            print(Back.RED + 'Invalid choice! Please try again.')
+            select_pack(packs)
+        else:
+            selected_pack = packs[choice-1]
+            GAME = selected_pack['GAME']
+            GAME_VERSION = selected_pack['GAME_VERSION']
+            MOD_LOADER = selected_pack['MOD_LOADER']
+            MOD_LOADER_VERSION = selected_pack['MOD_LOADER_VERSION']
+            PACK_NAME = selected_pack['PACK_NAME']
+            PACK_VERSION = selected_pack['PACK_VERSION']
+            PACK = selected_pack
+            print(
+                Fore.GREEN + f"Installing {selected_pack['PACK_NAME']} - {selected_pack['GAME']} [{selected_pack['GAME_VERSION']}]")
+    except ValueError:
+        print(Back.RED + 'Invalid choice! Please try again.')
+        select_pack(packs)
 
 def print_title():
-    if GAME == 'Minecraft':
-        print(Back.MAGENTA + '')
-        print(Back.MAGENTA + '██╗   ██╗ ██████╗  ██████╗ ██████╗ ██████╗  █████╗ ███████╗██╗██╗         ███╗   ███╗ ██████╗ ██████╗ ███████╗')
-        print(Back.MAGENTA + '╚██╗ ██╔╝██╔════╝ ██╔════╝ ██╔══██╗██╔══██╗██╔══██╗██╔════╝██║██║         ████╗ ████║██╔═══██╗██╔══██╗██╔════╝')
-        print(Back.MAGENTA + ' ╚████╔╝ ██║  ███╗██║  ███╗██║  ██║██████╔╝███████║███████╗██║██║         ██╔████╔██║██║   ██║██║  ██║███████╗')
-        print(Back.MAGENTA + '  ╚██╔╝  ██║   ██║██║   ██║██║  ██║██╔══██╗██╔══██║╚════██║██║██║         ██║╚██╔╝██║██║   ██║██║  ██║╚════██║')
-        print(Back.MAGENTA + '   ██║   ╚██████╔╝╚██████╔╝██████╔╝██║  ██║██║  ██║███████║██║███████╗    ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████║')
-        print(Back.MAGENTA + '   ╚═╝    ╚═════╝  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝╚══════╝    ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝')
-        print(Back.MAGENTA + '                                                                                                              ')
+    global PACK
+    if PACK['BANNER_URL'] != '':
+        response = urllib.request.urlopen(PACK['BANNER_URL'])
+        data = json.loads(response.read())
+        print(Fore.MAGENTA + data['Banner'])
     else:
         print('Downloading Mods for ' + GAME)
 
-    print(Fore.MAGENTA + "Installer Designed by: " +
-          Fore.CYAN + "Geoffery Powell")
-    print(Fore.MAGENTA + "GitHub: " + Fore.CYAN +
-          "https://github.com/Geoffery10")
-    print(Fore.MAGENTA + "Discord: " + Fore.CYAN + "Geoffery10#6969")
-    print(Fore.MAGENTA + "Installer Version: " +
-          Fore.CYAN + f"v{CURRENT_VERSION}")
+
+def download_pack():
+    global PACK
+    global PATH
+    global BASE_DIR
+    global FILES
+
+    # Initialize download folder
+    if not os.path.exists(f'{BASE_DIR}\\Downloads'):
+        os.mkdir(f'{BASE_DIR}\\Downloads')
+    if not os.path.exists(f'{BASE_DIR}\\Downloads\\{PACK_NAME}'):
+        os.mkdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
+    else:
+        # Delete Anything in the Folder
+
+    
+    # Download each file in the pack
+    for file in PACK['PACK_URLS']:
+        # Split the file name from the URL to get the file name
+        file_name = file.split('/')[-1]
+        FILES.append(file_name)
+        print(f'Downloading {file_name}...')
+        
+        if file_name.endswith('.zip'):
+            # Download the file
+            urllib.request.urlretrieve(
+                file, f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}')
+            print(Fore.GREEN + f'{file_name} downloaded!')
+            # Unzip the file
+            with zipfile.ZipFile(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}', 'r') as zip_ref:
+                zip_ref.extractall(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
+            print(Fore.GREEN + f'{file_name} unpacked!')
+            # Delete Zip File
+
+        else:
+            # Download the file
+            urllib.request.urlretrieve(
+                file, f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}')
+            print(Fore.GREEN + f'{file_name} downloaded!')
+
+    print(Fore.GREEN + 'All files downloaded!')
 
 
 def check_pack_integrity():
@@ -344,9 +430,25 @@ def check_install_integrity():
     
 
 if __name__ == '__main__':
+    # Load Initial Variables
     colorama.init(autoreset=True)
     get_dotenv()
+
+    # Print Developer Info
+    print(Fore.MAGENTA + "Installer Designed by: " +
+          Fore.CYAN + "Geoffery Powell")
+    print(Fore.MAGENTA + "GitHub: " + Fore.CYAN +
+          "https://github.com/Geoffery10")
+    print(Fore.MAGENTA + "Discord: " + Fore.CYAN + "Geoffery10#6969")
+    print(Fore.MAGENTA + "Installer Version: " +
+          Fore.CYAN + f"v{CURRENT_VERSION}\n\n")
+
+    # Load Pack Info 
+    get_json()
     print_title()
+
+    # Download Pack
+    download_pack()
     check_pack_integrity()
     check_game_install_location()
     back_up_old()
