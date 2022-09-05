@@ -22,6 +22,7 @@ MOD_LOADER = ''
 MOD_LOADER_VERSION = ''
 APPDATA_PATH = os.getenv('APPDATA')
 PATH = ''
+SUPPORTED_GAMES = ['Minecraft']
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 URL=''
 PACK = {}
@@ -47,6 +48,14 @@ def get_json():
     if response.status == 200:
         data = json.loads(response.read())
         print(Fore.GREEN + f'Packs v{data["CURRENT_VERSION"]} received!')
+
+        # Check if packs are up to date
+        if CURRENT_VERSION != data['CURRENT_VERSION']:
+            print(Fore.RED + 'Mod Manager is out of date! ')
+            print(Fore.GREEN + 'Please download the latest version and try again! Download the latest version from: ' + Fore.MAGENTA + 'https://github.com/Geoffery10/Mod-Manager/releases')
+            print(Fore.YELLOW + 'Press enter to exit...')
+            input()
+            exit()
 
         packs = []
         for pack in data['PACKS']:
@@ -117,6 +126,12 @@ def download_pack():
         os.mkdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
     else:
         # Delete Anything in the Folder
+        try:
+            shutil.rmtree(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
+            os.mkdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
+        except OSError as e:
+            print("Error: %s : %s" % (f'{BASE_DIR}\\Downloads\\{PACK_NAME}', e.strerror))
+            exit()
 
     
     # Download each file in the pack
@@ -124,7 +139,7 @@ def download_pack():
         # Split the file name from the URL to get the file name
         file_name = file.split('/')[-1]
         FILES.append(file_name)
-        print(f'Downloading {file_name}...')
+        print(Fore.GREEN + f'Downloading {file_name}...')
         
         if file_name.endswith('.zip'):
             # Download the file
@@ -136,14 +151,15 @@ def download_pack():
                 zip_ref.extractall(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
             print(Fore.GREEN + f'{file_name} unpacked!')
             # Delete Zip File
-
+            os.remove(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}')
         else:
             # Download the file
             urllib.request.urlretrieve(
                 file, f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}')
             print(Fore.GREEN + f'{file_name} downloaded!')
+        print('')
 
-    print(Fore.GREEN + 'All files downloaded!')
+    print(Fore.MAGENTA + 'All files downloaded!')
 
 
 def check_pack_integrity():
@@ -189,18 +205,6 @@ def check_pack_integrity():
         exit()
     print(Back.RESET + Fore.RESET)
 
-
-""" 
-def checkPackIntegrity():
-    global PACK_NAME
-    global CURRENT_VERSION
-    if os.path.exists(f'{PACK_NAME}_v{CURRENT_VERSION}.zip'):
-        print(f'Found {PACK_NAME}_v{CURRENT_VERSION}.zip!')
-    else:
-        print(
-            f'Pack {PACK_NAME}_v{CURRENT_VERSION}.zip not found! Please download the latest pack from my Discord server.')
-        exit()
-"""
 
 def check_game_install_location():
     global GAME
@@ -262,9 +266,9 @@ def back_up_old():
                 # Backup Minecraft mods to new folder with date
                 current_date = datetime.datetime.now()
                 current_date = current_date.strftime("%m-%d-%Y_%H-%M-%S")
-                print(Fore.GREEN + f'Backing up old mods to ' + Fore.MAGENTA + '"mods_old_{current_date}"' + Fore.GREEN + '...')
+                print(Fore.GREEN + f'Backing up old mods to ' + Fore.MAGENTA + f'mods_old_{current_date}' + Fore.GREEN + '...')
                 os.rename(f'{PATH}\\mods', f'{PATH}\\mods_old_{current_date}')
-                print(Fore.GREEN + 'Done!')
+                print(Fore.GREEN + 'Backup Complete!')
         else:
             print(Fore.GREEN + 'No existing mods found.')
     else:
@@ -281,34 +285,21 @@ def copy_pack():
         # Copy pack to game folder
         # Copy mods folder
         print(Fore.GREEN + 'Copying pack to game folder... \n')
-        if not os.path.exists(f'{PATH}\\mods'):
-            os.makedirs(f'{PATH}\\mods')
-        for file in os.listdir(f'{BASE_DIR}\\mods'):
-            if file.endswith('.jar'):
-                shutil.copy(f'{BASE_DIR}\\mods\\{file}', f'{PATH}\\mods')
-                print(Back.GREEN + f'\tCopied {file} to mods folder.')
-                copied += 1
-        print(Fore.GREEN + f'Copied {copied} files to mods folder.\n')
-        copied = 0
-        # Copy config folder
-        if not os.path.exists(f'{PATH}\\config'):
-            os.makedirs(f'{PATH}\\config')
-        for file in os.listdir(f'{BASE_DIR}\\config'):
-            shutil.copy(f'{BASE_DIR}\\config\\{file}', f'{PATH}\\config')
-            print(Back.GREEN + f'\tCopied {file} to config folder.')
-            copied += 1
-        print(Fore.GREEN + f'Copied {copied} files to config folder.\n')
-        copied = 0
-        # Copy shaderpacks folder
-        if not os.path.exists(f'{PATH}\\shaderpacks'):
-            os.makedirs(f'{PATH}\\shaderpacks')
-        for file in os.listdir(f'{BASE_DIR}\\shaderpacks'):
-            shutil.copy(f'{BASE_DIR}\\shaderpacks\\{file}', f'{PATH}\\shaderpacks')
-            print(Back.GREEN + f'\tCopied {file} to shaderpacks folder.')
-            copied += 1
-        print(Fore.GREEN + f'Copied {copied} files to shaderpacks folder.\n')
-        copied = 0
-        print(Fore.GREEN + 'Done installing pack!\n')
+        for folder in os.listdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}'): # Make all directories in pack if missing
+            if os.path.isdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{folder}'):
+                if not os.path.exists(f'{PATH}\\{folder}'):
+                    os.mkdir(f'{PATH}\\{folder}')
+                    print(Fore.GREEN + f'Created {folder} folder.')
+
+        for folder in os.listdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}'):
+            # Check if it's a folder
+            if os.path.isdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{folder}'):
+                print(Fore.GREEN + f'Copying {folder} folder...')
+                for file in os.listdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{folder}'):
+                    shutil.copy(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{folder}\\{file}', f'{PATH}\\{folder}')
+                    copied += 1
+                print(Fore.MAGENTA + f'\tInstalled {copied} files to {folder} folder.\n')
+                copied = 0
     else:
         print(Back.RED + 'Game unknown! Please check to make sure everything is downloaded correctly from my Discord server.')
         exit()
@@ -323,104 +314,57 @@ def unzip_pack():
     print('Pack unzipped!')
 
 
-def run_fabric_installer():
-    global PATH
-    # Ask user if they want to install Fabric
-    print(Fore.YELLOW + 'Would you like to install Fabric? ' + Fore.CYAN +
+def run_modloader_installer():
+    global BASE_DIR
+    global MOD_LOADER
+    found = False
+    # Ask user if they want to install mod loader
+    print(Fore.YELLOW + f'Would you like to install {MOD_LOADER}? ' + Fore.CYAN +
           '(Recommended Unless You Are Reinstalling Pack)' + Fore.YELLOW + ' (y/n)')
     choice = input()
     if choice == 'y':
-        # Run Fabric installer executable
-        print(Fore.GREEN + 'Running Fabric installer...')
-        if os.path.exists(f'{BASE_DIR}\\fabric-installer.exe'):
-            print(Fore.GREEN + 'Fabric installer found!')
-            print(Back.MAGENTA + f'Please install Fabric {FABRIC_VERSION} to the game folder.')
-            subprocess.check_call([f'{BASE_DIR}\\fabric-installer.exe'])
-        else:
-            print(Back.RED + 'Fabric installer not found! Please check to make sure everything is downloaded correctly from my Discord server.')
+        # Run mod loader installer executable
+        print(Fore.GREEN + f'Running {MOD_LOADER} installer...')
+        for file in os.listdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}'):
+            if file.endswith('.exe'):
+                print(Fore.GREEN + f'{MOD_LOADER} installer found!')
+                print(Back.MAGENTA + f'Please install {MOD_LOADER} {MOD_LOADER_VERSION} to the game folder.\n')
+                subprocess.check_call(
+                    [f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file}'])
+                found = True
+        if found == False:
+            print(Back.RED + f'{MOD_LOADER} installer not found! Please check to make sure everything is downloaded correctly from my Discord server.\n')
 
 
 def check_install_integrity():
     global PATH
+    global BASE_DIR
     global GAME
+    passed_files = 0
+    failed_files = 0
     # Ask user if they want to check install integrity
     print(Fore.YELLOW + 'Would you like to check install integrity? (y/n)')
     choice = input()
     if choice == 'y':
         print(Fore.CYAN + '\nChecking install integrity...')
         if GAME == 'Minecraft':
-            tests = [0, 0, 0]
             # Check if mods folder exists
-            if os.path.exists(f'{PATH}\\mods'):
-                print(Fore.GREEN + 'Mods folder found!')
-
-                # Check if mods are the same as the ones in the pack
-                installed_files = [f for f in os.listdir(
-                    f"{PATH}\\mods") if os.path.isfile(f)]
-                pack_files = [f for f in os.listdir(
-                    f"{BASE_DIR}\\mods") if os.path.isfile(f)]
-                if installed_files == pack_files:
-                    print(Fore.GREEN + 'Mods are the same as the ones in the pack!')
-                    tests[0] = 1
-                else:
-                    print(Back.RED + 'Mods are not the same as the ones in the pack!')
-                    print(
-                        Back.RED + 'Please check to make sure everything is downloaded correctly from my Discord server.')
-            else:
-                print(Back.RED + 'Mods folder not found! Please check to make sure everything is downloaded correctly from my Discord server.')
-            
-            # Check if config folder exists
-            if os.path.exists(f'{PATH}\\config'):
-                print(Fore.GREEN + 'Config folder found!')
-
-                # Check if config from pack is the same as the one in the game
-                installed_files = [f for f in os.listdir(
-                    f"{PATH}\\config") if os.path.isfile(f)]
-                pack_files = [f for f in os.listdir(
-                    f"{BASE_DIR}\\config") if os.path.isfile(f)]
-                tests[1] = 1
-                for file in pack_files:
-                    if file in pack_files:
-                        print(Fore.GREEN + f'{file} found in pack!')
+            for folder in os.listdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}'):
+                if os.path.exists(f'{PATH}\\{folder}'):
+                    # Check if all files are in folder if it's a folder
+                    if os.path.isdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{folder}'):
+                        print(Fore.GREEN + f'\t{folder} folder found!')
+                        passed_files += 1
+                        for file in os.listdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{folder}'):
+                            if os.path.exists(f'{PATH}\\{folder}\\{file}'):
+                                passed_files += 1
+                            else:
+                                print(Back.RED + f'\t\t{file} not found!')
+                                failed_files += 1
                     else:
-                        print(Back.RED + f'{file} not found in pack!')
-                        print(
-                            Back.RED + 'Please check to make sure everything is downloaded correctly from my Discord server.')
-                        tests[1] = 0
-                if tests[1] == 1:
-                    print(Fore.GREEN +
-                          'Config from pack is the same as the one in the game!')
-            else:
-                print(Back.RED + 'Config folder not found! Please check to make sure everything is downloaded correctly from my Discord server.')
-            
-            # Check if shaderpacks folder exists
-            if os.path.exists(f'{PATH}\\shaderpacks'):
-                print(Fore.GREEN + 'Shaderpacks folder found!')
-
-                # Check if shaderpacks from pack is the same as the one in the game
-                installed_files = [f for f in os.listdir(
-                    f"{PATH}\\shaderpacks") if os.path.isfile(f)]
-                pack_files = [f for f in os.listdir(
-                    f"{BASE_DIR}\\shaderpacks") if os.path.isfile(f)]
-                tests[2] = 1
-                for file in pack_files:
-                    if file in pack_files:
-                        print(Fore.GREEN + f'{file} found in pack!')
-                    else:
-                        print(Back.RED + f'{file} not found in pack!')
-                        print(
-                            Back.RED + 'Please check to make sure everything is downloaded correctly from my Discord server.')
-                        tests[2] = 0
-                if tests[2] == 1:
-                    print(Fore.GREEN + 'Shaderpacks are the same as the ones in the pack!')
-            else:
-                print(Back.RED + 'Shaderpacks folder not found! Please check to make sure everything is downloaded correctly from my Discord server.')
-
-            percent_passed = 0
-            for test in tests:
-                if test == 1:
-                    percent_passed += 1.0
-            percent_passed = int((percent_passed / len(tests)) * 100)
+                        print(Back.RED + f'\t{folder} folder not found!')
+                        failed_files += 1
+            percent_passed = int(passed_files / (passed_files + failed_files)) * 100
             print(Fore.MAGENTA + f'{percent_passed}% of tests passed.')
     else:
         print(Back.RED + f'Game "{GAME}" was unknown. Skipping install integrity check...')
@@ -441,7 +385,9 @@ if __name__ == '__main__':
           "https://github.com/Geoffery10")
     print(Fore.MAGENTA + "Discord: " + Fore.CYAN + "Geoffery10#6969")
     print(Fore.MAGENTA + "Installer Version: " +
-          Fore.CYAN + f"v{CURRENT_VERSION}\n\n")
+          Fore.CYAN + f"v{CURRENT_VERSION}")
+    print(Fore.MAGENTA + "Supported Games: " +
+          Fore.CYAN + str(SUPPORTED_GAMES) + "\n\n")
 
     # Load Pack Info 
     get_json()
@@ -449,12 +395,17 @@ if __name__ == '__main__':
 
     # Download Pack
     download_pack()
-    check_pack_integrity()
+
+    # Check Where to Install
     check_game_install_location()
     back_up_old()
+
+    # Copy Pack Into Game
     copy_pack()
     if GAME == 'Minecraft':
-        run_fabric_installer()
+        run_modloader_installer()
+
+    # Check Install Integrity
     check_install_integrity()
 
     print(Fore.MAGENTA + '\nAll Done! Thank you for using my modpack installer!')
