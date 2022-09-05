@@ -2,6 +2,7 @@ from ast import For
 from http.client import FOUND
 from pickle import GLOBAL
 import shutil
+from struct import pack
 from tkinter import E, N
 import zipfile
 from dotenv import load_dotenv
@@ -78,10 +79,10 @@ def select_pack(packs):
     for i in range(len(packs)):  # Alternate between Fore.MAGENTA and Fore.WHITE
         if i % 2 == 0:
             print(Fore.MAGENTA + 
-                f"\t{i+1}. {packs[i]['PACK_NAME']} - {packs[i]['GAME']} [{packs[i]['GAME_VERSION']}]")
+                  f"\t{i+1}. {packs[i]['PACK_NAME']} [{packs[i]['PACK_VERSION']}] - {packs[i]['GAME']} [{packs[i]['GAME_VERSION']}]")
         else:
             print(Fore.WHITE + 
-                f"\t{i+1}. {packs[i]['PACK_NAME']} - {packs[i]['GAME']} [{packs[i]['GAME_VERSION']}]")
+                  f"\t{i+1}. {packs[i]['PACK_NAME']} [{packs[i]['PACK_VERSION']}] - {packs[i]['GAME']} [{packs[i]['GAME_VERSION']}]")
     choice = input()
     try:
         choice = int(choice)
@@ -160,50 +161,6 @@ def download_pack():
         print('')
 
     print(Fore.MAGENTA + 'All files downloaded!')
-
-
-def check_pack_integrity():
-    global GAME
-    print(Fore.CYAN + '\nChecking pack integrity...\n')
-    if GAME == 'Minecraft':
-        found_mods = 0
-        found_config = 0
-        found_shaders = 0
-        found_fabric = 0
-        # Check for folders
-        if os.path.exists(f'{BASE_DIR}/mods'):
-            print(Back.GREEN + '\tMods folder found!')
-            found_mods = 1
-        else:
-            print(Back.RED +
-                  '\tMods folder not found! Please try again.')
-            exit()
-        if os.path.exists(f'{BASE_DIR}/config'):
-            print(Back.GREEN + '\tConfig folder found!')
-            found_config = 1
-        else:
-            print(Back.RED +
-                  '\tConfig folder not found! It might not be needed.')
-        if os.path.exists(f'{BASE_DIR}/shaderpacks'):
-            print(Back.GREEN + '\tShaderpacks folder found!')
-            found_shaders = 1
-        else:
-            print(Back.RED +
-                  '\tShaderpacks folder not found! It might not be needed.')
-        if os.path.exists(f'{BASE_DIR}/fabric-installer.exe'):
-            print(Back.GREEN + '\tFabric installer found!')
-            found_fabric = 1
-        else:
-            print(Back.RED + '\tFabric installer not found!\nPlease download the latest version of the fabric installer from https://fabricmc.net/use/installer/')
-        
-        # Print percentage of found folders
-        percent_found = ((found_mods + found_config + found_shaders + found_fabric) / 4) * 100
-        print(Back.MAGENTA + f'\t{percent_found}% of folders found.')
-    else:
-        print(Back.RED +
-              'Game unknown! Please check to make sure everything is downloaded correctly from my Discord server.')
-        exit()
-    print(Back.RESET + Fore.RESET)
 
 
 def check_game_install_location():
@@ -413,6 +370,17 @@ if __name__ == '__main__':
 
     # Check Install Integrity
     check_install_integrity()
+
+    # Check if user wants to delete temporary files
+    print(Fore.YELLOW + 'Would you like to delete temporary files? (y/n)')
+    choice = input()
+    if choice == 'y':
+        print(Fore.GREEN + 'Deleting temporary files...')
+        try:
+            shutil.rmtree(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
+            print(Fore.GREEN + 'Temporary files deleted!')
+        except:
+            print(Back.RED + 'Temporary failed files to deleted!')
 
     print(Fore.MAGENTA + '\nAll Done! Thank you for using my modpack installer!')
     print(Fore.GREEN + 'Press Enter to exit...')
