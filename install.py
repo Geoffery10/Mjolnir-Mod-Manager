@@ -326,11 +326,17 @@ def run_modloader_installer():
         # Run mod loader installer executable
         print(Fore.GREEN + f'Running {MOD_LOADER} installer...')
         for file in os.listdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}'):
-            if file.endswith('.exe'):
+            if file.endswith('.exe') or file.endswith('.jar'):
                 print(Fore.GREEN + f'{MOD_LOADER} installer found!')
                 print(Back.MAGENTA + f'Please install {MOD_LOADER} {MOD_LOADER_VERSION} to the game folder.\n')
-                subprocess.check_call(
-                    [f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file}'])
+                if file.endswith('.exe'):
+                    subprocess.check_call(
+                        [f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file}'])
+                elif file.endswith('.jar'):
+                    subprocess.call(['java', '-jar', f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file}'])
+                else:
+                    print(Back.RED + 'Mod loader unable to run!')
+                    print(Back.RED + 'Please install manually.')
                 found = True
         if found == False:
             print(Back.RED + f'{MOD_LOADER} installer not found! Please check to make sure everything is downloaded correctly from my Discord server.\n')
