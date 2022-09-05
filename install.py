@@ -1,3 +1,7 @@
+import imp
+
+
+import shutil
 import zipfile
 from dotenv import load_dotenv
 import os
@@ -5,7 +9,7 @@ import datetime
 import subprocess
 import colorama
 from colorama import Fore, Back, Style
-import urllib.request
+import requests
 import json
 
 CURRENT_VERSION = ''
@@ -33,10 +37,10 @@ def get_json():
     global URL
     if not URL == '':
         print(Fore.GREEN + 'Getting Packs from Internet...')
-        response = urllib.request.urlopen(URL)
+        response = requests.get(URL)
         # Check if response is valid
-        if response.status == 200:
-            data = json.loads(response.read())
+        if response.status_code == 200:
+            data = response.json()
             print(Fore.GREEN + f'Packs v{data["CURRENT_VERSION"]} received!')
 
             # Check if packs are up to date
@@ -45,7 +49,7 @@ def get_json():
                 print(Fore.GREEN + 'Please download the latest version and try again! Download the latest version from: ' + Fore.MAGENTA + 'https://github.com/Geoffery10/Mod-Manager/releases')
                 print(Fore.YELLOW + 'Press enter to exit...')
                 input()
-                exit()
+                exit_app()
 
             packs = []
             for pack in data['PACKS']:
@@ -53,10 +57,10 @@ def get_json():
             select_pack(packs)
         else:
             print(Back.RED + 'Invalid response from server!')
-            exit()
+            exit_app()
     else:
         print(Back.RED + 'No URL specified!')
-        exit()
+        exit_app()
 
 def select_pack(packs):
 
@@ -99,8 +103,8 @@ def select_pack(packs):
 def print_title():
     global PACK
     if PACK['BANNER_URL'] != '':
-        response = urllib.request.urlopen(PACK['BANNER_URL'])
-        data = json.loads(response.read())
+        response = requests.get(PACK['BANNER_URL'])
+        data = response.json()
         print(Fore.MAGENTA + data['Banner'])
     else:
         print('Downloading Mods for ' + GAME)
@@ -124,7 +128,7 @@ def download_pack():
             os.mkdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
         except OSError as e:
             print("Error: %s : %s" % (f'{BASE_DIR}\\Downloads\\{PACK_NAME}', e.strerror))
-            exit()
+            exit_app()
 
     
     # Download each file in the pack
@@ -136,20 +140,26 @@ def download_pack():
         
         if file_name.endswith('.zip'):
             # Download the file
-            urllib.request.urlretrieve(
-                file, f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}')
-            print(Fore.GREEN + f'{file_name} downloaded!')
-            # Unzip the file
-            with zipfile.ZipFile(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}', 'r') as zip_ref:
-                zip_ref.extractall(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
-            print(Fore.GREEN + f'{file_name} unpacked!')
-            # Delete Zip File
-            os.remove(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}')
+            r = requests.get(file, allow_redirects=True)
+            # Write the file to the downloads folder
+            if r.status_code == 200:
+                open(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}', 'wb').write(r.content)
+                print(Fore.GREEN + f'{file_name} downloaded!')
+                # Unzip the file
+                with zipfile.ZipFile(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}', 'r') as zip_ref:
+                    zip_ref.extractall(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
+                print(Fore.GREEN + f'{file_name} unpacked!')
+                # Delete Zip File
+                os.remove(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}')
+            else:
+                print(Back.RED + f'Error downloading {file_name}!')
         else:
             # Download the file
-            urllib.request.urlretrieve(
-                file, f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}')
-            print(Fore.GREEN + f'{file_name} downloaded!')
+            r = requests.get(file, allow_redirects=True)
+            # Write the file to the downloads folder
+            if r.status_code == 200:
+                open(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}', 'wb').write(r.content)
+                print(Fore.GREEN + f'{file_name} downloaded!')
         print('')
 
     print(Fore.MAGENTA + 'All files downloaded!')
@@ -173,7 +183,7 @@ def check_game_install_location():
             found = False
     else:
         print(Back.RED + 'Game unknown! Please check to make sure everything is downloaded correctly from my Discord server.')
-        exit()
+        exit_app()
 
     # Check if user wants to install to a different location
     if found == False:
@@ -226,12 +236,12 @@ def back_up_old():
                     print(Fore.GREEN + 'Old mods folder removed!')
                 except OSError as e:
                     print(Back.RED + "Error: %s : %s" % (f'{PATH}\\mods', e.strerror))
-                    exit()
+                    exit_app()
         else:
             print(Fore.GREEN + 'No existing mods found.')
     else:
         print(Back.RED + 'Game unknown! Please check to make sure everything is downloaded correctly from my Discord server.')
-        exit()
+        exit_app()
 
 def copy_pack():
     global PACK_NAME
@@ -260,7 +270,7 @@ def copy_pack():
                 copied = 0
     else:
         print(Back.RED + 'Game unknown! Please check to make sure everything is downloaded correctly from my Discord server.')
-        exit()
+        exit_app()
 
 def unzip_pack():
     global PACK_NAME
@@ -334,6 +344,11 @@ def check_install_integrity():
         print(Back.RED + f'Game "{GAME}" was unknown. Skipping install integrity check...')
                 
 
+def exit_app():
+    print(Fore.GREEN + 'Press Enter to exit...')
+    # Wait for user to close with enter key
+    input()
+    exit()
 
     
 
@@ -360,7 +375,7 @@ if __name__ == '__main__':
         get_json()
     except:
         print(Back.RED + 'Unable to load pack info! Please check to make sure everything is downloaded correctly and you are connected to the internet.')
-        exit()
+        exit_app()
     try:
         print_title()
     except:
@@ -371,7 +386,7 @@ if __name__ == '__main__':
         download_pack()
     except:
         print(Back.RED + 'Unable to download pack! Please check to make sure everything is downloaded correctly and you are connected to the internet.')
-        exit()
+        exit_app()
 
     # Check Where to Install
     check_game_install_location()
