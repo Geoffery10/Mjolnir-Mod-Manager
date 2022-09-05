@@ -14,9 +14,10 @@ from colorama import Fore, Back, Style
 import urllib.request
 import json
 
+CURRENT_VERSION = ''
+URL = ''
 PACK_NAME = ''
 PACK_VERSION = ''
-CURRENT_VERSION = ''
 GAME = ''
 GAME_VERSION = ''
 MOD_LOADER = ''
@@ -33,37 +34,34 @@ FILES = []
 # ERROR_COLOR = Back.RED + Fore.WHITE
 # SUCCESS_COLOR = Back.GREEN + Fore.WHITE
 
-def get_dotenv():
-    load_dotenv()
-    global CURRENT_VERSION
-    global URL
-    CURRENT_VERSION = os.getenv('CURRENT_VERSION')
-    URL = os.getenv('URL')
-
 def get_json():
     global CURRENT_VERSION
     global URL
-    print(Fore.GREEN + 'Getting Packs from Internet...')
-    response = urllib.request.urlopen(URL)
-    # Check if response is valid
-    if response.status == 200:
-        data = json.loads(response.read())
-        print(Fore.GREEN + f'Packs v{data["CURRENT_VERSION"]} received!')
+    if not URL == '':
+        print(Fore.GREEN + 'Getting Packs from Internet...')
+        response = urllib.request.urlopen(URL)
+        # Check if response is valid
+        if response.status == 200:
+            data = json.loads(response.read())
+            print(Fore.GREEN + f'Packs v{data["CURRENT_VERSION"]} received!')
 
-        # Check if packs are up to date
-        if CURRENT_VERSION != data['CURRENT_VERSION']:
-            print(Fore.RED + 'Mod Manager is out of date! ')
-            print(Fore.GREEN + 'Please download the latest version and try again! Download the latest version from: ' + Fore.MAGENTA + 'https://github.com/Geoffery10/Mod-Manager/releases')
-            print(Fore.YELLOW + 'Press enter to exit...')
-            input()
+            # Check if packs are up to date
+            if CURRENT_VERSION != data['CURRENT_VERSION']:
+                print(Fore.RED + 'Mod Manager is out of date! ')
+                print(Fore.GREEN + 'Please download the latest version and try again! Download the latest version from: ' + Fore.MAGENTA + 'https://github.com/Geoffery10/Mod-Manager/releases')
+                print(Fore.YELLOW + 'Press enter to exit...')
+                input()
+                exit()
+
+            packs = []
+            for pack in data['PACKS']:
+                packs.append(pack)
+            select_pack(packs)
+        else:
+            print(Back.RED + 'Invalid response from server!')
             exit()
-
-        packs = []
-        for pack in data['PACKS']:
-            packs.append(pack)
-        select_pack(packs)
     else:
-        print(Back.RED + 'Invalid response from server!')
+        print(Back.RED + 'No URL specified!')
         exit()
 
 def select_pack(packs):
@@ -348,7 +346,9 @@ def check_install_integrity():
 if __name__ == '__main__':
     # Load Initial Variables
     colorama.init(autoreset=True)
-    get_dotenv()
+    CURRENT_VERSION = '1.0.2'
+    URL = 'https://mcweb.geoffery10.com/mods.json'
+    # get_dotenv()
 
     # Print Developer Info
     print(Fore.MAGENTA + "Installer Designed by: " +
