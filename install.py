@@ -1,9 +1,3 @@
-from ast import For
-from http.client import FOUND
-from pickle import GLOBAL
-import shutil
-from struct import pack
-from tkinter import E, N
 import zipfile
 from dotenv import load_dotenv
 import os
