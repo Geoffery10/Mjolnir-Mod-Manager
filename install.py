@@ -226,6 +226,15 @@ def back_up_old():
                 print(Fore.GREEN + f'Backing up old mods to ' + Fore.MAGENTA + f'mods_old_{current_date}' + Fore.GREEN + '...')
                 os.rename(f'{PATH}\\mods', f'{PATH}\\mods_old_{current_date}')
                 print(Fore.GREEN + 'Backup Complete!')
+            else:
+                print(Fore.GREEN + 'Skipping backup...')
+                # Delete old mods folder
+                try:
+                    shutil.rmtree(f'{PATH}\\mods')
+                    print(Fore.GREEN + 'Old mods folder removed!')
+                except OSError as e:
+                    print(Back.RED + "Error: %s : %s" % (f'{PATH}\\mods', e.strerror))
+                    exit()
         else:
             print(Fore.GREEN + 'No existing mods found.')
     else:
