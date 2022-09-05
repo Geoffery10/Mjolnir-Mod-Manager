@@ -340,7 +340,7 @@ def check_install_integrity():
 if __name__ == '__main__':
     # Load Initial Variables
     colorama.init(autoreset=True)
-    CURRENT_VERSION = '1.0.3'
+    CURRENT_VERSION = '1.0.4'
     URL = 'https://mcweb.geoffery10.com/mods.json'
     # get_dotenv()
 
@@ -356,11 +356,22 @@ if __name__ == '__main__':
           Fore.CYAN + str(SUPPORTED_GAMES) + "\n\n")
 
     # Load Pack Info 
-    get_json()
-    print_title()
+    try:
+        get_json()
+    except:
+        print(Back.RED + 'Unable to load pack info! Please check to make sure everything is downloaded correctly and you are connected to the internet.')
+        exit()
+    try:
+        print_title()
+    except:
+        print(Back.RED + 'Unable to print title! Please check to make sure everything is downloaded correctly and you are connected to the internet.')
 
     # Download Pack
-    download_pack()
+    try:
+        download_pack()
+    except:
+        print(Back.RED + 'Unable to download pack! Please check to make sure everything is downloaded correctly and you are connected to the internet.')
+        exit()
 
     # Check Where to Install
     check_game_install_location()
