@@ -4,6 +4,7 @@ mods/
 config/
 fabric-installer.exe
 install/
+Downloads/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
