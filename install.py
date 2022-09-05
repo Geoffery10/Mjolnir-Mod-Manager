@@ -340,7 +340,7 @@ def check_install_integrity():
 if __name__ == '__main__':
     # Load Initial Variables
     colorama.init(autoreset=True)
-    CURRENT_VERSION = '1.0.2'
+    CURRENT_VERSION = '1.0.3'
     URL = 'https://mcweb.geoffery10.com/mods.json'
     # get_dotenv()
 
@@ -369,7 +369,8 @@ if __name__ == '__main__':
     # Copy Pack Into Game
     copy_pack()
     if GAME == 'Minecraft':
-        run_modloader_installer()
+        if not MOD_LOADER == '':
+            run_modloader_installer()
 
     # Check Install Integrity
     check_install_integrity()
