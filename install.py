@@ -1,3 +1,4 @@
+import sys
 from packaging import version
 import PySimpleGUI as pg
 import shutil
@@ -538,7 +539,10 @@ def exit_app():
     # print(Fore.GREEN + 'Press Enter to exit...')
     # Wait for user to close with enter key
     # input()
-    exit()
+    try:
+        sys.exit()
+    except SystemExit:
+        os._exit(0)
 
 
 def UI_Setup(layout):
