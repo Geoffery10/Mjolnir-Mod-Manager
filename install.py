@@ -1,6 +1,8 @@
+from glob import glob
 import imp
+import re
 
-
+import PySimpleGUI as pg
 import shutil
 import zipfile
 from dotenv import load_dotenv
@@ -27,6 +29,7 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 URL=''
 PACK = {}
 FILES = []
+CLOSE_APP = False
 
 # Color Presets
 # ERROR_COLOR = Back.RED + Fore.WHITE
@@ -45,10 +48,15 @@ def get_json():
 
             # Check if packs are up to date
             if CURRENT_VERSION != data['CURRENT_VERSION']:
-                print(Fore.RED + 'Mod Manager is out of date! ')
-                print(Fore.GREEN + 'Please download the latest version and try again! Download the latest version from: ' + Fore.MAGENTA + 'https://github.com/Geoffery10/Mod-Manager/releases')
-                print(Fore.YELLOW + 'Press enter to exit...')
-                input()
+                layout = [
+                    [pg.Text(
+                        'There is a new version of ModDude available! Please download the new version: https://github.com/Geoffery10/Mod-Manager/releases')],
+                    [pg.Button('OK')]]
+                UI_Setup(layout)
+            #     print(Fore.RED + 'Mod Manager is out of date! ')
+            #     print(Fore.GREEN + 'Please download the latest version and try again! Download the latest version from: ' + Fore.MAGENTA + 'https://github.com/Geoffery10/Mod-Manager/releases')
+            #     print(Fore.YELLOW + 'Press enter to exit...')
+            # input()
                 exit_app()
 
             packs = []
@@ -56,11 +64,32 @@ def get_json():
                 packs.append(pack)
             select_pack(packs)
         else:
+            layout = [
+                [pg.Text(
+                    'There was an error connecting to the server! Please try again later!')],
+                [pg.Button('OK')]]
+            UI_Setup(layout)
             print(Back.RED + 'Invalid response from server!')
             exit_app()
     else:
+        layout = [
+            [pg.Text(
+                'Error: No URL specified! Please specify a URL in the config file!')],
+            [pg.Button('OK')]]
+        UI_Setup(layout)
         print(Back.RED + 'No URL specified!')
         exit_app()
+
+def print_dev_info():
+    print(Fore.MAGENTA + "Installer Designed by: " +
+          Fore.CYAN + "Geoffery Powell")
+    print(Fore.MAGENTA + "GitHub: " + Fore.CYAN +
+          "https://github.com/Geoffery10")
+    print(Fore.MAGENTA + "Discord: " + Fore.CYAN + "Geoffery10#6969")
+    print(Fore.MAGENTA + "Installer Version: " +
+          Fore.CYAN + f"v{CURRENT_VERSION}")
+    print(Fore.MAGENTA + "Supported Games: " +
+          Fore.CYAN + str(SUPPORTED_GAMES) + "\n\n")
 
 def select_pack(packs):
 
@@ -72,21 +101,30 @@ def select_pack(packs):
     global PACK_VERSION
     global PACK
     print(Fore.YELLOW + 'Which pack would you like to install?')
+    layout = [
+        [pg.Text(
+            'Select a pack to install:')]]
     for i in range(len(packs)):  # Alternate between Fore.MAGENTA and Fore.WHITE
-        if i % 2 == 0:
-            print(Fore.MAGENTA + 
-                  f"\t{i+1}. {packs[i]['PACK_NAME']} [{packs[i]['PACK_VERSION']}] - {packs[i]['GAME']} [{packs[i]['GAME_VERSION']}]")
+        pack_name = f"{packs[i]['PACK_NAME']} v{packs[i]['PACK_VERSION']} - {packs[i]['GAME']} v{packs[i]['GAME_VERSION']}"
+        layout.append([pg.Button(pack_name)])
+    layout.append([pg.Button('Exit')])
+    window = pg.Window('ModDude', layout)
+    while True:
+        event, values = window.read()
+        if event in (None, 'Exit'):
+            exit_app()
         else:
-            print(Fore.WHITE + 
-                  f"\t{i+1}. {packs[i]['PACK_NAME']} [{packs[i]['PACK_VERSION']}] - {packs[i]['GAME']} [{packs[i]['GAME_VERSION']}]")
-    choice = input()
-    try:
-        choice = int(choice)
-        if choice > len(packs) or choice < 1:
-            print(Back.RED + 'Invalid choice! Please try again.')
-            select_pack(packs)
-        else:
-            selected_pack = packs[choice-1]
+            PACK_NAME = event
+            print(Fore.GREEN + f'Installing {PACK_NAME}...')
+            break
+    
+    # Find pack by friendly name
+    print(Fore.GREEN + 'Finding pack...')
+    for pack in packs:
+        pack_name = f"{pack['PACK_NAME']} v{pack['PACK_VERSION']} - {pack['GAME']} v{pack['GAME_VERSION']}"
+        if pack_name == PACK_NAME:
+            print(Fore.GREEN + 'Pack found!')
+            selected_pack = pack
             GAME = selected_pack['GAME']
             GAME_VERSION = selected_pack['GAME_VERSION']
             MOD_LOADER = selected_pack['MOD_LOADER']
@@ -94,11 +132,8 @@ def select_pack(packs):
             PACK_NAME = selected_pack['PACK_NAME']
             PACK_VERSION = selected_pack['PACK_VERSION']
             PACK = selected_pack
-            print(
-                Fore.GREEN + f"Installing {selected_pack['PACK_NAME']} - {selected_pack['GAME']} [{selected_pack['GAME_VERSION']}]")
-    except ValueError:
-        print(Back.RED + 'Invalid choice! Please try again.')
-        select_pack(packs)
+            window.close()
+            break
 
 def print_title():
     global PACK
@@ -115,52 +150,82 @@ def download_pack():
     global PATH
     global BASE_DIR
     global FILES
+    extra_steps = 1
+    progress = 0
+    layout = [
+        [pg.Text(
+            'Start Downloading Mods...')],
+        [pg.ProgressBar(100, orientation='h', size=(20, 20), key='progressbar')],
+        [pg.Button('Start Download')]
+    ]
+    window = pg.Window('ModDude', layout)
+    progress_bar = window['progressbar']
+    # Get Step Size for Progress Bar
+    step_size = int(100 / (len(PACK['PACK_URLS']) + extra_steps))
 
-    # Initialize download folder
-    if not os.path.exists(f'{BASE_DIR}\\Downloads'):
-        os.mkdir(f'{BASE_DIR}\\Downloads')
-    if not os.path.exists(f'{BASE_DIR}\\Downloads\\{PACK_NAME}'):
-        os.mkdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
-    else:
-        # Delete Anything in the Folder
-        try:
-            shutil.rmtree(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
-            os.mkdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
-        except OSError as e:
-            print("Error: %s : %s" % (f'{BASE_DIR}\\Downloads\\{PACK_NAME}', e.strerror))
+    while True:
+        event, values = window.read(timeout=800)
+        if event in (None, 'Exit'):
             exit_app()
-
-    
-    # Download each file in the pack
-    for file in PACK['PACK_URLS']:
-        # Split the file name from the URL to get the file name
-        file_name = file.split('/')[-1]
-        FILES.append(file_name)
-        print(Fore.GREEN + f'Downloading {file_name}...')
-        
-        if file_name.endswith('.zip'):
-            # Download the file
-            r = requests.get(file, allow_redirects=True)
-            # Write the file to the downloads folder
-            if r.status_code == 200:
-                open(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}', 'wb').write(r.content)
-                print(Fore.GREEN + f'{file_name} downloaded!')
-                # Unzip the file
-                with zipfile.ZipFile(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}', 'r') as zip_ref:
-                    zip_ref.extractall(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
-                print(Fore.GREEN + f'{file_name} unpacked!')
-                # Delete Zip File
-                os.remove(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}')
+        elif event == 'Start Download':
+            # Initialize download folder
+            if not os.path.exists(f'{BASE_DIR}\\Downloads'):
+                os.mkdir(f'{BASE_DIR}\\Downloads')
+            if not os.path.exists(f'{BASE_DIR}\\Downloads\\{PACK_NAME}'):
+                os.mkdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
             else:
-                print(Back.RED + f'Error downloading {file_name}!')
-        else:
-            # Download the file
-            r = requests.get(file, allow_redirects=True)
-            # Write the file to the downloads folder
-            if r.status_code == 200:
-                open(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}', 'wb').write(r.content)
-                print(Fore.GREEN + f'{file_name} downloaded!')
-        print('')
+                # Delete Anything in the Folder
+                try:
+                    shutil.rmtree(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
+                    os.mkdir(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
+                except OSError as e:
+                    print("Error: %s : %s" %
+                        (f'{BASE_DIR}\\Downloads\\{PACK_NAME}', e.strerror))
+                    exit_app()
+            progress += step_size
+            progress_bar.UpdateBar(progress)
+
+            # Download each file in the pack
+            for file in PACK['PACK_URLS']:
+                # Split the file name from the URL to get the file name
+                file_name = file.split('/')[-1]
+                FILES.append(file_name)
+                print(Fore.GREEN + f'Downloading {file_name}...')
+
+                if file_name.endswith('.zip'):
+                    # Download the file
+                    r = requests.get(file, allow_redirects=True)
+                    # Write the file to the downloads folder
+                    if r.status_code == 200:
+                        open(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}',
+                            'wb').write(r.content)
+                        print(Fore.GREEN + f'{file_name} downloaded!')
+                        # Unzip the file
+                        with zipfile.ZipFile(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}', 'r') as zip_ref:
+                            zip_ref.extractall(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
+                        print(Fore.GREEN + f'{file_name} unpacked!')
+                        # Delete Zip File
+                        os.remove(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}')
+                    else:
+                        print(Back.RED + f'Error downloading {file_name}!')
+                else:
+                    # Download the file
+                    r = requests.get(file, allow_redirects=True)
+                    # Write the file to the downloads folder
+                    if r.status_code == 200:
+                        open(f'{BASE_DIR}\\Downloads\\{PACK_NAME}\\{file_name}',
+                            'wb').write(r.content)
+                        print(Fore.GREEN + f'{file_name} downloaded!')
+                progress += step_size
+                progress_bar.UpdateBar(progress)
+
+            progress += step_size
+            progress_bar.UpdateBar(progress)
+            window.close()
+            break
+        if progress >= 100:
+            break
+    
 
     print(Fore.MAGENTA + 'All files downloaded!')
 
@@ -182,19 +247,29 @@ def check_game_install_location():
             PATH = ''
             found = False
     else:
-        print(Back.RED + 'Game unknown! Please check to make sure everything is downloaded correctly from my Discord server.')
+        layout = [
+            [pg.Text(
+                'Game unknown! Please check to make sure everything is downloaded correctly.')],
+            [pg.Button('OK')]]
+        UI_Setup(layout)
+        print(Back.RED + 'Game unknown! Please check to make sure everything is downloaded correctly.')
         exit_app()
 
     # Check if user wants to install to a different location
     if found == False:
         print(Back.RED + f'{GAME} not found! Where is {GAME} installed?')
-        PATH = get_path(PATH)
+        layout = [[pg.Text(f'{GAME} not found! Where is {GAME} installed?')],
+                [pg.InputText(key='path'), pg.FolderBrowse()]]
+        PATH = get_path(PATH, layout)
     else:
         print(
             Fore.GREEN + f'Found {GAME} installed in {PATH}. ' + Fore.YELLOW + '\nWould you like to install mods here? (y/n)')
-        PATH = get_path(PATH)
+        layout = [[pg.Text(
+            f'Found {GAME}. ')],
+            [pg.InputText(key='path'), pg.FolderBrowse()]]
+        PATH = get_path(PATH, layout)
 
-def get_path(PATH):
+def get_path(PATH, layout):
     # Check for valid path
     temp_PATH = ''
     choice = input()
@@ -350,6 +425,27 @@ def exit_app():
     input()
     exit()
 
+
+def UI_Setup(layout):
+    # Variables
+    global CLOSE_APP
+    CLOSE_APP = False
+    page = 0
+    # Set Theme
+    pg.theme('DarkPurple1')
+    # Create Windows
+    window = pg.Window(f"ModDude!", layout)
+    # Event Loop
+    while True:
+        event, values = window.read()
+        if event == pg.WIN_CLOSED or CLOSE_APP == True:
+            exit_app()
+        if event == "Start!" or event == "Ok":
+            window.close()
+            page += 1
+            return page
+    # Close Windows
+
     
 
 if __name__ == '__main__':
@@ -357,39 +453,36 @@ if __name__ == '__main__':
     colorama.init(autoreset=True)
     CURRENT_VERSION = '1.0.4'
     URL = 'https://mcweb.geoffery10.com/mods.json'
-    # get_dotenv()
 
     # Print Developer Info
-    print(Fore.MAGENTA + "Installer Designed by: " +
-          Fore.CYAN + "Geoffery Powell")
-    print(Fore.MAGENTA + "GitHub: " + Fore.CYAN +
-          "https://github.com/Geoffery10")
-    print(Fore.MAGENTA + "Discord: " + Fore.CYAN + "Geoffery10#6969")
-    print(Fore.MAGENTA + "Installer Version: " +
-          Fore.CYAN + f"v{CURRENT_VERSION}")
-    print(Fore.MAGENTA + "Supported Games: " +
-          Fore.CYAN + str(SUPPORTED_GAMES) + "\n\n")
+    print_dev_info()
 
-    # Load Pack Info 
-    try:
-        get_json()
-    except:
-        print(Back.RED + 'Unable to load pack info! Please check to make sure everything is downloaded correctly and you are connected to the internet.')
-        exit_app()
-    try:
-        print_title()
-    except:
-        print(Back.RED + 'Unable to print title! Please check to make sure everything is downloaded correctly and you are connected to the internet.')
+    # Open UI
+    layout = [
+        [pg.Text("Welcome to ModDude!")],
+        [pg.Text(
+            "This program was developed by Geoffery10 to help you install mods for your games.")],
+        [pg.Button("Ok", key="Ok")]
+    ]
+    UI_Setup(layout)
+
+    # Load Pack Info
+    get_json()
+
+    '''
+    if page == 2:
+        try:
+            print_title()
+        except:
+            print(Back.RED + 'Unable to print title! Please check to make sure everything is downloaded correctly and you are connected to the internet.')
+    '''
 
     # Download Pack
-    try:
-        download_pack()
-    except:
-        print(Back.RED + 'Unable to download pack! Please check to make sure everything is downloaded correctly and you are connected to the internet.')
-        exit_app()
+    download_pack()
 
     # Check Where to Install
     check_game_install_location()
+
     back_up_old()
 
     # Copy Pack Into Game
@@ -398,22 +491,23 @@ if __name__ == '__main__':
         if not MOD_LOADER == '':
             run_modloader_installer()
 
+    
     # Check Install Integrity
     check_install_integrity()
 
+    
     # Check if user wants to delete temporary files
-    print(Fore.YELLOW + 'Would you like to delete temporary files? (y/n)')
-    choice = input()
-    if choice == 'y':
-        print(Fore.GREEN + 'Deleting temporary files...')
-        try:
-            shutil.rmtree(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
-            print(Fore.GREEN + 'Temporary files deleted!')
-        except:
-            print(Back.RED + 'Temporary failed files to deleted!')
+    print(Fore.GREEN + 'Deleting temporary files...')
+    try:
+        shutil.rmtree(f'{BASE_DIR}\\Downloads\\{PACK_NAME}')
+        print(Fore.GREEN + 'Temporary files deleted!')
+    except:
+        print(Back.RED + 'Temporary failed files to deleted!')
 
+    
+    CLOSE_APP = True
     print(Fore.MAGENTA + '\nAll Done! Thank you for using my modpack installer!')
     print(Fore.GREEN + 'Press Enter to exit...')
     # Wait for user to close with enter key
-    input()
+    # input()
 
