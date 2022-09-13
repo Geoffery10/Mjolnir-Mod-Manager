@@ -30,7 +30,7 @@ if __name__ == '__main__':
     colorama.init(autoreset=True)
     pg.theme('DarkPurple1')
     pg.isAnimated = True
-    CURRENT_VERSION = '1.0.7'
+    CURRENT_VERSION = '1.0.6'
     URL = 'https://mcweb.geoffery10.com/mods.json'
     SUPPORTED_GAMES = ['Minecraft']
 
