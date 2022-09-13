@@ -2,12 +2,15 @@ import PySimpleGUI as pg
 import os
 import colorama
 from colorama import Fore, Back
+from subprocess import Popen
+import sys
 
 # Custom Functions
 import online
 from ui_menus import exit_app, UI_Setup
 import pack
 import file_manager
+
 
 modpack = pack.Pack()
 CURRENT_VERSION = ''
@@ -42,6 +45,16 @@ if __name__ == '__main__':
         [pg.Text("Current Version: " + CURRENT_VERSION)],
         [pg.Button("Ok", key="Ok")]]
     UI_Setup(layout)
+
+    # Check for Updates or Install Packs
+    # Run auto-update.py to download the latest version of ModDude!
+    # This will overwrite the current version of ModDude! with the latest version
+    # This will close the current instance of ModDude! and open the new one
+    if online.check_for_updates(CURRENT_VERSION, URL):
+        Popen([sys.executable, os.path.join(BASE_DIR, 'auto-update.py')])
+        exit_app()
+    
+
 
     # Load Pack Info
     modpack = online.get_json(CURRENT_VERSION, URL)

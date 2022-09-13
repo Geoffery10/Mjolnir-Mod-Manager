@@ -10,8 +10,6 @@ import sys
 
 def UI_Setup(layout):
     # Variables
-    global CLOSE_APP
-    CLOSE_APP = False
     # Set Theme
     pg.theme('DarkPurple1')
     # Create Windows
@@ -19,7 +17,7 @@ def UI_Setup(layout):
     # Event Loop
     while True:
         event, values = window.read()
-        if event == pg.WIN_CLOSED or CLOSE_APP == True:
+        if event == pg.WIN_CLOSED:
             exit_app()
         if event == "Start!" or event == "Ok":
             window.close()

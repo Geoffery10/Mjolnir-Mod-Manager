@@ -14,6 +14,29 @@ import zipfile
 import base64
 
 
+def check_for_updates(CURRENT_VERSION, URL):
+    if not URL == '':
+        print(Fore.GREEN + 'Checking for updates...')
+        response = requests.get(URL)
+        # Check if response is valid
+        if response.status_code == 200:
+            data = response.json()
+            print(Fore.GREEN + f'Packs v{data["CURRENT_VERSION"]} received!')
+
+            # Check if packs are up to date
+            if version.parse(CURRENT_VERSION) < version.parse(data['CURRENT_VERSION']):
+                print(Fore.GREEN + 'Update found!')
+                return True
+            else:
+                print(Fore.GREEN + 'No updates found!')
+                return False
+        else:
+            ERROR_UI(
+                'Error', 'Error getting packs from internet! Please check your internet connection and try again!', FATAL=True)
+    else:
+        ERROR_UI(
+            'Error', 'No URL specified! Please contact the developer!', FATAL=True)
+
 def get_json(CURRENT_VERSION, URL):
     if not URL == '':
         print(Fore.GREEN + 'Getting Packs from Internet...')
