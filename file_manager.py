@@ -9,6 +9,7 @@ import shutil
 import datetime
 import PySimpleGUI as pg
 from ui_menus import ERROR_UI, exit_app, UI_Setup
+import json
 
 
 def check_game_install_location(modpack, APPDATA_PATH, PATH):
@@ -274,6 +275,80 @@ def run_mod_loader_installer(modpack, BASE_DIR):
             ERROR_UI(
                 'Error', f'Unable to find {modpack.mod_loader} installer!', FATAL=True)
 
+
+def check_launcher_profiles(modpack, PATH):
+    print(Fore.GREEN + f'{modpack.game} - {modpack.game_version} [{modpack.mod_loader} - {modpack.mod_loader_version}]')
+    print(Fore.GREEN + 'Checking launcher profiles...')
+    # Check if launcher profiles exist
+    if os.path.exists(f'{PATH}\\launcher_profiles.json'):
+        # Check if mod loader is already installed
+        with open(f'{PATH}\\launcher_profiles.json', 'r') as f:
+            data = json.load(f)
+            for profile in data['profiles']:
+                print (Fore.GREEN + f'Checking {profile} profile...')
+                if modpack.mod_loader.lower() in data['profiles'][profile]['name'].lower():
+                    print(Fore.GREEN + 'Mod loader found installed!')
+                    if modpack.mod_loader_version in data['profiles'][profile]['lastVersionId']:
+                        print(Fore.GREEN + 'Mod loader version installed!')
+                        return True
+    print(Fore.YELLOW + 'Mod loader not installed!')
+    return False
+
+
+def check_ram(modpack, PATH):
+    print(Fore.GREEN + 'Checking RAM...')
+    # Check if launcher profiles exist
+    if os.path.exists(f'{PATH}\\launcher_profiles.json'):
+        # Check if mod loader is already installed
+        with open(f'{PATH}\\launcher_profiles.json', 'r') as f:
+            data = json.load(f)
+            for profile in data['profiles']:
+                print (Fore.GREEN + f'Checking {profile} profile...')
+                if modpack.mod_loader.lower() in data['profiles'][profile]['name'].lower():
+                    print(Fore.GREEN + 'Mod loader found installed!')
+                    if modpack.mod_loader_version in data['profiles'][profile]['lastVersionId']:
+                        print(Fore.GREEN + 'Mod loader version installed!')
+                        # Get Current RAM
+                        current_ram = data['profiles'][profile]['javaArgs']
+                        current_ram = current_ram.split(' ')
+                        for arg in current_ram:
+                            if arg.startswith('-Xmx'):
+                                # Get number out of argument
+                                current_ram = arg[4:]
+                                current_ram = current_ram[:-1]
+                                current_ram = int(current_ram)
+                                print(Fore.GREEN + f'Current RAM: {current_ram}GB')
+                                if current_ram < modpack.recommended_ram:
+                                    print(Fore.YELLOW + 'RAM is too low!')
+                                    # Ask if user wants to change RAM
+                                    layout = [[pg.Text('RAM is too low!')],
+                                              [pg.Text(
+                                                  f'Current RAM: {current_ram}GB')],
+                                              [pg.Text(
+                                                  f'Recommended RAM: {modpack.recommended_ram}GB')],
+                                              [pg.Text('Do you want to change the RAM?')],
+                                              [pg.Button('Yes'), pg.Button('No')]]
+                                    window = pg.Window('ModDude', layout)
+                                    while True:
+                                        event, values = window.read()
+                                        if event in (None, 'Exit'):
+                                            exit_app()
+                                        elif event == 'Yes':
+                                            # Change RAM in launcher profile
+                                            print(Fore.GREEN + 'Changing RAM...')
+                                            data['profiles'][profile]['javaArgs'].replace(
+                                                f"-Xmx{current_ram}G", f"-Xmx{modpack.recommended_ram}G")
+                                            with open(f'{PATH}\\launcher_profiles.json', 'w') as f:
+                                                json.dump(data, f)
+                                            print(Fore.GREEN + 'RAM changed!')
+                                            window.close()
+                                            return True
+                                        elif event == 'No':
+                                            window.close()
+                                            return False
+                                    
+    print(Fore.YELLOW + 'Mod loader not installed!')
+    return False
 
 def check_install_integrity(modpack, PATH, BASE_DIR):
     passed_files = 0

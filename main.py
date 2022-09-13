@@ -63,7 +63,12 @@ if __name__ == '__main__':
     file_manager.copy_pack(modpack, PATH, BASE_DIR)
     if modpack.game == 'Minecraft':
         if not modpack.mod_loader == '':
-            file_manager.run_mod_loader_installer(modpack, BASE_DIR)
+            # Check if Mod Loader is Installed
+            if not file_manager.check_launcher_profiles(modpack, PATH):
+                file_manager.run_mod_loader_installer(modpack, BASE_DIR)
+
+    # Check if Profile Has Enough RAM
+    file_manager.check_ram(modpack, PATH)
 
     
     # Check Install Integrity
@@ -71,7 +76,7 @@ if __name__ == '__main__':
 
     
     # Delete Temp Files
-    file_manager.delete_temp_files(modpack, BASE_DIR, FILES)
+    file_manager.delete_temp_files(modpack, BASE_DIR)
 
     # Finished
     layout = [
