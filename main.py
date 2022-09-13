@@ -68,7 +68,10 @@ if __name__ == '__main__':
                 file_manager.run_mod_loader_installer(modpack, BASE_DIR)
 
     # Check if Profile Has Enough RAM
-    file_manager.check_ram(modpack, PATH)
+    # TODO: Add RAM Check
+    # This has no error handling, so it will crash if the java arguments are not found.
+    # Saving also doesn't work it seems.
+    # file_manager.check_ram(modpack, PATH)
 
     
     # Check Install Integrity

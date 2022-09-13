@@ -318,6 +318,8 @@ def check_ram(modpack, PATH):
                                 current_ram = current_ram[:-1]
                                 current_ram = int(current_ram)
                                 print(Fore.GREEN + f'Current RAM: {current_ram}GB')
+                                print(
+                                    Fore.GREEN + f'Modpack RAM: {modpack.recommended_ram}GB')
                                 if current_ram < modpack.recommended_ram:
                                     print(Fore.YELLOW + 'RAM is too low!')
                                     # Ask if user wants to change RAM

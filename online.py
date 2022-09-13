@@ -76,6 +76,7 @@ def select_pack(packs):
             modpack.mod_loader_version = selected_pack['MOD_LOADER_VERSION']
             modpack.pack_version = selected_pack['PACK_VERSION']
             modpack.pack_urls = selected_pack['PACK_URLS']
+            modpack.recommended_ram = selected_pack['RECOMMEND_RAM']
             modpack.mods = selected_pack['MODS']
             modpack.banner_url = selected_pack['BANNER_URL']
             window.close()
