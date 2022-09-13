@@ -1,12 +1,11 @@
 import PySimpleGUI as pg
-import shutil
 import os
 import colorama
 from colorama import Fore, Back
 
 # Custom Functions
 import online
-from ui_menus import exit_app, ERROR_UI, UI_Setup
+from ui_menus import exit_app, UI_Setup
 import pack
 import file_manager
 
@@ -71,7 +70,7 @@ if __name__ == '__main__':
     # TODO: Add RAM Check
     # This has no error handling, so it will crash if the java arguments are not found.
     # Saving also doesn't work it seems.
-    # file_manager.check_ram(modpack, PATH)
+    # * file_manager.check_ram(modpack, PATH)
 
     
     # Check Install Integrity

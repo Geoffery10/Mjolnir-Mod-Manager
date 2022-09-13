@@ -229,6 +229,7 @@ def run_mod_loader_installer(modpack, BASE_DIR):
 
     # Check if mod loader is already installed
     if modpack.mod_loader == 'Forge':
+        # ! This is not expected to work and needs a rewrite
         for file in os.listdir(f'{BASE_DIR}\\Downloads'):
             if file.startswith('forge-'):
                 found = True
@@ -237,7 +238,7 @@ def run_mod_loader_installer(modpack, BASE_DIR):
         if not found:
             print(Fore.GREEN + 'Downloading mod loader...')
             # Download mod loader
-            # TODO: THIS IS OUT OF DATE AND NEEDS TO BE UPDATED
+            # ! THIS IS OUT OF DATE AND NEEDS TO BE UPDATED
             try:
                 request.urlretrieve(
                     f'{FORGE_URL}', f'{BASE_DIR}\\Downloads\\forge-{FORGE_VERSION}-installer.jar')
@@ -296,6 +297,7 @@ def check_launcher_profiles(modpack, PATH):
 
 
 def check_ram(modpack, PATH):
+    # ? This method should probably be simplified
     print(Fore.GREEN + 'Checking RAM...')
     # Check if launcher profiles exist
     if os.path.exists(f'{PATH}\\launcher_profiles.json'):
