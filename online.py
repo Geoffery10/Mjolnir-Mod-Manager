@@ -37,6 +37,29 @@ def check_for_updates(CURRENT_VERSION, URL):
         ERROR_UI(
             'Error', 'No URL specified! Please contact the developer!', FATAL=True)
 
+
+def get_games(URL):
+    if not URL == '':
+        print(Fore.GREEN + 'Getting Games from Internet...')
+        response = requests.get(URL)
+        # Check if response is valid
+        if response.status_code == 200:
+            data = response.json()
+            print(Fore.GREEN + f'Games received!')
+
+            games = []
+            for game in data['Games']:
+                games.append(game)
+            game = select_game(games)
+        else:
+            ERROR_UI(
+                'Error', 'Error getting games from internet! Please check your internet connection and try again!', FATAL=True)
+    else:
+        ERROR_UI(
+            'Error', 'No URL specified! Please contact the developer!', FATAL=True)
+
+    return game
+
 def get_json(CURRENT_VERSION, URL):
     if not URL == '':
         print(Fore.GREEN + 'Getting Packs from Internet...')
@@ -64,6 +87,29 @@ def get_json(CURRENT_VERSION, URL):
 
     return modpack
 
+
+def select_game(games):
+    print(Fore.YELLOW + 'Which game would you like to mod?')
+    layout = [
+        [pg.Text(
+            'Select a game to mod:')]]
+    for i in range(len(games)):  # Alternate between Fore.MAGENTA and Fore.WHITE
+        game_name = f"{games[i]['Name']}"
+        layout.append([pg.Button(game_name)])
+    layout.append([pg.Button('Exit')])
+    window = pg.Window('ModDude', layout)
+    while True:
+        event, values = window.read()
+        if event in (None, 'Exit'):
+            exit_app()
+        else:
+            GAME_NAME = event
+            print(Fore.GREEN + f'Modding {GAME_NAME}...')
+            # Get game info from json using game name
+            for game in games:
+                if game == GAME_NAME:
+                    game = games[i][game]
+            return game
 
 def select_pack(packs):
     print(Fore.YELLOW + 'Which pack would you like to install?')

@@ -25,6 +25,14 @@ def check_game_install_location(modpack, APPDATA_PATH, PATH):
                 Back.RED + 'Minecraft not found! Please install Minecraft if you haven\' already.')
             PATH = ''
             found = False
+    elif modpack.game == 'Bonelab':
+        # Bonelab is in the LocalLow folder in AppData under Stress Level Zero
+        # Get username for path tp LocalLow
+        username = os.getlogin()
+        if os.path.exists(f'C:\\Users\\{username}\\AppData\\LocalLow\\Stress Level Zero\\Bonelab\\Mods'):
+            print(Fore.GREEN + 'Bonelab found!')
+            PATH = f'C:\\Users\\{username}\\AppData\\LocalLow\\Stress Level Zero\\BONELAB\\Mods'
+            found = True
     else:
         layout = [
             [pg.Text(
@@ -126,6 +134,10 @@ def back_up_old(modpack, PATH):
                     return
         else:
             print(Fore.GREEN + 'No existing mods found.')
+    elif modpack.game == 'Bonelab':
+        # Check if mod downloaded already exists
+        # TODO: Check if mod downloaded already exists
+        return
     else:
         ERROR_UI(
             'Error', 'Game unknown! Please check to make sure everything is downloaded correctly.', FATAL=True)
@@ -186,10 +198,65 @@ def copy_pack(modpack, PATH, BASE_DIR):
                     copied = 0
             done = True
         window.close()
+    elif modpack.game == 'Bonelab':
+        # Unzip pack to game folder
+        for root, dirs, files in os.walk(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}'):
+            for file in files:
+                MAX_COPY += 1
+        if MAX_COPY == 0:
+            ERROR_UI('Error', 'No files found in pack!', FATAL=True)
+
+        layout = [[pg.Text('Copying mods...')],
+                      [pg.ProgressBar(MAX_COPY, orientation='h', size=(20, 20), key='progressbar_copied')]]
+        window = pg.Window('ModDude', layout)
+        progress_bar = window['progressbar_copied']
+        while not done:
+            event, values = window.read(timeout=10)
+            if event in (None, 'Exit'):
+                exit_app()
+            print(Fore.GREEN + 'Copying pack to game folder... \n')
+            # Make all directories and subdirectories in pack if missing 
+            # Folder structure is modname/modfilesandfolders
+            for folder in os.listdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}'):
+                # Delete existing pack folder if exists
+                if os.path.isdir(f'{PATH}\\{folder}'):
+                    shutil.rmtree(f'{PATH}\\{folder}')
+                # Check each Pack folder for subfolders
+                if os.path.isdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{folder}'):
+                    # Create pack folder if missing
+                    if not os.path.exists(f'{PATH}\\{folder}'):
+                        os.mkdir(f'{PATH}\\{folder}')
+                        print(Fore.GREEN + f'Created {folder} folder.')
+                    # Copy files and folders to from the pack folder to the game folder
+                    for file in os.listdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{folder}'):
+                        # Check if it's a folder
+                        if os.path.isdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{folder}\\{file}'):
+                            # Create subfolder if missing
+                            if not os.path.exists(f'{PATH}\\{folder}\\{file}'):
+                                os.mkdir(f'{PATH}\\{folder}\\{file}')
+                                print(Fore.GREEN + f'Created {file} folder.')
+                            for subfile in os.listdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{folder}\\{file}'):
+                                shutil.copy(
+                                    f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{folder}\\{file}\\{subfile}', f'{PATH}\\{folder}\\{file}')
+                                copied += 1
+                                progress_bar.UpdateBar(copied / MAX_COPY * 100)
+                            print(Fore.MAGENTA +
+                                  f'\tInstalled {copied} files to {file} folder.\n')
+                            copied = 0
+                        else:
+                            shutil.copy(
+                                f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{folder}\\{file}', f'{PATH}\\{folder}')
+                            copied += 1
+                            progress_bar.UpdateBar(copied / MAX_COPY * 100)
+
+            done = True
+        window.close()
+
+        # Delete if already exists
+
     else:
         ERROR_UI(
             'Error', 'Game unknown! Please check to make sure everything is downloaded correctly.', FATAL=True)
-
 
 def run_mod_loader_installer(modpack, BASE_DIR):
     found = False

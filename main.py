@@ -30,9 +30,10 @@ if __name__ == '__main__':
     colorama.init(autoreset=True)
     pg.theme('DarkPurple1')
     pg.isAnimated = True
-    CURRENT_VERSION = '1.0.7'
+    CURRENT_VERSION = '1.0.8'
     URL = 'https://mcweb.geoffery10.com/mods.json'
-    SUPPORTED_GAMES = ['Minecraft']
+    GAMES_URL = 'https://mcweb.geoffery10.com/games.json'
+    SUPPORTED_GAMES = ['Minecraft', 'Bonelab']
 
     # Open UI
     layout = [
@@ -56,10 +57,10 @@ if __name__ == '__main__':
         if os.path.isfile(os.path.join(BASE_DIR, 'auto-update.py')):
             try:
                 Popen([os.path.join(BASE_DIR, 'auto-update.py')])
-                exit(0)
+                exit_app()
             except:
                 print('Error updating ModDude! Please try again!')
-                exit(1)
+                exit_app()
         else:
             # Download auto-update.py
             print('Downloading auto-update.py...')
@@ -70,7 +71,7 @@ if __name__ == '__main__':
                     f.write(response.content)
             else:
                 print('Error downloading auto-update.py! Please try again!')
-                exit(1)
+                exit_app()
         # Run auto-update.py
         Popen([sys.executable, os.path.join(BASE_DIR, 'auto-update.py')])
         exit_app()
@@ -82,10 +83,12 @@ if __name__ == '__main__':
             print('Error deleting auto-update.py!')
     
     
+    # Load Games
+    game = online.get_games(GAMES_URL)
 
 
     # Load Pack Info
-    modpack = online.get_json(CURRENT_VERSION, URL)
+    modpack = online.get_json(CURRENT_VERSION, game['Mod URL'])
 
 
     # Download Pack
@@ -95,9 +98,12 @@ if __name__ == '__main__':
     PATH = file_manager.check_game_install_location(modpack, APPDATA_PATH, PATH)
 
     # Backup Files
-    file_manager.back_up_old(modpack, (f"{PATH}\\mods"))
-    file_manager.back_up_old(modpack, (f"{PATH}\\config"))
-    file_manager.back_up_old(modpack, (f"{PATH}\\shaderpacks"))
+    if modpack.game == 'Minecraft':
+        file_manager.backup_files(modpack, PATH)
+        file_manager.back_up_old(modpack, (f"{PATH}\\mods"))
+        file_manager.back_up_old(modpack, (f"{PATH}\\config"))
+        file_manager.back_up_old(modpack, (f"{PATH}\\shaderpacks"))
+    
 
     # Copy Pack Into Game
     file_manager.copy_pack(modpack, PATH, BASE_DIR)
@@ -115,7 +121,8 @@ if __name__ == '__main__':
 
     
     # Check Install Integrity
-    file_manager.check_install_integrity(modpack, PATH, BASE_DIR)
+    if modpack.game == 'Minecraft':
+        file_manager.check_install_integrity(modpack, PATH, BASE_DIR)
 
     
     # Delete Temp Files
