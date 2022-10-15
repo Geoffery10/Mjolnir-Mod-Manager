@@ -30,9 +30,9 @@ if __name__ == '__main__':
     colorama.init(autoreset=True)
     pg.theme('DarkPurple1')
     pg.isAnimated = True
-    CURRENT_VERSION = '1.0.8'
-    URL = 'https://mcweb.geoffery10.com/mods.json'
-    GAMES_URL = 'https://mcweb.geoffery10.com/games.json'
+    CURRENT_VERSION = '1.0.9'
+    URL = 'https://www.geoffery10.com/mods.json'
+    GAMES_URL = 'https://www.geoffery10.com/games.json'
     SUPPORTED_GAMES = ['Minecraft', 'Bonelab']
 
     # Open UI
@@ -64,7 +64,7 @@ if __name__ == '__main__':
         else:
             # Download auto-update.py
             print('Downloading auto-update.py...')
-            response = requests.get('https://mcweb.geoffery10.com/auto-update.py')
+            response = requests.get('https://www.geoffery10.com/auto-update.py')
             if response.status_code == 200:
                 # Download file
                 with open(os.path.join(BASE_DIR, 'auto-update.py'), 'wb') as f:
