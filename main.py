@@ -85,6 +85,7 @@ if __name__ == '__main__':
     
     # Load Games
     game = online.get_games(GAMES_URL)
+    print(game)
 
 
     # Load Pack Info

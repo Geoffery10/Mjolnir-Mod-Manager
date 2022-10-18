@@ -106,9 +106,11 @@ def select_game(games):
             GAME_NAME = event
             print(Fore.GREEN + f'Modding {GAME_NAME}...')
             # Get game info from json using game name
-            for game in games:
-                if game == GAME_NAME:
-                    game = games[i][game]
+            for i in range(len(games)):
+                if games[i]['Name'] == GAME_NAME:
+                    game = games[i]
+                    break
+            window.close()
             return game
 
 def select_pack(packs):
