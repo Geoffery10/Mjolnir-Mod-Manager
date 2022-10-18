@@ -75,9 +75,10 @@ def bonelabSteamApps(modpack, melon_mods_path):
         PATH = LikelyPath
         found = True
     return
-    
+
 def find_file(file_name):
-    val = subprocess.run(f"dir \"{file_name}\" /s ", capture_output=True, shell=True).stdout.decode()
+    p = subprocess.run(f"dir \"{file_name}\" /s ", capture_output=True, shell=True, cwd="C:\\")
+    val = p.stdout.decode()
     loc = re.search('Directory of .*', val)
     if loc != None:
         return val[loc.start()+13: loc.end()]
