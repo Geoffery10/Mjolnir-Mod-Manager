@@ -52,44 +52,43 @@ def bonelabLocalLow(mods_path):
 
                 # Check is user wants to delete old mods folder
                 file_manager.ask_for_delete(f'{PATH}\\Mods')
-        # Copy mods to mods folder
-        for folder in os.listdir(mods_path):
-            # Copy file structure to game folder
-            done = False
-            MAX_COPY = len(os.listdir(mods_path))
-            print(Fore.GREEN + f'Folders/Files to copy: {MAX_COPY}')
-            copied = 0
-            layout = [[pg.Text('Copying mods...')],
-                    [pg.ProgressBar(MAX_COPY, orientation='h', size=(20, 20), key='progressbar_copied')]]
-            window = pg.Window('ModDude', layout)
-            progress_bar = window['progressbar_copied']
-            while not done:
-                event, values = window.read(timeout=10)
-                if event in (None, 'Exit'):
-                    exit_app()
-                print(Fore.GREEN + 'Copying pack to game folder... \n')
-                for file in os.listdir(mods_path):
-                    # Copy files/folders and only delete files that conflict
-                    # Copy directory structure to game folder
-                    print(Fore.GREEN + f'Copying {file}...')
-                    if os.path.isdir(f'{mods_path}\\{file}'):
-                        try:
-                            shutil.copytree(f'{mods_path}\\{file}', f'{PATH}\\Mods\\{file}')
-                        except FileExistsError:
-                            print(Fore.RED + f'{file} already exists, overriding...')
-                            shutil.rmtree(f'{PATH}\\Mods\\{file}')
-                            shutil.copytree(f'{mods_path}\\{file}', f'{PATH}\\Mods\\{file}')
-                    else:
-                        try:
-                            shutil.copy(f'{mods_path}\\{file}', f'{PATH}\\Mods\\{file}')
-                        except FileExistsError:
-                            print(Fore.RED + f'{file} already exists, overriding...')
-                            os.remove(f'{PATH}\\Mods\\{file}')
-                            shutil.copy(f'{mods_path}\\{file}', f'{PATH}\\Mods\\{file}')
-                    copied += 1
-                    progress_bar.UpdateBar(copied / MAX_COPY * 100)
-                done = True
-                window.close()
+
+        # Copy mods to LocalLow folder
+        done = False
+        MAX_COPY = len(os.listdir(mods_path))
+        print(Fore.GREEN + f'Folders/Files to copy: {MAX_COPY}')
+        copied = 0
+        layout = [[pg.Text('Copying mods...')],
+                [pg.ProgressBar(MAX_COPY, orientation='h', size=(20, 20), key='progressbar_copied')]]
+        window = pg.Window('ModDude', layout)
+        progress_bar = window['progressbar_copied']
+        while not done:
+            event, values = window.read(timeout=10)
+            if event in (None, 'Exit'):
+                exit_app()
+            print(Fore.GREEN + 'Copying pack to mods folder... \n')
+            for file in os.listdir(f'{mods_path}'):
+                # Copy files/folders and only delete files that conflict
+                # Copy directory structure to game folder
+                print(Fore.GREEN + f'Copying {file}...')
+                if os.path.isdir(f'{mods_path}\\{file}'):
+                    try:
+                        shutil.copytree(f'{mods_path}\\{file}', f'{PATH}\\Mods\\{file}')
+                    except FileExistsError:
+                        print(Fore.RED + f'{file} already exists, overriding...')
+                        shutil.rmtree(f'{PATH}\\Mods\\{file}')
+                        shutil.copytree(f'{mods_path}\\{file}', f'{PATH}\\Mods\\{file}')
+                else:
+                    try:
+                        shutil.copy(f'{mods_path}\\{file}', f'{PATH}\\Mods\\{file}')
+                    except FileExistsError:
+                        print(Fore.RED + f'{file} already exists, overriding...')
+                        os.remove(f'{PATH}\\Mods\\{file}')
+                        shutil.copy(f'{mods_path}\\{file}', f'{PATH}\\Mods\\{file}')
+                copied += 1
+                progress_bar.UpdateBar(copied / MAX_COPY * 100)
+            done = True
+            window.close()
 
         # Check copy integrity
         if file_manager.check_integrity(mods_path, f'{PATH}\\Mods'):

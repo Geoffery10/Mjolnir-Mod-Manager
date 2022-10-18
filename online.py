@@ -2,6 +2,8 @@
 # Path: online.py
 
 # Import Modules
+import threading
+import time
 from colorama import Fore, Back, Style
 import PySimpleGUI as pg
 import requests
@@ -203,34 +205,16 @@ def download_pack(modpack, BASE_DIR, FILES):
                 file_name = file.split('/')[-1]
                 FILES.append(file_name)
                 print(Fore.GREEN + f'Downloading {file_name}...')
+                # Start async timer to record download speed
+                start = time.time()
 
-                if file_name.endswith('.zip'):
-                    # Download the file
-                    r = requests.get(file, allow_redirects=True)
-                    # Write the file to the downloads folder
-                    if r.status_code == 200:
-                        open(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}',
-                             'wb').write(r.content)
-                        print(Fore.GREEN + f'{file_name} downloaded!')
-                        # Unzip the file
-                        with zipfile.ZipFile(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}', 'r') as zip_ref:
-                            zip_ref.extractall(
-                                f'{BASE_DIR}\\Downloads\\{modpack.pack_name}')
-                        print(Fore.GREEN + f'{file_name} unpacked!')
-                        # Delete Zip File
-                        os.remove(
-                            f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}')
-                    else:
-                        ERROR_UI(
-                            'Error', f'Error downloading {file_name}! Please try again later!', FATAL=True)
-                else:
-                    # Download the file
-                    r = requests.get(file, allow_redirects=True)
-                    # Write the file to the downloads folder
-                    if r.status_code == 200:
-                        open(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}',
-                             'wb').write(r.content)
-                        print(Fore.GREEN + f'{file_name} downloaded!')
+                # Download the file asynchronously to prevent freezing
+                download_file = threading.Thread(
+                    target=download_file_async, args=(file, file_name, BASE_DIR, modpack))
+                download_file.start()
+                download_file.join()
+                
+                print(Fore.GREEN + f'{file_name} downloaded! Took {time.time() - start} seconds!')
                 progress += step_size
                 progress_bar.UpdateBar(progress)
 
@@ -241,3 +225,32 @@ def download_pack(modpack, BASE_DIR, FILES):
         if progress >= 100:
             break
     print(Fore.MAGENTA + 'All files downloaded!')
+
+
+def download_file_async(file, file_name, BASE_DIR, modpack):
+    if file_name.endswith('.zip'):
+        # Download the file
+        r = requests.get(file, allow_redirects=True)
+        # Write the file to the downloads folder
+        if r.status_code == 200:
+            open(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}',
+                    'wb').write(r.content)
+            print(Fore.GREEN + f'{file_name} downloaded!')
+            # Unzip the file
+            with zipfile.ZipFile(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}', 'r') as zip_ref:
+                zip_ref.extractall(
+                    f'{BASE_DIR}\\Downloads\\{modpack.pack_name}')
+            print(Fore.GREEN + f'{file_name} unpacked!')
+            # Delete Zip File
+            os.remove(
+                f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}')
+        else:
+            ERROR_UI(
+                'Error', f'Error downloading {file_name}! Please try again later!', FATAL=True)
+    else:
+        # Download the file
+        r = requests.get(file, allow_redirects=True)
+        # Write the file to the downloads folder
+        if r.status_code == 200:
+            open(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}',
+                    'wb').write(r.content)
