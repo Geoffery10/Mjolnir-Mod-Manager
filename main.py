@@ -52,6 +52,7 @@ if __name__ == '__main__':
     # Run auto-update.py to download the latest version of ModDude!
     # This will overwrite the current version of ModDude! with the latest version
     # This will close the current instance of ModDude! and open the new one
+    # ! This will not work if ModDude! is running from a .exe file
     if online.check_for_updates(CURRENT_VERSION, URL):
         # check for update script
         if os.path.isfile(os.path.join(BASE_DIR, 'auto-update.py')):
