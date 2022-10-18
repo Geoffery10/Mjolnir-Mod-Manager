@@ -100,9 +100,12 @@ def backup_old(PATH):
     # Create backup folder
     os.mkdir(f'{PATH}_{now}')
 
-    # Copy files to backup folder
-    for file in os.listdir(PATH):
-        shutil.copy(f'{PATH}\\{file}', f'{PATH}_{now}')
+    # Copy folders to backup folder
+    for folder in os.listdir(PATH):
+        try:
+            shutil.copytree(f'{PATH}\\{folder}', f'{PATH}_{now}\\{folder}')
+        except OSError as e:
+            print("Error: %s : %s" % (f'{PATH}\\{folder}', e.strerror))
     
     return
 
@@ -112,8 +115,6 @@ def delete_old(PATH):
         shutil.rmtree(PATH)
     except OSError as e:
         print("Error: %s : %s" % (PATH, e.strerror))
-    # Create new folder
-    os.mkdir(PATH)
 
 def delete_temp_files(modpack, BASE_DIR):
     # Delete all files in the temp folder

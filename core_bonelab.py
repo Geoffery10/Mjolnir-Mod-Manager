@@ -23,11 +23,6 @@ def bonelab(modpack, BASE_DIR, APPDATA_PATH, FILES):
         # Copy LocalLow mods
         mods_path = f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\Mods'
         bonelabLocalLow(mods_path)
-
-
-    # Check Install Integrity
-
-
     return True
 
 
@@ -57,7 +52,8 @@ def bonelabLocalLow(mods_path):
                 # Check is user wants to delete old mods folder
                 file_manager.ask_for_delete(f'{PATH}\\Mods')
         # Copy mods to mods folder
-        file_manager.copy_folder(mods_path, f'{PATH}\\Mods')
+        for folder in os.listdir(mods_path):
+            file_manager.copy_folder(mods_path, f'{PATH}\\Mods\\{folder}')
 
         # Check copy integrity
         if file_manager.check_integrity(mods_path, f'{PATH}\\Mods'):
