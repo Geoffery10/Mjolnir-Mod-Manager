@@ -1,10 +1,13 @@
 # This installs minecraft mods
 
+import datetime
 import json
 import os
 import shutil
+import subprocess
 
 from colorama import Back, Fore
+from requests import request
 import file_manager
 from ui_menus import ERROR_UI, exit_app
 import PySimpleGUI as pg
@@ -15,9 +18,9 @@ def minecraft(modpack, BASE_DIR, APPDATA_PATH, FILES):
     PATH = check_game_install_location(modpack, APPDATA_PATH)
 
     # Backup Files
-    file_manager.back_up_old(modpack, (f"{PATH}\\mods"))
-    file_manager.back_up_old(modpack, (f"{PATH}\\config"))
-    file_manager.back_up_old(modpack, (f"{PATH}\\shaderpacks"))
+    back_up_old(modpack, (f"{PATH}\\mods"))
+    back_up_old(modpack, (f"{PATH}\\config"))
+    back_up_old(modpack, (f"{PATH}\\shaderpacks"))
 
     # Copy Pack Into Game
     copy_pack(modpack, PATH, BASE_DIR)
@@ -349,3 +352,54 @@ def check_install_integrity(modpack, PATH, BASE_DIR):
     else:
         ERROR_UI('Error', 'Game not supported!', FATAL=False)
 
+def back_up_old(modpack, PATH):
+    print(Fore.CYAN + f'\n{PATH}\n')
+    folder_name = os.path.basename(os.path.normpath(PATH))
+    if os.path.exists(f'{PATH}'):
+        # Ask user if they want to back up old mods
+        print(Fore.YELLOW +
+                f'Would you like to back up your old {folder_name}? (y/n)')
+        layout = [[pg.Text(f'Would you like to back up your old {folder_name}?')],
+                    [pg.Button('Yes'), pg.Button('No')]]
+        window = pg.Window('ModDude', layout)
+        while True:
+            event, values = window.read()
+            if event in (None, 'Exit'):
+                exit_app()
+            elif event == 'Yes':
+
+                # Backup Minecraft mods to new folder with date
+                current_date = datetime.datetime.now()
+                current_date = current_date.strftime("%m-%d-%Y_%H-%M-%S")
+                print(Fore.GREEN + f'Backing up old {folder_name} to ' + Fore.MAGENTA +
+                        f'{folder_name}_old_{current_date}' + Fore.GREEN + '...')
+                os.rename(f'{PATH}',
+                            f'{PATH}_old_{current_date}')
+                print(Fore.GREEN + 'Backup Complete!')
+                window.close()
+                break
+            elif event == 'No':
+                # Not backing up old files
+                # Only Delete Old Mods
+                if folder_name == 'mods':
+                    try:
+                        shutil.rmtree(f'{PATH}')
+                        print(Fore.GREEN + 'Old folder removed!')
+                    except OSError as e:
+                        ERROR_UI(
+                            'Error', f'Error: {e.filename} - {e.strerror}!', FATAL=True)
+                window.close()
+                return
+    else:
+        print(Fore.GREEN + 'No existing mods found.')
+    
+    layout = [[pg.Text('Files backed up!')],
+              [pg.Button('OK!')]]
+    window = pg.Window('ModDude', layout)
+    while True:
+        event, values = window.read()
+        if event in (None, 'Exit'):
+            exit_app()
+        elif event == 'OK!':
+            window.close()
+            break
