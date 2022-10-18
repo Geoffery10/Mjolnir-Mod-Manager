@@ -10,7 +10,7 @@ import requests
 import online
 from ui_menus import exit_app, UI_Setup
 import pack
-import file_manager
+from file_manager import delete_temp_files
 
 
 modpack = pack.Pack()
@@ -85,7 +85,6 @@ if __name__ == '__main__':
     
     # Load Games
     game = online.get_games(GAMES_URL)
-    print(game)
 
 
     # Load Pack Info
@@ -95,53 +94,50 @@ if __name__ == '__main__':
     # Download Pack
     online.download_pack(modpack, BASE_DIR, FILES)
 
-    # Check Where to Install
-    PATH = file_manager.check_game_install_location(modpack, APPDATA_PATH, PATH)
+    # Open Core
+    if game['Name'] == 'Minecraft':
+        # Minecraft
+        import core_minecraft
+        valid = core_minecraft.minecraft(modpack, BASE_DIR, APPDATA_PATH, FILES)
+    elif game['Name'] == 'Bonelab':
+        # Bonelab
+        import core_bonelab
+        valid = core_bonelab.bonelab(modpack, BASE_DIR, APPDATA_PATH, FILES)
+    else:
+        print('Error: Invalid Game!')
+        exit_app()
 
-    # Backup Files
-    if modpack.game == 'Minecraft':
-        file_manager.backup_files(modpack, PATH)
-        file_manager.back_up_old(modpack, (f"{PATH}\\mods"))
-        file_manager.back_up_old(modpack, (f"{PATH}\\config"))
-        file_manager.back_up_old(modpack, (f"{PATH}\\shaderpacks"))
-    
-
-    # Copy Pack Into Game
-    file_manager.copy_pack(modpack, PATH, BASE_DIR)
-    if modpack.game == 'Minecraft':
-        if not modpack.mod_loader == '':
-            # Check if Mod Loader is Installed
-            if not file_manager.check_launcher_profiles(modpack, PATH):
-                file_manager.run_mod_loader_installer(modpack, BASE_DIR)
-
-    # Check if Profile Has Enough RAM
-    # TODO: Add RAM Check
-    # This has no error handling, so it will crash if the java arguments are not found.
-    # Saving also doesn't work it seems.
-    # * file_manager.check_ram(modpack, PATH)
-
-    
-    # Check Install Integrity
-    if modpack.game == 'Minecraft':
-        file_manager.check_install_integrity(modpack, PATH, BASE_DIR)
-
-    
     # Delete Temp Files
-    file_manager.delete_temp_files(modpack, BASE_DIR)
+    delete_temp_files(modpack, BASE_DIR)
 
     # Finished
-    layout = [
-        [pg.Text("ModDude has finished installing your modpack!")],
-        [pg.Text("Thank you for using ModDude!")],
-        [pg.Text("Please contact me on Discord if you have any issues.")],
-        [pg.Text("Discord: Geoffery10#6969")],
-        [pg.Button("Ok", key="Ok")]]
-    window = pg.Window(f"ModDude!", layout)
-    while True:
-        event, values = window.read()
-        if event == pg.WIN_CLOSED:
-            exit_app()
-        if event == "Ok":
-            window.close()
-            exit_app()
+    if valid:
+        layout = [
+            [pg.Text("ModDude has finished installing your modpack!")],
+            [pg.Text("Thank you for using ModDude!")],
+            [pg.Text("Please contact me on Discord if you have any issues.")],
+            [pg.Text("Discord: Geoffery10#6969")],
+            [pg.Button("Ok", key="Ok")]]
+        window = pg.Window(f"ModDude!", layout)
+        while True:
+            event, values = window.read()
+            if event == pg.WIN_CLOSED:
+                exit_app()
+            if event == "Ok":
+                window.close()
+                exit_app()
+    else:
+        layout = [
+            [pg.Text("ModDude has encountered an error while installing your modpack!")],
+            [pg.Text("Please contact me on Discord if you have any issues.")],
+            [pg.Text("Discord: Geoffery10#6969")],
+            [pg.Button("Ok", key="Ok")]]
+        window = pg.Window(f"ModDude!", layout)
+        while True:
+            event, values = window.read()
+            if event == pg.WIN_CLOSED:
+                exit_app()
+            if event == "Ok":
+                window.close()
+                exit_app()
 

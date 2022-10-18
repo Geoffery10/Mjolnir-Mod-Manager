@@ -12,7 +12,7 @@ from ui_menus import ERROR_UI, exit_app, UI_Setup
 import json
 
 
-def check_game_install_location(modpack, APPDATA_PATH, PATH):
+def check_game_install_location(modpack, APPDATA_PATH):
     found = False
     print(Fore.CYAN + '\nChecking game install location...\n')
     if modpack.game == 'Minecraft':

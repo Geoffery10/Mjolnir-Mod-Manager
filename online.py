@@ -240,5 +240,4 @@ def download_pack(modpack, BASE_DIR, FILES):
             break
         if progress >= 100:
             break
-
     print(Fore.MAGENTA + 'All files downloaded!')
