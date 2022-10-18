@@ -57,6 +57,7 @@ def bonelabLocalLow(mods_path):
             # Copy file structure to game folder
             done = False
             MAX_COPY = len(os.listdir(mods_path))
+            print(Fore.GREEN + f'Folders/Files to copy: {MAX_COPY}')
             copied = 0
             layout = [[pg.Text('Copying mods...')],
                     [pg.ProgressBar(MAX_COPY, orientation='h', size=(20, 20), key='progressbar_copied')]]
@@ -70,10 +71,21 @@ def bonelabLocalLow(mods_path):
                 for file in os.listdir(mods_path):
                     # Copy files/folders and only delete files that conflict
                     # Copy directory structure to game folder
+                    print(Fore.GREEN + f'Copying {file}...')
                     if os.path.isdir(f'{mods_path}\\{file}'):
-                        shutil.copytree(f'{mods_path}\\{file}', f'{PATH}\\{file}')
+                        try:
+                            shutil.copytree(f'{mods_path}\\{file}', f'{PATH}\\Mods\\{file}')
+                        except FileExistsError:
+                            print(Fore.RED + f'{file} already exists, overriding...')
+                            shutil.rmtree(f'{PATH}\\Mods\\{file}')
+                            shutil.copytree(f'{mods_path}\\{file}', f'{PATH}\\Mods\\{file}')
                     else:
-                        shutil.copy(f'{mods_path}\\{file}', f'{PATH}\\{file}')
+                        try:
+                            shutil.copy(f'{mods_path}\\{file}', f'{PATH}\\Mods\\{file}')
+                        except FileExistsError:
+                            print(Fore.RED + f'{file} already exists, overriding...')
+                            os.remove(f'{PATH}\\Mods\\{file}')
+                            shutil.copy(f'{mods_path}\\{file}', f'{PATH}\\Mods\\{file}')
                     copied += 1
                     progress_bar.UpdateBar(copied / MAX_COPY * 100)
                 done = True
@@ -120,9 +132,17 @@ def bonelabSteamApps(modpack, melon_mods_path):
                 # Copy files/folders and don't delete files that conflict
                 if not os.path.exists(f'{PATH}\\{folder}'):
                     if os.path.isdir(f'{melon_mods_path}\\{folder}'):
+                        try:
                             shutil.copytree(f'{melon_mods_path}\\{folder}', f'{PATH}\\{folder}')
+                        except FileExistsError:
+                            # Directory already exists
+                            pass
                     else:
-                        shutil.copy(f'{melon_mods_path}\\{folder}', f'{PATH}\\{folder}')
+                        try:
+                            shutil.copy(f'{melon_mods_path}\\{folder}', f'{PATH}\\{folder}')
+                        except FileExistsError:
+                            # File already exists
+                            pass
                 copied += 1
                 progress_bar.UpdateBar(copied / MAX_COPY * 100)
             done = True
