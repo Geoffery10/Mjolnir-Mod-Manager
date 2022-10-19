@@ -73,10 +73,13 @@ def ask_for_backup(PATH):
             return False
 
 def ask_for_delete(PATH):
+    # Split path into list
+    path_list = PATH.split('\\')
     # Ask user if they want to delete the folder
     layout = [
-        [pg.Text(f'Would you like to delete the folder old {PATH}?')],
-        [pg.Button('Yes'), pg.Button('No')]
+        [pg.Text(f'Would you like to delete the old {PATH} folder? This is only recommended if you have backed up the folder and are installing a completely different modpack.')],
+        [pg.Text(f'DELETING THE FOLDER WILL PERMANENTLY DELETE ALL FILES IN THE FOLDER!')],
+        [pg.Button(f'Yes Delete All of The Files in the {path_list[-1]} Folder'), pg.Button('No')]
     ]
     window = pg.Window('ModDude', layout)
     while True:
