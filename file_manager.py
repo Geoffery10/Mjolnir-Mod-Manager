@@ -65,8 +65,8 @@ def ask_for_backup(PATH):
         if event in (None, 'Exit'):
             exit_app()
         elif event == 'Yes':
-            backup_old(PATH)
             window.close()
+            backup_old(PATH)
             return True
         elif event == 'No':
             window.close()
@@ -75,22 +75,26 @@ def ask_for_backup(PATH):
 def ask_for_delete(PATH):
     # Split path into list
     path_list = PATH.split('\\')
+    yes = f'Yes, Delete All of The Files in the {path_list[-1]} Folder'
+    no = 'No, I\'m just Updating/Adding Mods'
     # Ask user if they want to delete the folder
     layout = [
-        [pg.Text(f'Would you like to delete the old {PATH} folder? This is only recommended if you have backed up the folder and are installing a completely different modpack.')],
+        [pg.Text(f'Found Files at: {PATH}')],
+        [pg.Text(f'Would you like to delete the old {path_list[-1]} folder?')],
+        [pg.Text('This is only recommended if you have backed up the folder and are installing a completely different modpack.')],
         [pg.Text(f'DELETING THE FOLDER WILL PERMANENTLY DELETE ALL FILES IN THE FOLDER!')],
-        [pg.Button(f'Yes Delete All of The Files in the {path_list[-1]} Folder'), pg.Button('No')]
+        [pg.Button(yes), pg.Button(no)]
     ]
     window = pg.Window('ModDude', layout)
     while True:
         event, values = window.read()
         if event in (None, 'Exit'):
             exit_app()
-        elif event == 'Yes':
+        elif event == yes:
             delete_old(PATH)
             window.close()
             return True
-        elif event == 'No':
+        elif event == no:
             window.close()
             return False
 
@@ -103,12 +107,31 @@ def backup_old(PATH):
     # Create backup folder
     os.mkdir(f'{PATH}_{now}')
 
+    # Split path into list
+    path_list = PATH.split('\\')
+
     # Copy folders to backup folder
-    for folder in os.listdir(PATH):
-        try:
-            shutil.copytree(f'{PATH}\\{folder}', f'{PATH}_{now}\\{folder}')
-        except OSError as e:
-            print("Error: %s : %s" % (f'{PATH}\\{folder}', e.strerror))
+    done = False
+    MAX_COPY_BACK_UP = len(os.listdir(PATH))
+    copied_back_up = 0
+    layout = [[pg.Text(f'Backing up mods to {path_list[-1]}_{now} folder...')],
+              [pg.ProgressBar(MAX_COPY_BACK_UP, orientation='h', size=(20, 20), key='progressbar_backed_up')]]
+    window = pg.Window('ModDude', layout)
+    progress_bar_backed_up = window['progressbar_backed_up']
+    while not done:
+        event, values = window.read(timeout=10)
+        if event in (None, 'Exit'):
+            exit_app()
+        print(f'Backing up mods to {PATH}_{now} folder...')
+        for folder in os.listdir(PATH):
+            try:
+                shutil.copytree(f'{PATH}\\{folder}', f'{PATH}_{now}\\{folder}')
+            except OSError as e:
+                print("Error: %s : %s" % (f'{PATH}\\{folder}', e.strerror))
+            copied_back_up += 1
+            progress_bar_backed_up.UpdateBar(copied_back_up / MAX_COPY_BACK_UP * 100)
+        done = True
+        window.close()
     
     return
 
