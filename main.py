@@ -29,27 +29,40 @@ PACK = {}
 FILES = []
 FONTS = []
 
+# Colors
+transparent = '#00000000'
+dark_purple = '#5b0079'
+light_purple = '#995aae'
+
 # PAGES 
 # 0 = Main Menu
 # 1 = Modpack Menu
 # 2 = Downloading 
 
-# Main Menu
-def main_menu():
+
+def new_app(title='ModDude!', width=1280, height=720, resizable=False, icon=f'{BASE_DIR}\\icon.ico'):
     customtkinter.set_appearance_mode("System")
     customtkinter.set_default_color_theme("blue")
     app = customtkinter.CTk()
     # Aspect Ratio is 16:9
-    app.geometry('1280x720')
-    app.title('ModDude!')
-    app.iconbitmap(f'{BASE_DIR}\\icon.ico')
-    app.resizable(False, False)
+    app.geometry(f"{width}x{height}")
+    app.title(title)
+    app.iconbitmap(icon)
+    app.resizable(resizable, resizable)
     app.configure(bg='#380070')
+    return app
+    
 
-    transparent = '#00000000'
-    dark_purple = '#5b0079'
-    light_purple = '#995aae'
 
+
+# Main Menu
+def main_menu():
+    # Create main menu
+    app = new_app()
+    
+    # Colors
+    global dark_purple
+    global light_purple
     
 
     global FONTS
@@ -90,20 +103,48 @@ def main_menu():
     # Games in List
     global SUPPORTED_GAMES
     for game in SUPPORTED_GAMES:
-        game_button = customtkinter.CTkButton(game_list_frame, text=game, fg_color=dark_purple, border_width=0, bg_color=light_purple, hover=False, command=lambda game=game: modpack_menu(game))
-        game_button.pack(side='left', padx=20, pady=20)
+        game_image = tk.PhotoImage(file=f'{BASE_DIR}\\images\\covers\\{game}.png')
+        game_button = customtkinter.CTkButton(game_list_frame, text='', image=game_image, fg_color=light_purple, border_width=0, bg_color=light_purple, hover=False, command=lambda game=game: modpack_menu(game))
+        game_button.pack(side='left', padx=20, pady=10)
+
+    # Footer
+    footer_frame = tk.Frame(main_frame, bg=dark_purple)
+    footer_frame.place(x=0, y=598, width=1223, height=70)
+    global CURRENT_VERSION
+    current_version = tk.Label(footer_frame, text=f'Current Version: v{CURRENT_VERSION}', bg=dark_purple, fg='white', font=(FONTS[3], 25))
+    current_version.pack(side='left', padx=20, pady=0)
+    # Links on right side
+    github_icon = tk.PhotoImage(file=f'{BASE_DIR}\\images\\github.png')
+    github_link = customtkinter.CTkButton(footer_frame, text='', fg_color=dark_purple, image=github_icon, hover=False, command=lambda: open_website('https://github.com/Geoffery10/ModDude'))
+    github_link.pack(side='right', padx=0, pady=0)
+
+    discord_icon = tk.PhotoImage(file=f'{BASE_DIR}\\images\\discord.png')
+    discord_link = customtkinter.CTkButton(footer_frame, text='', fg_color=dark_purple, image=discord_icon,
+                                           hover=False, command=lambda: open_website('https://discordapp.com/users/253710834553847808'))
+    discord_link.pack(side='right', padx=0, pady=0)
+
 
     def modpack_menu(game):
         global PACK
-        # PACK = modpack.get_modpacks(game)
-        app.destroy()
-        modpack_menu()
+        global GAMES_URL
+        modpack_menu(game)
 
     def open_website(url):
         # Open github in browser
         webbrowser.open(url, new=2)
 
     app.mainloop()
+
+# Modpack Menu
+def modpack_menu(game, app):
+    # Create modpack menu
+    app.title(f'ModDude! - {game}')
+
+    # Colors
+    global dark_purple
+    global light_purple
+    
+
 
     
 
@@ -133,21 +174,6 @@ if __name__ == '__main__':
 
 
     main_menu()
-
-
-
-    # Open UI
-    layout = [
-        [pg.Text("Welcome to ModDude!")],
-        [pg.Text(" ")],
-        [pg.Text(
-            "This program was developed by Geoffery10 to help you install mods for your games.")],
-        [pg.Text("It is currently in beta, so please report any bugs to me on Discord.")],
-        [pg.Text("Discord: Geoffery10#6969")],
-        [pg.Text(" ")],
-        [pg.Text("Current Version: " + CURRENT_VERSION)],
-        [pg.Button("Ok", key="Ok")]]
-    UI_Setup(layout)
 
     # Check for Updates or Install Packs
     # Run auto-update.py to download the latest version of ModDude!
