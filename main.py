@@ -9,6 +9,7 @@ import requests
 import customtkinter
 import tkinter as tk
 import webbrowser
+import pyglet
 
 # Custom Functions
 import online
@@ -26,7 +27,7 @@ SUPPORTED_GAMES = []
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 PACK = {}
 FILES = []
-
+FONTS = []
 
 # PAGES 
 # 0 = Main Menu
@@ -47,6 +48,11 @@ def main_menu():
 
     transparent = '#00000000'
     dark_purple = '#5b0079'
+    light_purple = '#995aae'
+
+    
+
+    global FONTS
 
     # Main Menu
     # Page Breakdown:
@@ -65,23 +71,37 @@ def main_menu():
     # Logo (Image Button that links to website)
     # Logo is 655x98
     logo = tk.PhotoImage(file=f'{BASE_DIR}\\logo.png')
-    logo_button = customtkinter.CTkButton(app, text='', fg_color=dark_purple, border_width=0, bg_color=dark_purple, hover=False, image=logo, command=lambda: webbrowser.open(
-        'https://www.geoffery10.com/games.html', new=2))
+    logo_button = customtkinter.CTkButton(app, text='', fg_color=dark_purple, border_width=0, bg_color=dark_purple,
+                                          hover=False, image=logo, command=lambda: open_website('https://www.geoffery10.com/games.html'))
     logo_button.place(x=313, y=47)
 
+    # App Info
+    app_info = tk.Label(app, text='This program was developed by Geoffery10 to help you install mods for your games.\n This app is currently in beta, so please report any bugs to me on Discord.', bg=dark_purple, fg='white', font=(FONTS[3], 20))
+    app_info.place(x=67, y=182, width=1146, height=100)
 
-    def button_function():
-        print("button pressed")
+    # Select Game
+    select_game = tk.Label(app, text='Please Select A Game', bg=dark_purple, fg='white', font=(FONTS[3], 30))
+    select_game.place(x=67, y=265, width=1146, height=100)
 
-    def open_github():
+    # Games List
+    game_list_frame = tk.Frame(main_frame, bg=light_purple)
+    game_list_frame.place(x=0, y=340, width=1280, height=258)
+
+    # Games in List
+    global SUPPORTED_GAMES
+    for game in SUPPORTED_GAMES:
+        game_button = customtkinter.CTkButton(game_list_frame, text=game, fg_color=dark_purple, border_width=0, bg_color=light_purple, hover=False, command=lambda game=game: modpack_menu(game))
+        game_button.pack(side='left', padx=20, pady=20)
+
+    def modpack_menu(game):
+        global PACK
+        # PACK = modpack.get_modpacks(game)
+        app.destroy()
+        modpack_menu()
+
+    def open_website(url):
         # Open github in browser
-        webbrowser.open('https://www.geoffery10.com/games.html', new=2)
-        
-
-    # Use CTkButton instead of tkinter Button
-    button = customtkinter.CTkButton(
-        master=app, text="CTkButton", command=button_function)
-    button.place(relx=0.5, rely=0.5, anchor=customtkinter.CENTER)
+        webbrowser.open(url, new=2)
 
     app.mainloop()
 
@@ -96,6 +116,20 @@ if __name__ == '__main__':
     URL = 'https://www.geoffery10.com/mods.json'
     GAMES_URL = 'https://www.geoffery10.com/games.json'
     SUPPORTED_GAMES = ['Minecraft', 'Bonelab']
+
+    # Custom Fonts
+    try:
+        if os.path.exists(f'{BASE_DIR}\\fonts'):
+            for file in os.listdir(f'{BASE_DIR}\\fonts'):
+                if file.endswith('.ttf'):
+                    pyglet.font.add_directory(f'{BASE_DIR}\\fonts')
+                    file_name = file.split('.')[0]
+                    FONTS.append(file_name)
+        print(Fore.GREEN + 'Loaded Custom Fonts')
+        print(Fore.GREEN + f'Fonts: {FONTS}')
+    except Exception as e:
+        print(f"Failed to load fonts")
+        FONTS = ['Arial', 'Arial', 'Arial', 'Arial']
 
 
     main_menu()
