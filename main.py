@@ -40,7 +40,9 @@ light_purple = '#995aae'
 # 2 = Downloading 
 
 
-def new_app(title='ModDude!', width=1280, height=720, resizable=False, icon=f'{BASE_DIR}\\icon.ico'):
+def new_app(title='ModDude!', width=1280, height=720, resizable=False, icon=f'{BASE_DIR}\\ModDude_Icon.ico'):
+    global dark_purple
+    global light_purple
     customtkinter.set_appearance_mode("System")
     customtkinter.set_default_color_theme("blue")
     app = customtkinter.CTk()
@@ -50,7 +52,12 @@ def new_app(title='ModDude!', width=1280, height=720, resizable=False, icon=f'{B
     app.iconbitmap(icon)
     app.resizable(resizable, resizable)
     app.configure(bg='#380070')
-    return app
+
+    # Main Frame
+    main_frame = tk.Frame(app, bg=dark_purple)
+    main_frame.pack(fill='both', expand=True, padx=28, pady=28)
+
+    return app, main_frame
     
 
 
@@ -58,13 +65,13 @@ def new_app(title='ModDude!', width=1280, height=720, resizable=False, icon=f'{B
 # Main Menu
 def main_menu():
     # Create main menu
-    app = new_app()
+    app, main_frame = new_app()
     
     # Colors
     global dark_purple
     global light_purple
     
-
+    # FONTS
     global FONTS
 
     # Main Menu
@@ -78,9 +85,7 @@ def main_menu():
     ## Github Link
     ## Discord Link
 
-    # Main Frame
-    main_frame = tk.Frame(app, bg=dark_purple)
-    main_frame.pack(fill='both', expand=True, padx=28, pady=28)
+    
     # Logo (Image Button that links to website)
     # Logo is 655x98
     logo = tk.PhotoImage(file=f'{BASE_DIR}\\logo.png')
@@ -104,7 +109,8 @@ def main_menu():
     global SUPPORTED_GAMES
     for game in SUPPORTED_GAMES:
         game_image = tk.PhotoImage(file=f'{BASE_DIR}\\images\\covers\\{game}.png')
-        game_button = customtkinter.CTkButton(game_list_frame, text='', image=game_image, fg_color=light_purple, border_width=0, bg_color=light_purple, hover=False, command=lambda game=game: modpack_menu(game))
+        game_button = customtkinter.CTkButton(game_list_frame, text='', image=game_image, fg_color=light_purple,
+                                              border_width=0, bg_color=light_purple, hover=False, command=lambda game=game: game_button(game))
         game_button.pack(side='left', padx=20, pady=10)
 
     # Footer
@@ -124,9 +130,11 @@ def main_menu():
     discord_link.pack(side='right', padx=0, pady=0)
 
 
-    def modpack_menu(game):
+    def game_button(game):
         global PACK
         global GAMES_URL
+        
+        app.destroy()
         modpack_menu(game)
 
     def open_website(url):
@@ -136,13 +144,19 @@ def main_menu():
     app.mainloop()
 
 # Modpack Menu
-def modpack_menu(game, app):
+def modpack_menu(game):
     # Create modpack menu
-    app.title(f'ModDude! - {game}')
+    app, main_frame = new_app(title=f'ModDude! - {game}')
 
     # Colors
     global dark_purple
     global light_purple
+
+    # FONTS
+    global FONTS
+
+    app.mainloop()
+
     
 
 
