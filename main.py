@@ -1,3 +1,4 @@
+from tkinter import ttk
 import PySimpleGUI as pg
 import os
 import colorama
@@ -5,6 +6,9 @@ from colorama import Fore, Back
 from subprocess import Popen
 import sys
 import requests
+import customtkinter
+import tkinter as tk
+import webbrowser
 
 # Custom Functions
 import online
@@ -23,6 +27,64 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 PACK = {}
 FILES = []
 
+
+# PAGES 
+# 0 = Main Menu
+# 1 = Modpack Menu
+# 2 = Downloading 
+
+# Main Menu
+def main_menu():
+    customtkinter.set_appearance_mode("System")
+    customtkinter.set_default_color_theme("blue")
+    app = customtkinter.CTk()
+    # Aspect Ratio is 16:9
+    app.geometry('1280x720')
+    app.title('ModDude!')
+    app.iconbitmap(f'{BASE_DIR}\\icon.ico')
+    app.resizable(False, False)
+    app.configure(bg='#380070')
+
+    transparent = '#00000000'
+    dark_purple = '#5b0079'
+
+    # Main Menu
+    # Page Breakdown:
+    # Logo
+    # App Info
+    # Select Game 
+    # Games List
+    # Footer
+    ## Current Version
+    ## Github Link
+    ## Discord Link
+
+    # Main Frame
+    main_frame = tk.Frame(app, bg=dark_purple)
+    main_frame.pack(fill='both', expand=True, padx=28, pady=28)
+    # Logo (Image Button that links to website)
+    # Logo is 655x98
+    logo = tk.PhotoImage(file=f'{BASE_DIR}\\logo.png')
+    logo_button = customtkinter.CTkButton(app, text='', fg_color=dark_purple, border_width=0, bg_color=dark_purple, hover=False, image=logo, command=lambda: webbrowser.open(
+        'https://www.geoffery10.com/games.html', new=2))
+    logo_button.place(x=313, y=47)
+
+
+    def button_function():
+        print("button pressed")
+
+    def open_github():
+        # Open github in browser
+        webbrowser.open('https://www.geoffery10.com/games.html', new=2)
+        
+
+    # Use CTkButton instead of tkinter Button
+    button = customtkinter.CTkButton(
+        master=app, text="CTkButton", command=button_function)
+    button.place(relx=0.5, rely=0.5, anchor=customtkinter.CENTER)
+
+    app.mainloop()
+
     
 
 if __name__ == '__main__':
@@ -34,6 +96,11 @@ if __name__ == '__main__':
     URL = 'https://www.geoffery10.com/mods.json'
     GAMES_URL = 'https://www.geoffery10.com/games.json'
     SUPPORTED_GAMES = ['Minecraft', 'Bonelab']
+
+
+    main_menu()
+
+
 
     # Open UI
     layout = [
