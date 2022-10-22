@@ -1,3 +1,5 @@
+.VSCodeCounter/
+
 # Game Files to Ingore
 shaderpacks/
 mods/
@@ -160,3 +162,4 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 *.zip
+ModDude.exe
