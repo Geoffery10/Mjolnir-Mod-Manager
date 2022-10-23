@@ -7,6 +7,7 @@ from colorama import Fore, Back
 from subprocess import Popen
 import sys
 import requests
+# Docs at https://github.com/TomSchimansky/CustomTkinter/wiki
 import customtkinter
 import tkinter as tk
 import webbrowser
