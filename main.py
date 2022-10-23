@@ -299,26 +299,9 @@ def modpack_menu(games, game, app):
         # Install selected packs
         if len(SELECTED_PACKS) > 0:
             # Install packs
-            main_frame.destroy()
-            main_frame = new_frame(app)
-            # Info
-            info_frame = tk.Frame(main_frame, bg=dark_purple)
-            info_frame.pack(side='top', anchor='center', pady=20)
-            # Title
-            title = customtkinter.CTkLabel(
-                info_frame, text=f'Installing...', text_font=(20))
-            title.pack(side='top', anchor='center', pady=40)
-            # Out of X
-            out_of_x = customtkinter.CTkLabel(
-                info_frame, text=f'Packs: 0/{len(SELECTED_PACKS)}', text_font=(30))
-            out_of_x.pack(side='top', anchor='center', pady=20)
-            # Progress Bar
-            progress_bar = customtkinter.CTkProgressBar(
-                info_frame, fg_color=light_purple, bg_color=dark_purple, progress_color=medium_purple)
-            progress_bar.pack(side='top', anchor='center', pady=20)
-            progress_bar.start()
             count = 0
-            app.update()
+            loading_frame, title, of_x, progress_bar = loading_bar_popup(
+                app, main_frame, title_text=f'Downloading {SELECTED_PACKS[0]["PACK_NAME"]}', type='Packs', max=len(SELECTED_PACKS))
             for pack in SELECTED_PACKS:
                 # Parse packs into Pack objects
                 modpack = Pack()
@@ -335,16 +318,21 @@ def modpack_menu(games, game, app):
                 modpack.mods_count = pack['MOD_COUNT']
                 modpack.banner_url = pack['BANNER_URL']
                 modpack.size = pack['PACK_SIZE']
+
+                # Loading Screen
+                
+
                 # Download pack
                 print(f'Downloading {modpack.pack_name}...')
                 print(f'Pack Size: {len(modpack.pack_urls)}')
-                app.title(f'Installing {modpack.pack_name}')
-                title.configure(text=f'Installing {modpack.pack_name}')
+                app.title(f'Downloading {modpack.pack_name}')
+                title.configure(text=f'Downloading {modpack.pack_name}')
                 online.download_pack(modpack=modpack, BASE_DIR=BASE_DIR, FILES=FILES, app=app)
                 count += 1
-                out_of_x.configure(text=f'Packs: {count}/{len(SELECTED_PACKS)}')
+                of_x.configure(text=f'Packs: {count}/{len(SELECTED_PACKS)}')
                 app.update()
             progress_bar.stop()
+            loading_frame.destroy()
 
             # Install mods
             # ! THIS NEEDS ADDED !
@@ -359,12 +347,36 @@ def modpack_menu(games, game, app):
             messagebox.showinfo('Finished', 'Finished installing packs!')
 
             # Return to modpack menu
-            main_frame.destroy()
-            modpack_menu(games, game, app)
+            app.title(f'ModDude! - {modpack.game}')
                 
         else:
             # No packs selected
             messagebox.showerror('No Packs Selected', 'Please select a pack to install.', parent=app)
+
+
+def loading_bar_popup(app, frame, title_text='', type='', max=0):
+    # Open a frame in the middle of the screen with a loading bar
+    # Create frame
+    loading_frame = tk.Frame(frame, bg=dark_purple)
+    loading_frame.pack(side='top', anchor='center', pady=20)
+    # Put a smaller frame in the middle of the screen
+    loading_frame2 = tk.Frame(loading_frame, bg=light_purple)
+    loading_frame2.pack(side='top', anchor='center', pady=20, padx=20)
+    # Title
+    title = customtkinter.CTkLabel(
+        loading_frame2, text=title_text, text_font=(20))
+    title.pack(side='top', anchor='center', pady=40)
+    # Of X
+    of_x = customtkinter.CTkLabel(
+        loading_frame2, text=f'{type}: 0/{max}', text_font=(30))
+    # Progress Bar
+    progress_bar = customtkinter.CTkProgressBar(
+        loading_frame2, fg_color=light_purple, bg_color=dark_purple, progress_color=medium_purple)
+    progress_bar.pack(side='top', anchor='center', pady=20)
+    progress_bar.start()
+    app.update()
+    return loading_frame, title, of_x, progress_bar
+
 
 
 def initialize_pack(id, pack, image, height, right_frame, selected_packs, download_size, total_mods):
