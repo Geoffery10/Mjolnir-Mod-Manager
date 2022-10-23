@@ -281,22 +281,21 @@ def modpack_menu(games, game, app):
 
     # Pack Frame 1
     initialize_pack(id=1, pack=packs[0], image=images[0],
-                    height=PACK_HEIGHT, right_frame=right_frame)
+                    height=PACK_HEIGHT, right_frame=right_frame, selected_packs=selected_packs, download_size=download_size, total_mods=total_mods)
     # Pack Frame 2
     if len(packs) > 1:
         initialize_pack(id=2, pack=packs[1], image=images[1], 
-                        height=PACK_HEIGHT, right_frame=right_frame)
+                        height=PACK_HEIGHT, right_frame=right_frame, selected_packs=selected_packs, download_size=download_size, total_mods=total_mods)
     # Pack Frame 3
     if len(packs) > 2:
         initialize_pack(id=3, pack=packs[2], image=images[2],
-                        height=PACK_HEIGHT, right_frame=right_frame)
+                        height=PACK_HEIGHT, right_frame=right_frame, selected_packs=selected_packs, download_size=download_size, total_mods=total_mods)
     # Pack Frame 4
     if len(packs) > 3:
         initialize_pack(id=4, pack=packs[3], image=images[3],
-                        height=PACK_HEIGHT, right_frame=right_frame)
+                        height=PACK_HEIGHT, right_frame=right_frame, selected_packs=selected_packs, download_size=download_size, total_mods=total_mods)
     
-    
-
+    # PAGES
 
 
     # Functions
@@ -309,7 +308,8 @@ def modpack_menu(games, game, app):
         # Install selected packs
         pass
 
-def initialize_pack(id, pack, image, height, right_frame):
+
+def initialize_pack(id, pack, image, height, right_frame, selected_packs, download_size, total_mods):
     TEXT_WRAP = 350
     pack_frame = tk.Frame(right_frame, bg=light_purple)
     pack_frame.place(x=0, y=height * (id - 1), width=664, height=height)
@@ -341,8 +341,17 @@ def initialize_pack(id, pack, image, height, right_frame):
         pack_size = tk.Label(
             pack_details_frame, text=f'{round(pack["PACK_SIZE"], 1)} MB', bg=light_purple, fg='white')
     pack_size.pack(side='left', padx=10, pady=0)
-    pack_mods = tk.Label(
-        pack_details_frame, text=f'Mods: {len(pack["MODS"])}', bg=light_purple, fg='white')
+    if pack['MOD_COUNT'] == 0:
+        if len(pack['MODS']) == 0:
+            pack_mods = tk.Label(
+                pack_details_frame, text='Mods = 0', bg=light_purple, fg='white')
+        else:
+            pack_mods = tk.Label(
+                pack_details_frame, text=f'Mods = {len(pack["MODS"])}', bg=light_purple, fg='white')
+            pack['MOD_COUNT'] = len(pack['MODS'])
+    else:
+        pack_mods = tk.Label(
+            pack_details_frame, text=f'Mods: {pack["MOD_COUNT"]}', bg=light_purple, fg='white')
     pack_mods.pack(side='right', padx=10, pady=0)
 
     def add_to_pack(pack):
@@ -351,6 +360,13 @@ def initialize_pack(id, pack, image, height, right_frame):
         SELECTED_PACKS.append(pack)
         add_to_pack_button.configure(text='Remove', bg_color=light_purple,
                                      fg_color=dark_purple, command=lambda: remove_from_pack(pack))
+        selected_packs.configure(text=f'Selected Packs: {len(SELECTED_PACKS)}')
+        sum_download_size = sum([pack["PACK_SIZE"] for pack in SELECTED_PACKS])
+        if sum_download_size >= 1000:
+            download_size.configure(text=f'Download Size: {round(sum_download_size/1000, 1)} GB')
+        else:
+            download_size.configure(text=f'Download Size: {round(sum_download_size, 1)} MB')
+        total_mods.configure(text=f'Total Mods: {sum([len(pack["MODS"]) for pack in SELECTED_PACKS])}')
 
     def remove_from_pack(pack):
         print(f'Removed {pack["PACK_NAME"]} from install list')
@@ -358,6 +374,16 @@ def initialize_pack(id, pack, image, height, right_frame):
         SELECTED_PACKS.remove(pack)
         add_to_pack_button.configure(text='Add', bg_color=light_purple,
                                         fg_color=medium_purple, command=lambda: add_to_pack(pack))
+        selected_packs.configure(text=f'Selected Packs: {len(SELECTED_PACKS)}')
+        sum_download_size = sum([pack["PACK_SIZE"] for pack in SELECTED_PACKS])
+        if sum_download_size >= 1000:
+            download_size.configure(
+                text=f'Download Size: {round(sum_download_size/1000, 1)} GB')
+        else:
+            download_size.configure(
+                text=f'Download Size: {round(sum_download_size, 1)} MB')
+        total_mods.configure(
+            text=f'Total Mods: {sum([len(pack["MODS"]) for pack in SELECTED_PACKS])}')
         
 
     
