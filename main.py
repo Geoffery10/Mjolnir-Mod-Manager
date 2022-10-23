@@ -10,6 +10,7 @@ import customtkinter
 import tkinter as tk
 import webbrowser
 import pyglet
+from PIL import ImageTk, Image
 
 # Custom Functions
 import online
@@ -196,6 +197,7 @@ def modpack_menu(games, game, app):
     pack_info_background = tk.Label(
         pack_info_frame, image=pack_info_background_image, bg=dark_purple)
     pack_info_background.place(x=0, y=0, width=520, height=180)
+    pack_info_background.image = pack_info_background_image
 
     selected_packs = tk.Label(pack_info_frame, text='Selected Packs: 0',
                               bg=medium_purple, fg='white', font=(FONTS[3], 20))
@@ -214,11 +216,14 @@ def modpack_menu(games, game, app):
     extra_options_background = tk.Label(
         extra_options_frame, image=extra_options_background_image, bg=dark_purple)
     extra_options_background.place(x=0, y=0, width=520, height=120)
+    extra_options_background.image = extra_options_background_image
     # Options
     # TODO: IMPROVE CHECKBOXES
+    backup_old_mods = tk.IntVar()
     backup_old_mods = tk.Checkbutton(extra_options_frame, text='Backup Old Mods', bg=medium_purple, fg='white', font=(
         FONTS[3], 20), selectcolor=medium_purple, activebackground=medium_purple, activeforeground='white')
     backup_old_mods.pack(side='top', padx=0, pady=10)
+    delete_old_mods = tk.IntVar()
     delete_old_mods = tk.Checkbutton(extra_options_frame, text='Delete Old Mods', bg=medium_purple, fg='white', font=(
         FONTS[3], 20), selectcolor=medium_purple, activebackground=medium_purple, activeforeground='white')
     delete_old_mods.pack(side='top', padx=0, pady=10)
@@ -247,42 +252,93 @@ def modpack_menu(games, game, app):
     right_frame = tk.Frame(main_frame, bg=light_purple)
     right_frame.place(x=560, y=0, width=664, height=724)
 
-    # Packs List (Scrollable Canvas)
+    # Packs List (Pages)
     ## Get Packs from API
     packs = online.get_packs_list(game['Mod URL'])
+    
+    images = []
 
-    container = ttk.Frame(right_frame)
-    canvas = tk.Canvas(container)
-    scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
-    scrollable_frame = ttk.Frame(canvas)
-
-    scrollable_frame.bind(
-        "<Configure>",
-        lambda e: canvas.configure(
-            scrollregion=canvas.bbox("all")
-        )
-    )
-
-    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-
-    canvas.configure(yscrollcommand=scrollbar.set)
-
-    for i in range(len(packs)):
-        current_pack = packs[i]
-        ttk.Frame(scrollable_frame, height=10).grid(row=i, column=0)
-        ttk.Checkbutton(scrollable_frame, text=current_pack['PACK_NAME']).grid(
-            row=i, column=0, sticky='w')
-        ttk.Label(scrollable_frame, text=f"{current_pack['PACK_DESCRIPTION']}").grid(row=i, column=1, padx=10, pady=10)
-        if current_pack['PACK_SIZE'] >= 1000:
-            ttk.Label(scrollable_frame, text=f"{current_pack['PACK_SIZE'] / 1000} GB").grid(row=i, column=2, padx=10, pady=10)
+    # Download first 4 pack images (or how however many are in the pack) into the images\packs folder using the pack name as the file name
+    for pack in packs:
+        if len(images) < 4:
+            image_valid = online.get_image(pack['BANNER_URL'], f'{BASE_DIR}\\images\\packs\\{pack["PACK_NAME"]}.png')
+            if image_valid:
+                images.append(f'{BASE_DIR}\\images\\packs\\{pack["PACK_NAME"]}.png')
+            else:
+                images.append(f'{BASE_DIR}\\images\\packs\\default.png')
+                print(f'Failed to download image for {pack["PACK_NAME"]}')
         else:
-            ttk.Label(scrollable_frame, text=f"Size: {current_pack['PACK_SIZE']}MB").grid(row=i, column=2, padx=10, pady=10)
-        ttk.Label(scrollable_frame, text=f"Mods: {len(current_pack['MODS'])}").grid(row=i, column=3, padx=10, pady=10)
+            break
 
-    container.pack()
-    canvas.pack(side="left", fill="both", expand=True)
-    scrollbar.pack(side="right", fill="y")
+    print(images)
 
+    # Initialize frames
+    PACK_HEIGHT = 200
+
+    # Pack Frame 1
+    pack_frame_1 = tk.Frame(right_frame, bg=light_purple)
+    pack_frame_1.place(x=0, y=0, width=664, height=PACK_HEIGHT)
+    pack_checkbox = tk.Checkbutton(
+        pack_frame_1, text='', bg=light_purple, fg='white')
+    pack_checkbox.pack(side='left', padx=10, pady=10)
+
+    image1 = Image.open(images[0])
+    image1 = image1.resize(
+        (100, 100), Image.Resampling.LANCZOS)
+    image1 = ImageTk.PhotoImage(image1)
+    pack_image_label = tk.Label(pack_frame_1, image=image1, bg=light_purple)
+    pack_image_label.pack(side='left', padx=10, pady=10)
+    pack_image_label.image = image1
+
+    pack_details_frame = tk.Frame(pack_frame_1, bg=light_purple)
+    pack_details_frame.pack(side='left', padx=10, pady=10)
+    pack_name = tk.Label(pack_details_frame, text=packs[0]['PACK_NAME'], bg=light_purple, fg='white', font=(FONTS[3], 20))
+    pack_name.pack(side='top', padx=10, pady=10)
+    pack_description = tk.Label(
+        pack_details_frame, text=packs[0]['PACK_DESCRIPTION'], bg=light_purple, fg='white', font=(FONTS[3], 10), wraplength=400, justify='left')
+    pack_description.pack(side='top', padx=0, pady=10)
+    if packs[0]['PACK_SIZE'] >= 1000:
+        pack_size = tk.Label(pack_details_frame, text=f'{round(packs[0]["PACK_SIZE"]/1000, 1)} GB', bg=light_purple, fg='white')
+    else:
+        pack_size = tk.Label(pack_details_frame, text=f'{round(packs[0]["PACK_SIZE"], 1)} MB', bg=light_purple, fg='white')
+    pack_size.pack(side='left', padx=10, pady=10)
+    pack_mods = tk.Label(
+        pack_details_frame, text=f'Mods: {len(packs[0]["MODS"])}', bg=light_purple, fg='white')
+    pack_mods.pack(side='right', padx=10, pady=10)
+
+    # Pack Frame 2
+    pack_frame_2 = tk.Frame(right_frame, bg=light_purple)
+    pack_frame_2.place(x=0, y=PACK_HEIGHT, width=664, height=PACK_HEIGHT)
+    pack_checkbox = tk.Checkbutton(
+        pack_frame_2, text='', bg=light_purple, fg='white')
+    pack_checkbox.pack(side='left', padx=10, pady=10)
+
+    image2 = Image.open(images[1])
+    image2 = image2.resize(
+        (100, 100), Image.Resampling.LANCZOS)
+    image2 = ImageTk.PhotoImage(image2)
+    pack_image_label = tk.Label(pack_frame_2, image=image2, bg=light_purple)
+    pack_image_label.pack(side='left', padx=10, pady=10)
+    pack_image_label.image = image2
+
+    pack_details_frame = tk.Frame(pack_frame_2, bg=light_purple)
+    pack_details_frame.pack(side='left', padx=10, pady=10)
+    pack_name = tk.Label(
+        pack_details_frame, text=packs[1]['PACK_NAME'], bg=light_purple, fg='white', font=(FONTS[3], 20))
+    pack_name.pack(side='top', padx=10, pady=10)
+    pack_description = tk.Label(
+        pack_details_frame, text=packs[1]['PACK_DESCRIPTION'], bg=light_purple, fg='white', font=(FONTS[3], 10), wraplength=400, justify='left')
+    pack_description.pack(side='top', padx=0, pady=10)
+    if packs[1]['PACK_SIZE'] >= 1000:
+        pack_size = tk.Label(
+            pack_details_frame, text=f'{round(packs[1]["PACK_SIZE"]/1000, 1)} GB', bg=light_purple, fg='white')
+    else:
+        pack_size = tk.Label(
+            pack_details_frame, text=f'{round(packs[1]["PACK_SIZE"], 1)} MB', bg=light_purple, fg='white')
+    pack_size.pack(side='left', padx=10, pady=10)
+    pack_mods = tk.Label(
+        pack_details_frame, text=f'Mods: {len(packs[1]["MODS"])}', bg=light_purple, fg='white')
+    pack_mods.pack(side='right', padx=10, pady=10)
     
     
 
