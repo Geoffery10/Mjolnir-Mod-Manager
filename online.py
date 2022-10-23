@@ -156,14 +156,15 @@ def select_game(games):
 
 
 def get_image(URL, path):
-    response = requests.get(URL, stream=True)
-    if response.status_code == 200:
-        with open(path, 'wb') as f:
-            response.raw.decode_content = True
-            shutil.copyfileobj(response.raw, f)
-        return True
-    else:
-        return False
+    if not URL == '':
+        response = requests.get(URL, stream=True)
+        if response.status_code == 200:
+            with open(path, 'wb') as f:
+                response.raw.decode_content = True
+                shutil.copyfileobj(response.raw, f)
+            return True
+        else:
+            return False
 
 def select_pack(packs):
     print(Fore.YELLOW + 'Which pack would you like to install?')

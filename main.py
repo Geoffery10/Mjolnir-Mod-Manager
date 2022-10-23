@@ -29,6 +29,7 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 PACK = {}
 FILES = []
 FONTS = []
+SELECTED_PACKS = []
 
 # Colors
 transparent = '#00000000'
@@ -161,6 +162,9 @@ def modpack_menu(games, game, app):
     # FONTS
     global FONTS
 
+    global SELECTED_PACKS
+    SELECTED_PACKS = []
+
     # Modpack Menu
     # Page Breakdown:
     # Two Columns
@@ -219,11 +223,11 @@ def modpack_menu(games, game, app):
     extra_options_background.image = extra_options_background_image
     # Options
     # TODO: IMPROVE CHECKBOXES
-    backup_old_mods = tk.IntVar()
+    bool_back_up_mods = tk.IntVar()
     backup_old_mods = tk.Checkbutton(extra_options_frame, text='Backup Old Mods', bg=medium_purple, fg='white', font=(
         FONTS[3], 20), selectcolor=medium_purple, activebackground=medium_purple, activeforeground='white')
     backup_old_mods.pack(side='top', padx=0, pady=10)
-    delete_old_mods = tk.IntVar()
+    bool_delete_old_mods = tk.IntVar()
     delete_old_mods = tk.Checkbutton(extra_options_frame, text='Delete Old Mods', bg=medium_purple, fg='white', font=(
         FONTS[3], 20), selectcolor=medium_purple, activebackground=medium_purple, activeforeground='white')
     delete_old_mods.pack(side='top', padx=0, pady=10)
@@ -273,72 +277,23 @@ def modpack_menu(games, game, app):
     print(images)
 
     # Initialize frames
-    PACK_HEIGHT = 200
+    PACK_HEIGHT = 150
 
     # Pack Frame 1
-    pack_frame_1 = tk.Frame(right_frame, bg=light_purple)
-    pack_frame_1.place(x=0, y=0, width=664, height=PACK_HEIGHT)
-    pack_checkbox = tk.Checkbutton(
-        pack_frame_1, text='', bg=light_purple, fg='white')
-    pack_checkbox.pack(side='left', padx=10, pady=10)
-
-    image1 = Image.open(images[0])
-    image1 = image1.resize(
-        (100, 100), Image.Resampling.LANCZOS)
-    image1 = ImageTk.PhotoImage(image1)
-    pack_image_label = tk.Label(pack_frame_1, image=image1, bg=light_purple)
-    pack_image_label.pack(side='left', padx=10, pady=10)
-    pack_image_label.image = image1
-
-    pack_details_frame = tk.Frame(pack_frame_1, bg=light_purple)
-    pack_details_frame.pack(side='left', padx=10, pady=10)
-    pack_name = tk.Label(pack_details_frame, text=packs[0]['PACK_NAME'], bg=light_purple, fg='white', font=(FONTS[3], 20))
-    pack_name.pack(side='top', padx=10, pady=10)
-    pack_description = tk.Label(
-        pack_details_frame, text=packs[0]['PACK_DESCRIPTION'], bg=light_purple, fg='white', font=(FONTS[3], 10), wraplength=400, justify='left')
-    pack_description.pack(side='top', padx=0, pady=10)
-    if packs[0]['PACK_SIZE'] >= 1000:
-        pack_size = tk.Label(pack_details_frame, text=f'{round(packs[0]["PACK_SIZE"]/1000, 1)} GB', bg=light_purple, fg='white')
-    else:
-        pack_size = tk.Label(pack_details_frame, text=f'{round(packs[0]["PACK_SIZE"], 1)} MB', bg=light_purple, fg='white')
-    pack_size.pack(side='left', padx=10, pady=10)
-    pack_mods = tk.Label(
-        pack_details_frame, text=f'Mods: {len(packs[0]["MODS"])}', bg=light_purple, fg='white')
-    pack_mods.pack(side='right', padx=10, pady=10)
-
+    initialize_pack(id=1, pack=packs[0], image=images[0],
+                    height=PACK_HEIGHT, right_frame=right_frame)
     # Pack Frame 2
-    pack_frame_2 = tk.Frame(right_frame, bg=light_purple)
-    pack_frame_2.place(x=0, y=PACK_HEIGHT, width=664, height=PACK_HEIGHT)
-    pack_checkbox = tk.Checkbutton(
-        pack_frame_2, text='', bg=light_purple, fg='white')
-    pack_checkbox.pack(side='left', padx=10, pady=10)
-
-    image2 = Image.open(images[1])
-    image2 = image2.resize(
-        (100, 100), Image.Resampling.LANCZOS)
-    image2 = ImageTk.PhotoImage(image2)
-    pack_image_label = tk.Label(pack_frame_2, image=image2, bg=light_purple)
-    pack_image_label.pack(side='left', padx=10, pady=10)
-    pack_image_label.image = image2
-
-    pack_details_frame = tk.Frame(pack_frame_2, bg=light_purple)
-    pack_details_frame.pack(side='left', padx=10, pady=10)
-    pack_name = tk.Label(
-        pack_details_frame, text=packs[1]['PACK_NAME'], bg=light_purple, fg='white', font=(FONTS[3], 20))
-    pack_name.pack(side='top', padx=10, pady=10)
-    pack_description = tk.Label(
-        pack_details_frame, text=packs[1]['PACK_DESCRIPTION'], bg=light_purple, fg='white', font=(FONTS[3], 10), wraplength=400, justify='left')
-    pack_description.pack(side='top', padx=0, pady=10)
-    if packs[1]['PACK_SIZE'] >= 1000:
-        pack_size = tk.Label(
-            pack_details_frame, text=f'{round(packs[1]["PACK_SIZE"]/1000, 1)} GB', bg=light_purple, fg='white')
-    else:
-        pack_size = tk.Label(
-            pack_details_frame, text=f'{round(packs[1]["PACK_SIZE"], 1)} MB', bg=light_purple, fg='white')
-    pack_size.pack(side='left', padx=10, pady=10)
-    pack_mods = tk.Label(
-        pack_details_frame, text=f'Mods: {len(packs[1]["MODS"])}', bg=light_purple, fg='white')
-    pack_mods.pack(side='right', padx=10, pady=10)
+    if len(packs) > 1:
+        initialize_pack(id=2, pack=packs[1], image=images[1], 
+                        height=PACK_HEIGHT, right_frame=right_frame)
+    # Pack Frame 3
+    if len(packs) > 2:
+        initialize_pack(id=3, pack=packs[2], image=images[2],
+                        height=PACK_HEIGHT, right_frame=right_frame)
+    # Pack Frame 4
+    if len(packs) > 3:
+        initialize_pack(id=4, pack=packs[3], image=images[3],
+                        height=PACK_HEIGHT, right_frame=right_frame)
     
     
 
@@ -354,8 +309,56 @@ def modpack_menu(games, game, app):
         # Install selected packs
         pass
 
+def initialize_pack(id, pack, image, height, right_frame):
+    TEXT_WRAP = 350
+    pack_frame = tk.Frame(right_frame, bg=light_purple)
+    pack_frame.place(x=0, y=height * (id - 1), width=664, height=height)
     
+    # Add to pack button
+    add_to_pack_button = customtkinter.CTkButton(pack_frame, text='Add', text_font=(15), fg_color=medium_purple, bg_color=light_purple, hover=False, command=lambda: add_to_pack(pack))
+    add_to_pack_button.pack(side='right', padx=0, pady=10)
 
+    image = Image.open(image)
+    image = image.resize(
+        (100, 100), Image.Resampling.LANCZOS)
+    image = ImageTk.PhotoImage(image)
+    pack_image_label = tk.Label(pack_frame, image=image, bg=light_purple)
+    pack_image_label.pack(side='left', padx=10, pady=10)
+    pack_image_label.image = image
+
+    pack_details_frame = tk.Frame(pack_frame, bg=light_purple)
+    pack_details_frame.pack(side='left', padx=10, pady=10)
+    pack_name = tk.Label(
+        pack_details_frame, text=pack['PACK_NAME'], bg=light_purple, fg='white', font=(FONTS[3], 15), wraplength=TEXT_WRAP, justify='center')
+    pack_name.pack(side='top', padx=0, pady=0)
+    pack_description = tk.Label(
+        pack_details_frame, text=pack['PACK_DESCRIPTION'], bg=light_purple, fg='white', font=(FONTS[3], 10), wraplength=TEXT_WRAP, justify='left')
+    pack_description.pack(side='top', padx=0, pady=0)
+    if pack['PACK_SIZE'] >= 1000:
+        pack_size = tk.Label(
+            pack_details_frame, text=f'{round(pack["PACK_SIZE"]/1000, 1)} GB', bg=light_purple, fg='white')
+    else:
+        pack_size = tk.Label(
+            pack_details_frame, text=f'{round(pack["PACK_SIZE"], 1)} MB', bg=light_purple, fg='white')
+    pack_size.pack(side='left', padx=10, pady=0)
+    pack_mods = tk.Label(
+        pack_details_frame, text=f'Mods: {len(pack["MODS"])}', bg=light_purple, fg='white')
+    pack_mods.pack(side='right', padx=10, pady=0)
+
+    def add_to_pack(pack):
+        print(f'Added {pack["PACK_NAME"]} to install list')
+        global SELECTED_PACKS
+        SELECTED_PACKS.append(pack)
+        add_to_pack_button.configure(text='Remove', bg_color=light_purple,
+                                     fg_color=dark_purple, command=lambda: remove_from_pack(pack))
+
+    def remove_from_pack(pack):
+        print(f'Removed {pack["PACK_NAME"]} from install list')
+        global SELECTED_PACKS
+        SELECTED_PACKS.remove(pack)
+        add_to_pack_button.configure(text='Add', bg_color=light_purple,
+                                        fg_color=medium_purple, command=lambda: add_to_pack(pack))
+        
 
     
 
