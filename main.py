@@ -231,7 +231,7 @@ def modpack_menu(games, game, app):
 
     # Install Selected Packs
     install_selected_packs = customtkinter.CTkButton(left_frame, text='Install Selected Packs', text_font=(
-        FONTS[3], 20), fg_color=medium_purple, bg_color=dark_purple, hover=False, command=lambda: install_selected_packs_button())
+        FONTS[3], 20), fg_color=medium_purple, bg_color=dark_purple, hover=False, command=lambda: install_selected_packs_button(main_frame))
     install_selected_packs.place(x=79, y=510, width=393, height=80)
 
     # Back Button
@@ -293,10 +293,11 @@ def modpack_menu(games, game, app):
         main_frame.destroy()
         main_menu(app=app, games=games)
 
-    def install_selected_packs_button():
+    def install_selected_packs_button(main_frame):
         # Install selected packs
         if len(SELECTED_PACKS) > 0:
             # Install packs
+            main_frame.destroy()
             for pack in SELECTED_PACKS:
                 # Parse packs into Pack objects
                 modpack = Pack()
@@ -315,10 +316,19 @@ def modpack_menu(games, game, app):
                 modpack.size = pack['PACK_SIZE']
                 # Download pack
                 print(f'Downloading {modpack.pack_name}...')
-                print(f'Pack Size: {len(modpack.mods)}')
+                print(f'Pack Size: {len(modpack.pack_urls)}')
 
-                online.download_pack(
-                    modpack=modpack, BASE_DIR=BASE_DIR, FILES=FILES)
+                main_frame = new_frame(app)
+                app.title(f'Installing {modpack.pack_name}')
+                # Progress Bar
+                progress_bar = customtkinter.CTkProgressBar(main_frame, fg_color=medium_purple, bg_color=dark_purple, progress_color=medium_purple)
+                progress_bar.place(x=0, y=0, width=1200, height=100)
+                for i in range(1, len(modpack.pack_urls)):
+                    progress_bar.update_progress(i)
+                    online.download_pack(
+                        modpack=modpack, BASE_DIR=BASE_DIR, FILES=FILES, app=app, main_frame=main_frame)
+                    app.update()
+                
         else:
             # No packs selected
             messagebox.showerror('No Packs Selected', 'Please select a pack to install.', parent=app)
@@ -331,7 +341,7 @@ def initialize_pack(id, pack, image, height, right_frame, selected_packs, downlo
     
     # Add to pack button
     add_to_pack_button = customtkinter.CTkButton(pack_frame, text='Add', text_font=(15), fg_color=medium_purple, bg_color=light_purple, hover=False, command=lambda: add_to_pack(pack))
-    add_to_pack_button.pack(side='right', padx=0, pady=10)
+    add_to_pack_button.pack(side='right', padx=10, pady=10)
 
     image = Image.open(image)
     image = image.resize(
@@ -351,10 +361,10 @@ def initialize_pack(id, pack, image, height, right_frame, selected_packs, downlo
     pack_description.pack(side='top', padx=0, pady=0)
     if pack['PACK_SIZE'] >= 1000:
         pack_size = tk.Label(
-            pack_details_frame, text=f'{round(pack["PACK_SIZE"]/1000, 1)} GB', bg=light_purple, fg='white')
+            pack_details_frame, text=f'Size: {round(pack["PACK_SIZE"]/1000, 1)} GB', bg=light_purple, fg='white')
     else:
         pack_size = tk.Label(
-            pack_details_frame, text=f'{round(pack["PACK_SIZE"], 1)} MB', bg=light_purple, fg='white')
+            pack_details_frame, text=f'Size: {round(pack["PACK_SIZE"], 1)} MB', bg=light_purple, fg='white')
     pack_size.pack(side='left', padx=10, pady=0)
     if pack['MOD_COUNT'] == 0:
         if len(pack['MODS']) == 0:
@@ -381,7 +391,8 @@ def initialize_pack(id, pack, image, height, right_frame, selected_packs, downlo
             download_size.configure(text=f'Download Size: {round(sum_download_size/1000, 1)} GB')
         else:
             download_size.configure(text=f'Download Size: {round(sum_download_size, 1)} MB')
-        total_mods.configure(text=f'Total Mods: {sum([len(pack["MODS"]) for pack in SELECTED_PACKS])}')
+        total_mods.configure(
+            text=f'Total Mods: {sum([pack["MOD_COUNT"] for pack in SELECTED_PACKS])}')
 
     def remove_from_pack(pack):
         print(f'Removed {pack["PACK_NAME"]} from install list')
@@ -398,7 +409,7 @@ def initialize_pack(id, pack, image, height, right_frame, selected_packs, downlo
             download_size.configure(
                 text=f'Download Size: {round(sum_download_size, 1)} MB')
         total_mods.configure(
-            text=f'Total Mods: {sum([len(pack["MODS"]) for pack in SELECTED_PACKS])}')
+            text=f'Total Mods: {sum([pack["MOD_COUNT"] for pack in SELECTED_PACKS])}')
         
 
     
@@ -408,7 +419,7 @@ if __name__ == '__main__':
     colorama.init(autoreset=True)
     pg.theme('DarkPurple1')
     pg.isAnimated = True
-    CURRENT_VERSION = '1.1.1'
+    CURRENT_VERSION = '2.0.0'
     URL = 'https://www.geoffery10.com/mods.json'
     GAMES_URL = 'https://www.geoffery10.com/games.json'
     SUPPORTED_GAMES = ['Minecraft', 'Bonelab']
