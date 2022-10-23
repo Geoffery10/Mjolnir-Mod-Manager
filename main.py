@@ -1,4 +1,4 @@
-from tkinter import ttk
+from tkinter import messagebox, ttk
 import PySimpleGUI as pg
 import os
 import colorama
@@ -17,6 +17,7 @@ import online
 from ui_menus import exit_app, UI_Setup
 import pack
 from file_manager import backup_old, delete_temp_files
+from pack import Pack
 
 
 modpack = pack.Pack()
@@ -214,23 +215,19 @@ def modpack_menu(games, game, app):
     total_mods.pack(side='top', padx=0, pady=12)
 
     # Extra Options
-    extra_options_frame = tk.Frame(left_frame, bg=medium_purple)
-    extra_options_frame.place(x=20, y=368, width=520, height=120)
-    extra_options_background_image = tk.PhotoImage(file=f'{BASE_DIR}\\images\\ui\\info_window_02.png')
-    extra_options_background = tk.Label(
-        extra_options_frame, image=extra_options_background_image, bg=dark_purple)
-    extra_options_background.place(x=0, y=0, width=520, height=120)
-    extra_options_background.image = extra_options_background_image
+    extra_options_frame = tk.Frame(left_frame, bg=dark_purple)
+    extra_options_frame.place(x=79, y=368, width=393, height=120)
     # Options
-    # TODO: IMPROVE CHECKBOXES
-    bool_back_up_mods = tk.IntVar()
-    backup_old_mods = tk.Checkbutton(extra_options_frame, text='Backup Old Mods', bg=medium_purple, fg='white', font=(
-        FONTS[3], 20), selectcolor=medium_purple, activebackground=medium_purple, activeforeground='white')
-    backup_old_mods.pack(side='top', padx=0, pady=10)
-    bool_delete_old_mods = tk.IntVar()
-    delete_old_mods = tk.Checkbutton(extra_options_frame, text='Delete Old Mods', bg=medium_purple, fg='white', font=(
-        FONTS[3], 20), selectcolor=medium_purple, activebackground=medium_purple, activeforeground='white')
-    delete_old_mods.pack(side='top', padx=0, pady=10)
+
+    bool_back_up_mods = False
+    backup_old_mods = customtkinter.CTkButton(extra_options_frame, text='Backup Old Mods', fg_color=medium_purple, 
+                                                bg_color=medium_purple, text_font=(18), hover=False, command=lambda: backup_old_mods_button())
+    backup_old_mods.pack(side='top', padx=0, pady=10, anchor='w', fill='x', expand=True)
+    bool_delete_old_mods = False
+    delete_old_mods = customtkinter.CTkButton(extra_options_frame, text='Delete Old Mods', fg_color=medium_purple,
+                                                bg_color=medium_purple, text_font=(18), hover=False, command=lambda: delete_old_mods_button())
+    delete_old_mods.pack(side='top', padx=0, pady=10,
+                         anchor='w', fill='x', expand=True)
 
     # Install Selected Packs
     install_selected_packs = customtkinter.CTkButton(left_frame, text='Install Selected Packs', text_font=(
@@ -244,14 +241,6 @@ def modpack_menu(games, game, app):
     
 
     ## Right Column (Width 667)
-    ## Packs List (Scrollable)
-    ### pack_frame
-    #### Pack Image
-    #### Pack Name
-    #### Pack Description
-    #### Pack Size
-    #### Pack Mods
-    #### Pack Checkbox
 
     right_frame = tk.Frame(main_frame, bg=light_purple)
     right_frame.place(x=560, y=0, width=664, height=724)
@@ -306,7 +295,33 @@ def modpack_menu(games, game, app):
 
     def install_selected_packs_button():
         # Install selected packs
-        pass
+        if len(SELECTED_PACKS) > 0:
+            # Install packs
+            for pack in SELECTED_PACKS:
+                # Parse packs into Pack objects
+                modpack = Pack()
+                modpack.game = pack['GAME']
+                modpack.pack_name = pack['PACK_NAME']
+                modpack.pack_description = pack['PACK_DESCRIPTION']
+                modpack.pack_version = pack['PACK_VERSION']
+                modpack.game_version = pack['GAME_VERSION']
+                modpack.mod_loader = pack['MOD_LOADER']
+                modpack.mod_loader_version = pack['MOD_LOADER_VERSION']
+                modpack.pack_urls = pack['PACK_URLS']
+                modpack.recommended_ram = pack['RECOMMEND_RAM']
+                modpack.mods = pack['MODS']
+                modpack.mods_count = pack['MOD_COUNT']
+                modpack.banner_url = pack['BANNER_URL']
+                modpack.size = pack['PACK_SIZE']
+                # Download pack
+                print(f'Downloading {modpack.pack_name}...')
+                print(f'Pack Size: {len(modpack.mods)}')
+
+                online.download_pack(
+                    modpack=modpack, BASE_DIR=BASE_DIR, FILES=FILES)
+        else:
+            # No packs selected
+            messagebox.showerror('No Packs Selected', 'Please select a pack to install.', parent=app)
 
 
 def initialize_pack(id, pack, image, height, right_frame, selected_packs, download_size, total_mods):
