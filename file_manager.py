@@ -2,6 +2,7 @@
 # Path: file_manager.py
 
 # Import Modules
+import json
 import subprocess
 from colorama import Fore, Back, Style
 import os
@@ -9,6 +10,34 @@ import shutil
 import datetime
 import PySimpleGUI as pg
 from ui_menus import ERROR_UI, exit_app, UI_Setup
+
+def game_settings_initialization(game, BASE_DIR, APPDATA_PATH):
+    if not os.path.exists(f'{BASE_DIR}\\GameSettings'):
+        os.mkdir(f'{BASE_DIR}\\GameSettings')
+    path = f'{BASE_DIR}\\GameSettings\\{game}_Settings.json'
+    if game == 'Minecraft':
+        if not os.path.exists(path):
+            if os.path.exists(f'{APPDATA_PATH}\\.minecraft'):
+                with open(path, 'w') as f:
+                    f.write('{"game_path": f"{APPDATA_PATH}\\.minecraft"}')
+            else:
+                with open(path, 'w') as f:
+                    f.write('{"game_path": ""}')
+    elif game == 'Bonelab':
+        if not os.path.exists(path):
+            # Get LocalLow install path
+            username = os.getlogin()
+            game_path = f"C:\\Program Files (x86)\\Steam\\steamapps\\common\\BONELAB"
+            locallow_path = f"C:\\Users\\{username}\\AppData\\LocalLow\\Stress Level Zero\\BONELAB"
+            with open(path, 'w') as file:
+                json.dump({'game_path': game_path, 'locallow_path': locallow_path}, file)
+
+    # Load settings
+    with open(path, 'r') as f:
+        settings = eval(f.read())
+    
+    return settings
+    
 
 def path_finder(folder, additional_info=""):
     # This code will ask the user for the correct path to an install folder and check 

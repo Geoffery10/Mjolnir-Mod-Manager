@@ -1,3 +1,4 @@
+import json
 import time
 from tkinter import messagebox, ttk
 import PySimpleGUI as pg
@@ -18,7 +19,7 @@ from PIL import ImageTk, Image
 import online
 from ui_menus import exit_app, UI_Setup
 import pack
-from file_manager import backup_old, delete_temp_files
+from file_manager import backup_old, delete_temp_files, game_settings_initialization
 from pack import Pack
 
 
@@ -33,6 +34,7 @@ PACK = {}
 FILES = []
 FONTS = []
 SELECTED_PACKS = []
+GAME_SETTINGS = ''
 
 # Colors
 transparent = '#00000000'
@@ -167,6 +169,11 @@ def modpack_menu(games, game, app):
 
     global SELECTED_PACKS
     SELECTED_PACKS = []
+    global GAME_SETTINGS
+
+    # Create Game Settings.json if it doesn't exist
+    GAME_SETTINGS = game_settings_initialization(game['Name'], BASE_DIR, APPDATA_PATH)
+
 
     # Modpack Menu
     # Page Breakdown:
@@ -188,6 +195,7 @@ def modpack_menu(games, game, app):
     left_frame = tk.Frame(main_frame, bg=dark_purple)
     left_frame.place(x=0, y=0, width=560, height=730)
 
+
     # Logo (Small)
     logo_image = Image.open(f'{BASE_DIR}\\logo.png')
     logo_image = logo_image.resize(
@@ -197,6 +205,15 @@ def modpack_menu(games, game, app):
         left_frame, image=logo_image, bg=dark_purple)
     logo.place(x=0, y=10, width=560, height=98)
     logo.image = logo_image
+
+    # Settings Button
+    settings_icon = Image.open(f'{BASE_DIR}\\images\\settings.png')
+    settings_icon = settings_icon.resize((30, 30), Image.Resampling.LANCZOS)
+    settings_icon = ImageTk.PhotoImage(settings_icon)
+    settings_button = customtkinter.CTkButton(
+        left_frame, text='', bg_color=dark_purple, fg_color=dark_purple, image=settings_icon, hover=False, command=lambda: settings_menu(game, app))
+    settings_button.place(x=10, y=10, width=30, height=30)
+    settings_button.image = settings_icon
 
 
     # Select Packs
@@ -308,6 +325,12 @@ def modpack_menu(games, game, app):
         main_frame.destroy()
         main_menu(app=app, games=games)
 
+    def settings_menu(game, app):
+        # Open settings menu for selected game
+        main_frame.destroy()
+        settings(games=games, game=game, app=app)
+
+
     def backup_old_mods_button():
         # TODO: Backup old mods
         messagebox.showinfo('Backup Old Mods', 'This feature is not yet implemented')
@@ -319,6 +342,7 @@ def modpack_menu(games, game, app):
     def install_selected_packs_button(main_frame):
         # Install selected packs
         if len(SELECTED_PACKS) > 0:
+            modpacks = []
             # Install packs
             count = 0
             loading_frame, title, of_x, progress_bar = loading_bar_popup(
@@ -339,9 +363,7 @@ def modpack_menu(games, game, app):
                 modpack.mods_count = pack['MOD_COUNT']
                 modpack.banner_url = pack['BANNER_URL']
                 modpack.size = pack['PACK_SIZE']
-
-                # Loading Screen
-                
+                modpacks.append(modpack)
 
                 # Download pack
                 print(f'Downloading {modpack.pack_name}...')
@@ -356,10 +378,20 @@ def modpack_menu(games, game, app):
             loading_frame.destroy()
 
             # Install mods
-            # ! THIS NEEDS ADDED !
-            # ! THIS NEEDS ADDED !
             # * SEE OLD MAIN FOR EXAMPLES
+            loading_frame, title, of_x, progress_bar = loading_bar_popup(
+                app, main_frame, title_text=f'Installing {SELECTED_PACKS[0]["PACK_NAME"]}', type='Packs', max=len(SELECTED_PACKS))
 
+            for pack in modpacks:
+                # Open Core
+                if pack.game == 'Minecraft':
+                    # Minecraft
+                    import core_minecraft
+                    valid = core_minecraft.minecraft(pack, BASE_DIR, APPDATA_PATH, FILES)
+                elif pack.game == 'Bonelab':
+                    # Bonelab
+                    import core_bonelab
+                    valid = core_bonelab.bonelab(pack, BASE_DIR, APPDATA_PATH, FILES)
 
             # ! THIS NEEDS ADDED !
             # ! THIS NEEDS ADDED !
@@ -478,7 +510,78 @@ def initialize_pack(id, pack, image, height, right_frame, selected_packs, downlo
             text=f'Total Mods: {sum([pack["MOD_COUNT"] for pack in SELECTED_PACKS])}')
         
 
-    
+def settings(games, game, app):
+    global APPDATA_PATH
+    global BASE_DIR
+    global GAME_SETTINGS
+    settings_path = f'{BASE_DIR}\\GameSettings\\{game["Name"]}_Settings.json'
+    # Settings window
+    main_frame = new_frame(app)
+    main_frame.pack(fill='both', expand=True)
+    # Title
+    title = tk.Label(main_frame, text=f'Settings {game["Name"]}', bg=dark_purple, fg='white', font=(FONTS[3], 20))
+    title.pack(side='top', fill='x', padx=10, pady=10)
+    # Settings
+    if game["Name"] == 'Minecraft':
+        # game path
+        game_path_frame = tk.Frame(main_frame, bg=dark_purple)
+        game_path_frame.pack(side='top', fill='x', padx=10, pady=10)
+        game_path_label = tk.Label(game_path_frame, text='Game Path:', bg=dark_purple, fg='white', font=(FONTS[3], 15))
+        game_path_label.pack(side='left', padx=10, pady=10)
+        game_path_entry = tk.Entry(game_path_frame, bg=dark_purple, fg='white', font=(FONTS[3], 15))
+        game_path_entry.pack(side='left', padx=10, pady=10, fill='x', expand=True)
+        game_path_entry.insert(0, GAME_SETTINGS['game_path'])
+    elif game["Name"] == 'Bonelab':
+        # game path
+        game_path_frame = tk.Frame(main_frame, bg=dark_purple)
+        game_path_frame.pack(side='top', fill='x', padx=10, pady=10)
+        game_path_label = tk.Label(game_path_frame, text='Game Path:', bg=dark_purple, fg='white', font=(FONTS[3], 15))
+        game_path_label.pack(side='left', padx=10, pady=10)
+        game_path_entry = tk.Entry(game_path_frame, bg=dark_purple, fg='white', font=(FONTS[3], 15))
+        game_path_entry.pack(side='left', padx=10, pady=10, fill='x', expand=True)
+        game_path_entry.insert(0, GAME_SETTINGS['game_path'])
+        # locallow path
+        locallow_path_frame = tk.Frame(main_frame, bg=dark_purple)
+        locallow_path_frame.pack(side='top', fill='x', padx=10, pady=10)
+        locallow_path_label = tk.Label(locallow_path_frame, text='Locallow Path:', bg=dark_purple, fg='white', font=(FONTS[3], 15))
+        locallow_path_label.pack(side='left', padx=10, pady=10)
+        locallow_path_entry = tk.Entry(locallow_path_frame, bg=dark_purple, fg='white', font=(FONTS[3], 15))
+        locallow_path_entry.pack(side='left', padx=10, pady=10, fill='x', expand=True)
+        locallow_path_entry.insert(0, GAME_SETTINGS['locallow_path'])
+    # Save
+    save_button = customtkinter.CTkButton(main_frame, text='Save', text_font=(15), fg_color=medium_purple, bg_color=dark_purple, hover=False, command=lambda: save_settings(game))
+    save_button.pack(side='bottom', padx=10, pady=10)
+
+    def save_settings(game):
+        if game["Name"] == 'Minecraft':
+            if os.path.exists(game_path_entry.get()):
+                with open(settings_path, 'w') as file:
+                    json.dump({'game_path': game_path_entry.get()}, file)
+                GAME_SETTINGS = {'game_path': game_path_entry.get()}
+            else:
+                messagebox.showerror('Error', 'Invalid game path')
+        elif game["Name"] == 'Bonelab':
+            if os.path.exists(game_path_entry.get()):
+                if os.path.exists(locallow_path_entry.get()):
+                    with open(settings_path, 'w') as file:
+                        json.dump({'game_path': game_path_entry.get(), 'locallow_path': locallow_path_entry.get()}, file)
+                    GAME_SETTINGS = {'game_path': game_path_entry.get(), 'locallow_path': locallow_path_entry.get()}
+                else:
+                    messagebox.showerror('Error', 'Invalid locallow path')
+                    main_frame.destroy()
+                    settings(games, game, app)
+            else:
+                messagebox.showerror('Error', 'Invalid game path')
+                main_frame.destroy()
+                settings(games, game, app)
+        else:
+            messagebox.showerror('Error', 'No settings for this game')
+            main_frame.destroy()
+            modpack_menu(app=app, game=game, games=games)
+        
+        # Return to modpacks
+        main_frame.destroy()
+        modpack_menu(app=app, game=game, games=games)
 
 if __name__ == '__main__':
     # Load Initial Variables
