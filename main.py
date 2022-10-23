@@ -1,3 +1,4 @@
+from tkinter import ttk
 import PySimpleGUI as pg
 import os
 import colorama
@@ -60,8 +61,6 @@ def new_frame(app):
     main_frame.pack(fill='both', expand=True, padx=28, pady=28)
     return main_frame
     
-
-
 
 # Main Menu
 def main_menu(app, games):
@@ -252,46 +251,38 @@ def modpack_menu(games, game, app):
     ## Get Packs from API
     packs = online.get_packs_list(game['Mod URL'])
 
-    packs_canvas = tk.Canvas(right_frame, bg=light_purple)
-    packs_canvas.place(x=0, y=0, width=664, height=724)
+    container = ttk.Frame(right_frame)
+    canvas = tk.Canvas(container)
+    scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
+    scrollable_frame = ttk.Frame(canvas)
 
-    packs_scrollbar = tk.Scrollbar(right_frame, orient='vertical', command=packs_canvas.yview)
-    packs_scrollbar.place(x=644, y=0, width=20, height=724)
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(
+            scrollregion=canvas.bbox("all")
+        )
+    )
 
-    packs_canvas.configure(yscrollcommand=packs_scrollbar.set)
-    packs_canvas.bind('<Configure>', lambda e: packs_canvas.configure(scrollregion=packs_canvas.bbox('all')))
-    packs_canvas_frame = tk.Frame(packs_canvas, bg=light_purple)
-    packs_canvas.create_window((0, 0), window=packs_canvas_frame, anchor='nw')
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
 
-    pack_frame = []
-    pack_image = []
-    pack_name = []
-    pack_description = []
-    pack_size = []
-    pack_mods = []
-    pack_checkbox = []
-    pack_checkbox_state = []
+    canvas.configure(yscrollcommand=scrollbar.set)
 
     for i in range(len(packs)):
-        pack_frame.append(tk.Frame(packs_canvas_frame, bg=light_purple))
-        pack_frame[i].place(x=0, y=0 + (i * 180), width=664, height=180)
-        pack_image.append(tk.PhotoImage(file=f'{BASE_DIR}\\images\\packs\\{packs[i]["Name"]}.png'))
-        pack_name.append(tk.Label(pack_frame[i], text=packs[i]['Name'],
-                                  bg=light_purple, fg='white', font=(FONTS[3], 20)))
-        pack_name[i].place(x=0, y=0, width=664, height=30)
-        pack_description.append(tk.Label(pack_frame[i], text=packs[i]['Description'],
-                                        bg=light_purple, fg='white', font=(FONTS[3], 15)))
-        pack_description[i].place(x=0, y=30, width=664, height=30)
-        pack_size.append(tk.Label(pack_frame[i], text=f'Size: {packs[i]["Size"]} MB',
-                                  bg=light_purple, fg='white', font=(FONTS[3], 15)))
-        pack_size[i].place(x=0, y=60, width=664, height=30)
-        pack_mods.append(tk.Label(pack_frame[i], text=f'Mods: {packs[i]["Mods"]}',
-                                  bg=light_purple, fg='white', font=(FONTS[3], 15)))
-        pack_mods[i].place(x=0, y=90, width=664, height=30)
-        pack_checkbox_state.append(tk.IntVar())
-        pack_checkbox.append(tk.Checkbutton(pack_frame[i], text='Select', bg=light_purple, fg='white', font=(
-            FONTS[3], 15), selectcolor=light_purple, activebackground=light_purple, activeforeground='white', variable=pack_checkbox_state[i]))
-        pack_checkbox[i].place(x=0, y=120, width=664, height=30)
+        current_pack = packs[i]
+        ttk.Frame(scrollable_frame, height=10).grid(row=i, column=0)
+        ttk.Checkbutton(scrollable_frame, text=current_pack['PACK_NAME']).grid(
+            row=i, column=0, sticky='w')
+        ttk.Label(scrollable_frame, text=f"{current_pack['PACK_DESCRIPTION']}").grid(row=i, column=1, padx=10, pady=10)
+        if current_pack['PACK_SIZE'] >= 1000:
+            ttk.Label(scrollable_frame, text=f"{current_pack['PACK_SIZE'] / 1000} GB").grid(row=i, column=2, padx=10, pady=10)
+        else:
+            ttk.Label(scrollable_frame, text=f"Size: {current_pack['PACK_SIZE']}MB").grid(row=i, column=2, padx=10, pady=10)
+        ttk.Label(scrollable_frame, text=f"Mods: {len(current_pack['MODS'])}").grid(row=i, column=3, padx=10, pady=10)
+
+    container.pack()
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
     
     
 
@@ -338,6 +329,7 @@ if __name__ == '__main__':
     games = online.get_games_list(GAMES_URL)
     main_menu(app, games)
     app.mainloop()
+    exit_app()
 
     # Check for Updates or Install Packs
     # Run auto-update.py to download the latest version of ModDude!
