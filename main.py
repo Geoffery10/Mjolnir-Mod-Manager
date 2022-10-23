@@ -204,9 +204,16 @@ def modpack_menu(games, game, app):
     select_packs.place(x=0, y=98, width=560, height=100)
 
     # Pack Info
+    pack_info_frame_width = 520
+    pack_info_frame_height = 180
     pack_info_frame = tk.Frame(left_frame, bg=medium_purple)
-    pack_info_frame.place(x=20, y=170, width=520, height=180)
-    pack_info_background_image = tk.PhotoImage(file=f'{BASE_DIR}\\images\\ui\\info_window_01.png')
+    pack_info_frame.place(
+        x=20, y=170, width=pack_info_frame_width, height=pack_info_frame_height)
+    pack_info_background_image = Image.open(
+        f'{BASE_DIR}\\images\\ui\\info_window_01.png')
+    pack_info_background_image = pack_info_background_image.resize(
+        (pack_info_frame_width, pack_info_frame_height), Image.Resampling.LANCZOS)
+    pack_info_background_image = ImageTk.PhotoImage(pack_info_background_image)
     pack_info_background = tk.Label(
         pack_info_frame, image=pack_info_background_image, bg=dark_purple)
     pack_info_background.place(x=0, y=0, width=520, height=180)
@@ -229,11 +236,11 @@ def modpack_menu(games, game, app):
 
     bool_back_up_mods = False
     backup_old_mods = customtkinter.CTkButton(extra_options_frame, text='Backup Old Mods', fg_color=medium_purple, 
-                                                bg_color=medium_purple, text_font=(18), hover=False, command=lambda: backup_old_mods_button())
+                                              bg_color=dark_purple, text_font=(18), hover=False, command=lambda: backup_old_mods_button())
     backup_old_mods.pack(side='top', padx=0, pady=10, anchor='w', fill='x', expand=True)
     bool_delete_old_mods = False
     delete_old_mods = customtkinter.CTkButton(extra_options_frame, text='Delete Old Mods', fg_color=medium_purple,
-                                                bg_color=medium_purple, text_font=(18), hover=False, command=lambda: delete_old_mods_button())
+                                                bg_color=dark_purple, text_font=(18), hover=False, command=lambda: delete_old_mods_button())
     delete_old_mods.pack(side='top', padx=0, pady=10,
                          anchor='w', fill='x', expand=True)
 
@@ -300,6 +307,14 @@ def modpack_menu(games, game, app):
         # Return to main menu
         main_frame.destroy()
         main_menu(app=app, games=games)
+
+    def backup_old_mods_button():
+        # TODO: Backup old mods
+        messagebox.showinfo('Backup Old Mods', 'This feature is not yet implemented')
+
+    def delete_old_mods_button():
+        # TODO: Delete old mods
+        messagebox.showinfo('Delete Old Mods', 'This feature is not yet implemented')
 
     def install_selected_packs_button(main_frame):
         # Install selected packs
