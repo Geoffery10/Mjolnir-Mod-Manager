@@ -207,93 +207,74 @@ def select_pack(packs):
             return modpack
 
 
-def download_pack(modpack, BASE_DIR, FILES):
+def download_pack(modpack, BASE_DIR, FILES, app):
     extra_steps = 2
     progress = 0
-    
-    layout = [
-        [pg.Text('Start Downloading Mods... This may take a while!')],
-        [pg.Text('Program may appear frozen, please wait...')],
-        [pg.Text(f'Pack Files to Download: {len(modpack.pack_urls)}')]]
-    if len(modpack.mods) > 0:
-        layout.append([pg.Text(f'Mods to Download: {len(modpack.mods)}')])
-    layout.append([pg.ProgressBar(100, orientation='h', size=(
-        20, 20), key='progressbar')])
-    layout.append([pg.Button('Start Download')])
-    window = pg.Window('ModDude', layout)
-    progress_bar = window['progressbar']
+
     # Get Step Size for Progress Bar
     step_size = int(100 / (len(modpack.pack_urls) + extra_steps))
 
-    while True:
-        window.Refresh()
-        event, values = window.read(timeout=800)
-        if event in (None, 'Exit'):
-            exit_app()
-        elif event == 'Start Download':
-            progress += step_size
-            progress_bar.UpdateBar(progress)
-            # Initialize download folder
-            if not os.path.exists(f'{BASE_DIR}\\Downloads'):
-                os.mkdir(f'{BASE_DIR}\\Downloads')
-            if not os.path.exists(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}'):
-                os.mkdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}')
-            else:
-                # Delete Anything in the Folder
-                try:
-                    shutil.rmtree(
+    progress += step_size
+    # Initialize download folder
+    if not os.path.exists(f'{BASE_DIR}\\Downloads'):
+        os.mkdir(f'{BASE_DIR}\\Downloads')
+    if not os.path.exists(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}'):
+        os.mkdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}')
+    else:
+        # Delete Anything in the Folder
+        try:
+            shutil.rmtree(
+                f'{BASE_DIR}\\Downloads\\{modpack.pack_name}')
+            os.mkdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}')
+        except OSError as e:
+            ERROR_UI(
+                'Error', 'Error deleting old files! Please close any open files and try again!', FATAL=True)
+    progress += step_size
+    app.update()
+
+    # Download each file in the pack
+    for file in modpack.pack_urls:
+        progress = 0
+        # Split the file name from the URL to get the file name
+        file_name = file.split('/')[-1]
+        FILES.append(file_name)
+        print(Fore.GREEN + f'Downloading {file_name}...')
+        # Start async timer to record download speed
+        start = time.time()
+        app.update()
+
+        if file_name.endswith('.zip'):
+            # Download the file
+            r = requests.get(file, allow_redirects=True)
+            # Write the file to the downloads folder
+            if r.status_code == 200:
+                open(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}',
+                        'wb').write(r.content)
+                print(Fore.GREEN + f'{file_name} downloaded!')
+                # Unzip the file
+                with zipfile.ZipFile(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}', 'r') as zip_ref:
+                    zip_ref.extractall(
                         f'{BASE_DIR}\\Downloads\\{modpack.pack_name}')
-                    os.mkdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}')
-                except OSError as e:
-                    ERROR_UI(
-                        'Error', 'Error deleting old files! Please close any open files and try again!', FATAL=True)
-            progress += step_size
-            progress_bar.UpdateBar(progress)
+                    app.update()
+                print(Fore.GREEN + f'{file_name} unpacked!')
+                # Delete Zip File
+                os.remove(
+                    f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}')
+                app.update()
+            else:
+                ERROR_UI(
+                    'Error', f'Error downloading {file_name}! Please try again later!', FATAL=True)
+        else:
+            # Download the file
+            r = requests.get(file, allow_redirects=True)
+            # Write the file to the downloads folder
+            if r.status_code == 200:
+                open(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}',
+                        'wb').write(r.content)
+                app.update()
+                print(Fore.GREEN + f'{file_name} downloaded! Took {time.time() - start} seconds!')
+        app.update()
+        progress += step_size
 
-            # Download each file in the pack
-            for file in modpack.pack_urls:
-                # Split the file name from the URL to get the file name
-                file_name = file.split('/')[-1]
-                FILES.append(file_name)
-                print(Fore.GREEN + f'Downloading {file_name}...')
-                # Start async timer to record download speed
-                start = time.time()
-
-                if file_name.endswith('.zip'):
-                    # Download the file
-                    r = requests.get(file, allow_redirects=True)
-                    # Write the file to the downloads folder
-                    if r.status_code == 200:
-                        open(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}',
-                             'wb').write(r.content)
-                        print(Fore.GREEN + f'{file_name} downloaded!')
-                        # Unzip the file
-                        with zipfile.ZipFile(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}', 'r') as zip_ref:
-                            zip_ref.extractall(
-                                f'{BASE_DIR}\\Downloads\\{modpack.pack_name}')
-                        print(Fore.GREEN + f'{file_name} unpacked!')
-                        # Delete Zip File
-                        os.remove(
-                            f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}')
-                    else:
-                        ERROR_UI(
-                            'Error', f'Error downloading {file_name}! Please try again later!', FATAL=True)
-                else:
-                    # Download the file
-                    r = requests.get(file, allow_redirects=True)
-                    # Write the file to the downloads folder
-                    if r.status_code == 200:
-                        open(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{file_name}',
-                             'wb').write(r.content)
-                        print(Fore.GREEN + f'{file_name} downloaded! Took {time.time() - start} seconds!')
-                        
-                progress += step_size
-                progress_bar.UpdateBar(progress)
-
-            progress += step_size
-            progress_bar.UpdateBar(progress)
-            window.close()
-            break
-        if progress >= 100:
-            break
+    progress += step_size
     print(Fore.MAGENTA + 'All files downloaded!')

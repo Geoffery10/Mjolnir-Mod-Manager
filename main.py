@@ -1,3 +1,4 @@
+import time
 from tkinter import messagebox, ttk
 import PySimpleGUI as pg
 import os
@@ -298,6 +299,25 @@ def modpack_menu(games, game, app):
         if len(SELECTED_PACKS) > 0:
             # Install packs
             main_frame.destroy()
+            main_frame = new_frame(app)
+            # Info
+            info_frame = tk.Frame(main_frame, bg=dark_purple)
+            info_frame.pack(side='top', anchor='center', pady=20)
+            # Title
+            title = customtkinter.CTkLabel(
+                info_frame, text=f'Installing...', text_font=(20))
+            title.pack(side='top', anchor='center', pady=40)
+            # Out of X
+            out_of_x = customtkinter.CTkLabel(
+                info_frame, text=f'Packs: 0/{len(SELECTED_PACKS)}', text_font=(30))
+            out_of_x.pack(side='top', anchor='center', pady=20)
+            # Progress Bar
+            progress_bar = customtkinter.CTkProgressBar(
+                info_frame, fg_color=light_purple, bg_color=dark_purple, progress_color=medium_purple)
+            progress_bar.pack(side='top', anchor='center', pady=20)
+            progress_bar.start()
+            count = 0
+            app.update()
             for pack in SELECTED_PACKS:
                 # Parse packs into Pack objects
                 modpack = Pack()
@@ -317,17 +337,29 @@ def modpack_menu(games, game, app):
                 # Download pack
                 print(f'Downloading {modpack.pack_name}...')
                 print(f'Pack Size: {len(modpack.pack_urls)}')
-
-                main_frame = new_frame(app)
                 app.title(f'Installing {modpack.pack_name}')
-                # Progress Bar
-                progress_bar = customtkinter.CTkProgressBar(main_frame, fg_color=medium_purple, bg_color=dark_purple, progress_color=medium_purple)
-                progress_bar.place(x=0, y=0, width=1200, height=100)
-                for i in range(1, len(modpack.pack_urls)):
-                    progress_bar.update_progress(i)
-                    online.download_pack(
-                        modpack=modpack, BASE_DIR=BASE_DIR, FILES=FILES, app=app, main_frame=main_frame)
-                    app.update()
+                title.configure(text=f'Installing {modpack.pack_name}')
+                online.download_pack(modpack=modpack, BASE_DIR=BASE_DIR, FILES=FILES, app=app)
+                count += 1
+                out_of_x.configure(text=f'Packs: {count}/{len(SELECTED_PACKS)}')
+                app.update()
+            progress_bar.stop()
+
+            # Install mods
+            # ! THIS NEEDS ADDED !
+            # ! THIS NEEDS ADDED !
+            # * SEE OLD MAIN FOR EXAMPLES
+
+
+            # ! THIS NEEDS ADDED !
+            # ! THIS NEEDS ADDED !
+
+            # Finished Message
+            messagebox.showinfo('Finished', 'Finished installing packs!')
+
+            # Return to modpack menu
+            main_frame.destroy()
+            modpack_menu(games, game, app)
                 
         else:
             # No packs selected
