@@ -1,4 +1,4 @@
-from tkinter import ttk
+from tkinter import font, ttk
 import PySimpleGUI as pg
 import os
 import colorama
@@ -15,7 +15,7 @@ import pyglet
 import online
 from ui_menus import exit_app, UI_Setup
 import pack
-from file_manager import delete_temp_files
+from file_manager import backup_old, delete_temp_files
 
 
 modpack = pack.Pack()
@@ -32,6 +32,7 @@ FONTS = []
 # Colors
 transparent = '#00000000'
 dark_purple = '#5b0079'
+medium_purple = '#813C98'
 light_purple = '#995aae'
 
 # PAGES 
@@ -52,25 +53,25 @@ def new_app(title='ModDude!', width=1280, height=720, resizable=False, icon=f'{B
     app.iconbitmap(icon)
     app.resizable(resizable, resizable)
     app.configure(bg='#380070')
+    return app
 
+def new_frame(app):
     # Main Frame
     main_frame = tk.Frame(app, bg=dark_purple)
     main_frame.pack(fill='both', expand=True, padx=28, pady=28)
-
-    return app, main_frame
+    return main_frame
     
 
 
 
 # Main Menu
-def main_menu():
+def main_menu(app):
     # Create main menu
-    app, main_frame = new_app()
-    
+    app.title(f'ModDude!')
+    main_frame = new_frame(app)
     # Colors
     global dark_purple
     global light_purple
-    
     # FONTS
     global FONTS
 
@@ -134,28 +135,120 @@ def main_menu():
         global PACK
         global GAMES_URL
         
-        app.destroy()
-        modpack_menu(game)
+        main_frame.destroy()
+        modpack_menu(game, app)
 
     def open_website(url):
         # Open github in browser
         webbrowser.open(url, new=2)
 
-    app.mainloop()
-
 # Modpack Menu
-def modpack_menu(game):
+def modpack_menu(game, app):
     # Create modpack menu
-    app, main_frame = new_app(title=f'ModDude! - {game}')
-
+    app.title(f'ModDude! - {game}')
+    main_frame = new_frame(app)
     # Colors
     global dark_purple
     global light_purple
-
+    global medium_purple
     # FONTS
     global FONTS
 
-    app.mainloop()
+    # Modpack Menu
+    # Page Breakdown:
+    # Two Columns
+
+    ## Left Column (Width: 506)
+    ## Logo (Small)
+    ## Select Packs
+    ## Pack info
+    ### Select Packs
+    ### Download Size
+    ### Total Mods 
+    ## Extra Options
+    ### Backup Old Mods (Checkbox)
+    ### Delete Old Mods (Checkbox)
+    ## Install Selected Packs
+    ## Back Button
+
+    left_frame = tk.Frame(main_frame, bg=dark_purple)
+    left_frame.place(x=0, y=0, width=560, height=730)
+
+    # Logo (Small)
+    logo = tk.PhotoImage(file=f'{BASE_DIR}\\logo_small.png')
+    logo_button = customtkinter.CTkButton(left_frame, text='', fg_color=dark_purple, border_width=0, image=logo, bg_color=dark_purple, hover=False)
+    logo_button.place(x=0, y=10, width=560, height=98)
+
+    # Select Packs
+    select_packs = tk.Label(left_frame, text='Please Select Packs to Install', bg=dark_purple, fg='white', font=(FONTS[3], 20))
+    select_packs.place(x=0, y=98, width=560, height=100)
+
+    # Pack Info
+    pack_info_frame = tk.Frame(left_frame, bg=dark_purple)
+    pack_info_frame.place(x=20, y=170, width=520, height=180)
+    pack_info_background_image = tk.PhotoImage(
+        file=f'{BASE_DIR}\\images\\info_window_01.png')
+    pack_info_background = tk.Label(
+        pack_info_frame, image=pack_info_background_image, bg=dark_purple)
+    pack_info_background.place(x=0, y=0, width=520, height=180)
+
+    selected_packs = tk.Label(pack_info_frame, text='Selected Packs: 0',
+                              bg=medium_purple, fg='white', font=(FONTS[3], 20))
+    selected_packs.pack(side='top', padx=0, pady=12)
+    download_size = tk.Label(pack_info_frame, text='Download Size: 0 MB',
+                             bg=medium_purple, fg='white', font=(FONTS[3], 20))
+    download_size.pack(side='top', padx=0, pady=12)
+    total_mods = tk.Label(pack_info_frame, text='Total Mods: 0',
+                          bg=medium_purple, fg='white', font=(FONTS[3], 20))
+    total_mods.pack(side='top', padx=0, pady=12)
+
+    # Extra Options
+    extra_options_frame = tk.Frame(left_frame, bg=dark_purple)
+    extra_options_frame.place(x=20, y=368, width=520, height=120)
+    extra_options_background_image = tk.PhotoImage(file=f'{BASE_DIR}\\images\\info_window_02.png')
+    extra_options_background = tk.Label(extra_options_frame, image=extra_options_background_image, bg=dark_purple)
+    extra_options_background.place(x=0, y=0, width=520, height=120)
+    # Options
+    # TODO: IMPROVE CHECKBOXES
+    backup_old_mods = tk.Checkbutton(extra_options_frame, text='Backup Old Mods', bg=medium_purple, fg='white', font=(
+        FONTS[3], 20), selectcolor=medium_purple, activebackground=medium_purple, activeforeground='white')
+    backup_old_mods.pack(side='top', padx=0, pady=10)
+    delete_old_mods = tk.Checkbutton(extra_options_frame, text='Delete Old Mods', bg=medium_purple, fg='white', font=(
+        FONTS[3], 20), selectcolor=medium_purple, activebackground=medium_purple, activeforeground='white')
+    delete_old_mods.pack(side='top', padx=0, pady=10)
+
+    # Install Selected Packs
+    install_selected_packs = customtkinter.CTkButton(left_frame, text='Install Selected Packs', text_font=(
+        FONTS[3], 20), fg_color=medium_purple, bg_color=dark_purple, hover=False, command=lambda: install_selected_packs_button())
+    install_selected_packs.place(x=79, y=510, width=393, height=80)
+
+    # Back Button
+    back_button = customtkinter.CTkButton(left_frame, text='Back', text_font=(
+        FONTS[3], 15), fg_color=medium_purple, bg_color=dark_purple, hover=False, command=lambda: back())
+    back_button.place(x=12, y=610, width=80, height=40)
+    
+
+    ## Right Column (Width 667)
+    ## Packs List (Scrollable)
+    ### pack_frame
+    #### Pack Image
+    #### Pack Name
+    #### Pack Description
+    #### Pack Size
+    #### Pack Mods
+    #### Pack Checkbox
+
+    right_frame = tk.Frame(main_frame, bg=light_purple)
+    right_frame.place(x=560, y=0, width=664, height=724)
+
+
+
+
+    # Functions
+    def back():
+        # Return to main menu
+        main_frame.destroy()
+        main_menu(app)
 
     
 
@@ -180,14 +273,13 @@ if __name__ == '__main__':
                     pyglet.font.add_directory(f'{BASE_DIR}\\fonts')
                     file_name = file.split('.')[0]
                     FONTS.append(file_name)
-        print(Fore.GREEN + 'Loaded Custom Fonts')
-        print(Fore.GREEN + f'Fonts: {FONTS}')
     except Exception as e:
         print(f"Failed to load fonts")
         FONTS = ['Arial', 'Arial', 'Arial', 'Arial']
 
-
-    main_menu()
+    app = new_app()
+    main_menu(app)
+    app.mainloop()
 
     # Check for Updates or Install Packs
     # Run auto-update.py to download the latest version of ModDude!
