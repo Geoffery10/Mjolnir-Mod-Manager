@@ -46,7 +46,7 @@ light_purple = '#995aae'
 # 2 = Downloading 
 
 
-def new_app(title='ModDude!', width=1280, height=720, resizable=False, icon=f'{BASE_DIR}\\ModDude_Icon.ico'):
+def new_app(title='Mjolnir', width=1280, height=720, resizable=False, icon=f'{BASE_DIR}\\Mjolnir_Icon.ico'):
     global dark_purple
     global light_purple
     customtkinter.set_appearance_mode("System")
@@ -70,7 +70,7 @@ def new_frame(app):
 # Main Menu
 def main_menu(app, games):
     # Create main menu
-    app.title(f'ModDude!')
+    app.title(f'Mjolnir')
     main_frame = new_frame(app)
     # Colors
     global dark_purple
@@ -156,7 +156,7 @@ def main_menu(app, games):
 
 def modpack_menu(games, game, app):
     # Create modpack menu
-    app.title(f'ModDude! - {game["Name"]}')
+    app.title(f'Mjolnir - {game["Name"]}')
     main_frame = new_frame(app)
     # Colors
     global dark_purple
@@ -189,9 +189,15 @@ def modpack_menu(games, game, app):
     left_frame.place(x=0, y=0, width=560, height=730)
 
     # Logo (Small)
-    logo = tk.PhotoImage(file=f'{BASE_DIR}\\logo_small.png')
-    logo_button = customtkinter.CTkButton(left_frame, text='', fg_color=dark_purple, border_width=0, image=logo, bg_color=dark_purple, hover=False)
-    logo_button.place(x=0, y=10, width=560, height=98)
+    logo_image = Image.open(f'{BASE_DIR}\\logo.png')
+    logo_image = logo_image.resize(
+        (484, 78), Image.Resampling.LANCZOS)
+    logo_image = ImageTk.PhotoImage(logo_image)
+    logo = tk.Label(
+        left_frame, image=logo_image, bg=dark_purple)
+    logo.place(x=0, y=10, width=560, height=98)
+    logo.image = logo_image
+
 
     # Select Packs
     select_packs = tk.Label(left_frame, text='Please Select Packs to Install', bg=dark_purple, fg='white', font=(FONTS[3], 20))
@@ -347,7 +353,7 @@ def modpack_menu(games, game, app):
             messagebox.showinfo('Finished', 'Finished installing packs!')
 
             # Return to modpack menu
-            app.title(f'ModDude! - {modpack.game}')
+            app.title(f'Mjolnir - {modpack.game}')
                 
         else:
             # No packs selected
@@ -488,10 +494,10 @@ if __name__ == '__main__':
     exit_app()
 
     # Check for Updates or Install Packs
-    # Run auto-update.py to download the latest version of ModDude!
-    # This will overwrite the current version of ModDude! with the latest version
-    # This will close the current instance of ModDude! and open the new one
-    # ! This will not work if ModDude! is running from a .exe file
+    # Run auto-update.py to download the latest version of Mjolnir
+    # This will overwrite the current version of Mjolnir with the latest version
+    # This will close the current instance of Mjolnir and open the new one
+    # ! This will not work if Mjolnir is running from a .exe file
     if online.check_for_updates(CURRENT_VERSION, URL):
         # check for update script
         if os.path.isfile(os.path.join(BASE_DIR, 'auto-update.py')):
@@ -499,7 +505,7 @@ if __name__ == '__main__':
                 Popen([os.path.join(BASE_DIR, 'auto-update.py')])
                 exit_app()
             except:
-                print('Error updating ModDude! Please try again!')
+                print('Error updating Mjolnir Please try again!')
                 exit_app()
         else:
             # Download auto-update.py
@@ -553,12 +559,12 @@ if __name__ == '__main__':
     # Finished
     if valid:
         layout = [
-            [pg.Text("ModDude has finished installing your modpack!")],
-            [pg.Text("Thank you for using ModDude!")],
+            [pg.Text("Mjolnir has finished installing your modpack!")],
+            [pg.Text("Thank you for using Mjolnir")],
             [pg.Text("Please contact me on Discord if you have any issues.")],
             [pg.Text("Discord: Geoffery10#6969")],
             [pg.Button("Ok", key="Ok")]]
-        window = pg.Window(f"ModDude!", layout)
+        window = pg.Window(f"Mjolnir", layout)
         while True:
             event, values = window.read()
             if event == pg.WIN_CLOSED:
@@ -568,11 +574,11 @@ if __name__ == '__main__':
                 exit_app()
     else:
         layout = [
-            [pg.Text("ModDude has encountered an error while installing your modpack!")],
+            [pg.Text("Mjolnir has encountered an error while installing your modpack!")],
             [pg.Text("Please contact me on Discord if you have any issues.")],
             [pg.Text("Discord: Geoffery10#6969")],
             [pg.Button("Ok", key="Ok")]]
-        window = pg.Window(f"ModDude!", layout)
+        window = pg.Window(f"Mjolnir", layout)
         while True:
             event, values = window.read()
             if event == pg.WIN_CLOSED:
