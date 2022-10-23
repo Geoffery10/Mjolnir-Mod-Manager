@@ -1,4 +1,3 @@
-from tkinter import font, ttk
 import PySimpleGUI as pg
 import os
 import colorama
@@ -65,7 +64,7 @@ def new_frame(app):
 
 
 # Main Menu
-def main_menu(app):
+def main_menu(app, games):
     # Create main menu
     app.title(f'ModDude!')
     main_frame = new_frame(app)
@@ -136,16 +135,24 @@ def main_menu(app):
         global GAMES_URL
         
         main_frame.destroy()
-        modpack_menu(game, app)
+        game_data = ''
+        for temp_game in games:
+            if temp_game['Name'] == game:
+                game = temp_game
+                break
+        modpack_menu(games, game, app)
+            
 
     def open_website(url):
         # Open github in browser
         webbrowser.open(url, new=2)
 
 # Modpack Menu
-def modpack_menu(game, app):
+
+
+def modpack_menu(games, game, app):
     # Create modpack menu
-    app.title(f'ModDude! - {game}')
+    app.title(f'ModDude! - {game["Name"]}')
     main_frame = new_frame(app)
     # Colors
     global dark_purple
@@ -184,10 +191,9 @@ def modpack_menu(game, app):
     select_packs.place(x=0, y=98, width=560, height=100)
 
     # Pack Info
-    pack_info_frame = tk.Frame(left_frame, bg=dark_purple)
+    pack_info_frame = tk.Frame(left_frame, bg=medium_purple)
     pack_info_frame.place(x=20, y=170, width=520, height=180)
-    pack_info_background_image = tk.PhotoImage(
-        file=f'{BASE_DIR}\\images\\info_window_01.png')
+    pack_info_background_image = tk.PhotoImage(file=f'{BASE_DIR}\\images\\ui\\info_window_01.png')
     pack_info_background = tk.Label(
         pack_info_frame, image=pack_info_background_image, bg=dark_purple)
     pack_info_background.place(x=0, y=0, width=520, height=180)
@@ -203,10 +209,11 @@ def modpack_menu(game, app):
     total_mods.pack(side='top', padx=0, pady=12)
 
     # Extra Options
-    extra_options_frame = tk.Frame(left_frame, bg=dark_purple)
+    extra_options_frame = tk.Frame(left_frame, bg=medium_purple)
     extra_options_frame.place(x=20, y=368, width=520, height=120)
-    extra_options_background_image = tk.PhotoImage(file=f'{BASE_DIR}\\images\\info_window_02.png')
-    extra_options_background = tk.Label(extra_options_frame, image=extra_options_background_image, bg=dark_purple)
+    extra_options_background_image = tk.PhotoImage(file=f'{BASE_DIR}\\images\\ui\\info_window_02.png')
+    extra_options_background = tk.Label(
+        extra_options_frame, image=extra_options_background_image, bg=dark_purple)
     extra_options_background.place(x=0, y=0, width=520, height=120)
     # Options
     # TODO: IMPROVE CHECKBOXES
@@ -241,6 +248,52 @@ def modpack_menu(game, app):
     right_frame = tk.Frame(main_frame, bg=light_purple)
     right_frame.place(x=560, y=0, width=664, height=724)
 
+    # Packs List (Scrollable Canvas)
+    ## Get Packs from API
+    packs = online.get_packs_list(game['Mod URL'])
+
+    packs_canvas = tk.Canvas(right_frame, bg=light_purple)
+    packs_canvas.place(x=0, y=0, width=664, height=724)
+
+    packs_scrollbar = tk.Scrollbar(right_frame, orient='vertical', command=packs_canvas.yview)
+    packs_scrollbar.place(x=644, y=0, width=20, height=724)
+
+    packs_canvas.configure(yscrollcommand=packs_scrollbar.set)
+    packs_canvas.bind('<Configure>', lambda e: packs_canvas.configure(scrollregion=packs_canvas.bbox('all')))
+    packs_canvas_frame = tk.Frame(packs_canvas, bg=light_purple)
+    packs_canvas.create_window((0, 0), window=packs_canvas_frame, anchor='nw')
+
+    pack_frame = []
+    pack_image = []
+    pack_name = []
+    pack_description = []
+    pack_size = []
+    pack_mods = []
+    pack_checkbox = []
+    pack_checkbox_state = []
+
+    for i in range(len(packs)):
+        pack_frame.append(tk.Frame(packs_canvas_frame, bg=light_purple))
+        pack_frame[i].place(x=0, y=0 + (i * 180), width=664, height=180)
+        pack_image.append(tk.PhotoImage(file=f'{BASE_DIR}\\images\\packs\\{packs[i]["Name"]}.png'))
+        pack_name.append(tk.Label(pack_frame[i], text=packs[i]['Name'],
+                                  bg=light_purple, fg='white', font=(FONTS[3], 20)))
+        pack_name[i].place(x=0, y=0, width=664, height=30)
+        pack_description.append(tk.Label(pack_frame[i], text=packs[i]['Description'],
+                                        bg=light_purple, fg='white', font=(FONTS[3], 15)))
+        pack_description[i].place(x=0, y=30, width=664, height=30)
+        pack_size.append(tk.Label(pack_frame[i], text=f'Size: {packs[i]["Size"]} MB',
+                                  bg=light_purple, fg='white', font=(FONTS[3], 15)))
+        pack_size[i].place(x=0, y=60, width=664, height=30)
+        pack_mods.append(tk.Label(pack_frame[i], text=f'Mods: {packs[i]["Mods"]}',
+                                  bg=light_purple, fg='white', font=(FONTS[3], 15)))
+        pack_mods[i].place(x=0, y=90, width=664, height=30)
+        pack_checkbox_state.append(tk.IntVar())
+        pack_checkbox.append(tk.Checkbutton(pack_frame[i], text='Select', bg=light_purple, fg='white', font=(
+            FONTS[3], 15), selectcolor=light_purple, activebackground=light_purple, activeforeground='white', variable=pack_checkbox_state[i]))
+        pack_checkbox[i].place(x=0, y=120, width=664, height=30)
+    
+    
 
 
 
@@ -248,7 +301,11 @@ def modpack_menu(game, app):
     def back():
         # Return to main menu
         main_frame.destroy()
-        main_menu(app)
+        main_menu(app=app, games=games)
+
+    def install_selected_packs_button():
+        # Install selected packs
+        pass
 
     
 
@@ -278,7 +335,8 @@ if __name__ == '__main__':
         FONTS = ['Arial', 'Arial', 'Arial', 'Arial']
 
     app = new_app()
-    main_menu(app)
+    games = online.get_games_list(GAMES_URL)
+    main_menu(app, games)
     app.mainloop()
 
     # Check for Updates or Install Packs

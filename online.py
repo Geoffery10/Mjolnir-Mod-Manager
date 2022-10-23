@@ -60,6 +60,27 @@ def get_games(URL):
 
     return game
 
+
+def get_games_list(URL):
+    if not URL == '':
+        print(Fore.GREEN + 'Getting Games from Internet...')
+        response = requests.get(URL)
+        # Check if response is valid
+        if response.status_code == 200:
+            data = response.json()
+            print(Fore.GREEN + f'Games received!')
+
+            games = []
+            for game in data['Games']:
+                games.append(game)
+        else:
+            ERROR_UI(
+                'Error', 'Error getting games from internet! Please check your internet connection and try again!', FATAL=True)
+    else:
+        ERROR_UI(
+            'Error', 'No URL specified! Please contact the developer!', FATAL=True)
+    return games
+
 def get_json(CURRENT_VERSION, URL):
     if not URL == '':
         print(Fore.GREEN + 'Getting Packs from Internet...')
@@ -86,6 +107,26 @@ def get_json(CURRENT_VERSION, URL):
             'Error', 'No URL specified! Please contact the developer!', FATAL=True)
 
     return modpack
+
+def get_packs_list(URL):
+    if not URL == '':
+        print(Fore.GREEN + 'Getting Packs from Internet...')
+        response = requests.get(URL)
+        # Check if response is valid
+        if response.status_code == 200:
+            data = response.json()
+            print(Fore.GREEN + f'Packs v{data["CURRENT_VERSION"]} received!')
+            packs = []
+            for pack in data['PACKS']:
+                packs.append(pack)
+        else:
+            ERROR_UI(
+                'Error', 'Error getting packs from internet! Please check your internet connection and try again!', FATAL=True)
+    else:
+        ERROR_UI(
+            'Error', 'No URL specified! Please contact the developer!', FATAL=True)
+
+    return packs
 
 
 def select_game(games):
