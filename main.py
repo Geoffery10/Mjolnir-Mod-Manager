@@ -1,4 +1,5 @@
 import json
+import shutil
 import time
 import PySimpleGUI as pg
 import os
@@ -18,7 +19,7 @@ from PIL import ImageTk, Image
 import online
 from ui_menus import exit_app, UI_Setup
 import pack
-from file_manager import backup_old, delete_temp_files, game_settings_initialization, validate_settings
+from file_manager import backup_old, delete_temp_files, game_settings_initialization, validate_settings, install_app
 from pack import Pack
 
 
@@ -93,7 +94,7 @@ def main_menu(app, games):
     
     # Logo (Image Button that links to website)
     # Logo is 655x98
-    logo = tk.PhotoImage(file=f'{BASE_DIR}\\logo.png')
+    logo = tk.PhotoImage(file=f'{BASE_DIR}\\images\\logo.png')
     logo_button = customtkinter.CTkButton(app, text='', fg_color=dark_purple, border_width=0, bg_color=dark_purple,
                                           hover=False, image=logo, command=lambda: open_website('https://www.geoffery10.com/games.html'))
     logo_button.place(x=313, y=47)
@@ -196,7 +197,7 @@ def modpack_menu(games, game, app):
 
 
     # Logo (Small)
-    logo_image = Image.open(f'{BASE_DIR}\\logo.png')
+    logo_image = Image.open(f'{BASE_DIR}\\images\\logo.png')
     logo_image = logo_image.resize(
         (484, 78), Image.Resampling.LANCZOS)
     logo_image = ImageTk.PhotoImage(logo_image)
@@ -613,6 +614,13 @@ def settings(games, game, app):
         modpack_menu(app=app, game=game, games=games)
 
 if __name__ == '__main__':
+    # ! NOT WORKING
+    '''
+    # Check if currently in Roaming
+    if not 'Roaming' in os.path.basename(os.getcwd()):
+        install_app()
+    '''
+
     # Load Initial Variables
     colorama.init(autoreset=True)
     pg.theme('DarkPurple1')
