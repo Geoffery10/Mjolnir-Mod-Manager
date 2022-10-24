@@ -746,7 +746,7 @@ if __name__ == '__main__':
     colorama.init(autoreset=True)
     pg.theme('DarkPurple1')
     pg.isAnimated = True
-    CURRENT_VERSION = '2.0.1'
+    CURRENT_VERSION = '2.0.2'
     URL = 'https://www.geoffery10.com/mods.json'
     GAMES_URL = 'https://www.geoffery10.com/games.json'
     SUPPORTED_GAMES = ['Minecraft', 'Bonelab']

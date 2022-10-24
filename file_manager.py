@@ -29,9 +29,9 @@ def install_app():
         # Delete old packs folder
         shutil.rmtree(os.path.join(os.getenv('APPDATA'),
                      'Mjolnir Modpack Manager', 'images', 'packs'))
-        # Create new packs folder
-        os.mkdir(os.path.join(os.getenv('APPDATA'),
-                 'Mjolnir Modpack Manager', 'images', 'packs'))
+    # Create new packs folder
+    os.mkdir(os.path.join(os.getenv('APPDATA'),
+                'Mjolnir Modpack Manager', 'images', 'packs'))
 
     if not os.path.exists(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager', 'GameSettings')):
         os.mkdir(os.path.join(os.getenv('APPDATA'),
