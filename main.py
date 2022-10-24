@@ -1,19 +1,16 @@
 import json
-import shutil
 import time
 import PySimpleGUI as pg
 import os
 import colorama
 from colorama import Fore, Back
-from subprocess import Popen
-import sys
-import requests
 # Docs at https://github.com/TomSchimansky/CustomTkinter/wiki
 import customtkinter
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import webbrowser
 from PIL import ImageTk, Image
+
 
 # Custom Functions
 import online
@@ -23,6 +20,7 @@ from file_manager import backup_old, delete_temp_files, game_settings_initializa
 from pack import Pack
 import core_bonelab
 import core_minecraft
+import discord_rich_presence
 
 
 modpack = pack.Pack()
@@ -39,6 +37,15 @@ SELECTED_PACKS = []
 GAME_SETTINGS = ''
 ROAMING_PATH = ''
 
+# DISCORD RICH PRESENCE
+rpc_rpc = None
+rpc_start = time.time()
+rpc_large_image = 'icon'
+rpc_large_text = 'Mjolnir Mod Manager'
+rpc_small_image = None
+
+
+
 # Colors
 transparent = '#00000000'
 dark_purple = '#5b0079'
@@ -49,6 +56,15 @@ light_purple = '#995aae'
 # 0 = Main Menu
 # 1 = Modpack Menu
 # 2 = Downloading 
+
+
+def update_discord(small_image, details, state):
+    global rpc_rpc
+    global rpc_start
+    global rpc_large_image
+    global rpc_large_text
+    discord_rich_presence.rpc_update(rpc_rpc, rpc_start, large_image=rpc_large_image, small_image=rpc_small_image,
+                                     large_text=rpc_large_text, details=details, state=state)
 
 
 def new_app(title='Mjolnir', width=1280, height=720, resizable=False, icon=f'{BASE_DIR}\\Mjolnir_Icon.ico'):
@@ -82,14 +98,20 @@ def main_menu(app, games):
     global light_purple
     # FONTS
     global FONTS
+    # Discord Rich Presence
+    global rpc_small_image
+    rpc_small_image = None
+    update_discord(rpc_small_image, 'In the Main Menu', 'Idle')
 
     
     # Logo (Image Button that links to website)
     # Logo is 655x98
-    logo = tk.PhotoImage(file=f'{BASE_DIR}\\images\\logo.png')
+    logo_image = Image.open(f'{BASE_DIR}\\images\\logo.png')
+    logo_image = ImageTk.PhotoImage(logo_image)
     logo_button = customtkinter.CTkButton(app, text='', fg_color=dark_purple, border_width=0, bg_color=dark_purple,
-                                          hover=False, image=logo, command=lambda: open_website('https://www.geoffery10.com/games.html'))
+                                          hover=False, image=logo_image, command=lambda: open_website('https://www.geoffery10.com/games.html'))
     logo_button.place(x=313, y=47)
+    logo_button.image = logo_image
 
     # App Info
     app_info = tk.Label(app, text='This program was developed by Geoffery10 to help you install mods for your games.\n This app is currently in beta, so please report any bugs to me on Discord.', bg=dark_purple, fg='white', font=(FONTS[3], 20))
@@ -167,6 +189,13 @@ def modpack_menu(games, game, app):
     global medium_purple
     # FONTS
     global FONTS
+    # Discord Rich Presence
+    global rpc_small_image
+    if game['Name'] == 'Minecraft':
+        rpc_small_image = 'minecraft'
+    elif game['Name'] == 'Bonelab':
+        rpc_small_image = 'bonelab'
+    update_discord(rpc_small_image, game['Name'], 'Browsing Modpacks')
 
     global SELECTED_PACKS
     SELECTED_PACKS = []
@@ -312,9 +341,14 @@ def modpack_menu(games, game, app):
 
     # Functions
     def back():
+        # Discord Rich Presence
+        global rpc_small_image
+        rpc_small_image = None
+        update_discord(rpc_small_image, 'In the Main Menu', 'Idle')
         # Return to main menu
         main_frame.destroy()
         main_menu(app=app, games=games)
+
 
     def settings_menu(game, app):
         # Open settings menu for selected game
@@ -326,6 +360,10 @@ def modpack_menu(games, game, app):
         # Backup old mods
         valid = validate_settings(game['Name'], GAME_SETTINGS)
         if valid:
+            # Discord Rich Presence
+            global rpc_small_image
+            update_discord(rpc_small_image, game['Name'],
+                           'Backing up old mods')
             if game['Name'] == 'Minecraft':
                 loading_frame, title, of_x, progress_bar = loading_bar_popup(
                     app, main_frame, title_text=f'Backing Up Old Mods', type='Backups', max=1)
@@ -348,7 +386,6 @@ def modpack_menu(games, game, app):
                         return
             
             
-
     def delete_old_mods_button():
         # Delete old mods
         valid = validate_settings(game['Name'], GAME_SETTINGS)
@@ -356,6 +393,10 @@ def modpack_menu(games, game, app):
             # Ask user if they are sure
             sure = messagebox.askyesno(message='Are you sure you would like to delete old mods? This is not reversible', title='Are you sure?')
             if sure:
+                # Discord Rich Presence
+                # Discord Rich Presence
+                global rpc_small_image
+                update_discord(rpc_small_image, game['Name'], 'Deleting up old mods')
                 if game['Name'] == 'Minecraft':
                     loading_frame, title, of_x, progress_bar = loading_bar_popup(
                         app, main_frame, title_text=f'Deleting Old Mods', type='Backups', max=1)
@@ -379,6 +420,7 @@ def modpack_menu(games, game, app):
                             'Missing Settings', f'You are missing the {key} setting')
                         return
 
+
     def install_selected_packs_button(main_frame):
         # Validate Settings
         valid = validate_settings(game['Name'], GAME_SETTINGS)
@@ -393,9 +435,13 @@ def modpack_menu(games, game, app):
 
         # Install selected packs
         if len(SELECTED_PACKS) > 0:
+            count = 0
+            # Discord Rich Presence
+            global rpc_small_image
+            update_discord(rpc_small_image, game['Name'], f'Downloading {SELECTED_PACKS[count]["PACK_NAME"]}')
+            
             modpacks = []
             # Install packs
-            count = 0
             loading_frame, title, of_x, progress_bar = loading_bar_popup(
                 app, main_frame, title_text=f'Downloading {SELECTED_PACKS[0]["PACK_NAME"]}', type='Packs', max=len(SELECTED_PACKS))
             for pack in SELECTED_PACKS:
@@ -433,6 +479,9 @@ def modpack_menu(games, game, app):
                 app, main_frame, title_text=f'Installing {SELECTED_PACKS[0]["PACK_NAME"]}', type='Packs', max=len(SELECTED_PACKS))
 
             for pack in modpacks:
+                # Discord Rich Presence
+                update_discord(
+                    rpc_small_image, game['Name'], f'Installing {pack.pack_name}')
                 # Open Core
                 if pack.game == 'Minecraft':
                     # Minecraft
@@ -445,6 +494,9 @@ def modpack_menu(games, game, app):
 
             progress_bar.stop()
             loading_frame.destroy()
+
+            update_discord(
+                rpc_small_image, game['Name'], f'Installed {len(SELECTED_PACKS)} packs')
 
             # Finished Message
             messagebox.showinfo('Finished', 'Finished installing packs!')
@@ -479,7 +531,6 @@ def loading_bar_popup(app, frame, title_text='', type='', max=0):
     progress_bar.start()
     app.update()
     return loading_frame, title, of_x, progress_bar
-
 
 
 def initialize_pack(id, pack, image, height, right_frame, selected_packs, download_size, total_mods):
@@ -541,6 +592,9 @@ def initialize_pack(id, pack, image, height, right_frame, selected_packs, downlo
             download_size.configure(text=f'Download Size: {round(sum_download_size, 1)} MB')
         total_mods.configure(
             text=f'Total Mods: {sum([pack["MOD_COUNT"] for pack in SELECTED_PACKS])}')
+        global rpc_small_image
+        update_discord(
+            rpc_small_image, pack['GAME'], f'Selected: {len(SELECTED_PACKS)} Packs')
 
     def remove_from_pack(pack):
         print(f'Removed {pack["PACK_NAME"]} from install list')
@@ -558,13 +612,21 @@ def initialize_pack(id, pack, image, height, right_frame, selected_packs, downlo
                 text=f'Download Size: {round(sum_download_size, 1)} MB')
         total_mods.configure(
             text=f'Total Mods: {sum([pack["MOD_COUNT"] for pack in SELECTED_PACKS])}')
-        
+        if len(SELECTED_PACKS) == 0:
+            global rpc_small_image
+            update_discord(rpc_small_image, pack['GAME'], 'Browsing Packs')
+        else:
+            update_discord(
+                rpc_small_image, pack['GAME'], f'Selected: {len(SELECTED_PACKS)} Modpacks')
+
 
 def settings(games, game, app):
     global APPDATA_PATH
     global BASE_DIR
     global GAME_SETTINGS
     global ROAMING_PATH
+    update_discord(small_image='settings',
+                   details=f'{game["Name"]}', state='Changing Settings')
     settings_path = f'{ROAMING_PATH}\\GameSettings\\{game["Name"]}_Settings.json'
     # Settings window
     main_frame = new_frame(app)
@@ -669,6 +731,7 @@ def settings(games, game, app):
             main_frame.destroy()
             modpack_menu(app=app, game=game, games=games)
 
+
 if __name__ == '__main__':
     # ! NOT WORKING
     '''
@@ -705,103 +768,19 @@ if __name__ == '__main__':
 
     FONTS = ['Arial', 'Arial', 'Arial', 'Arial']
 
+    # Initialize Discord Rich Presence
+    # Run in a thread so it doesn't block the main thread and cause the app to freeze
+    print('Launching Mod Manager')
     app = new_app()
+    rpc_rpc = discord_rich_presence.connect()
+    rpc_start = time.time()
+    rpc_small_image = None
     games = online.get_games_list(GAMES_URL)
     main_menu(app, games)
+    update_discord(None, 'In the Main Menu', 'Idle')
     app.mainloop()
+    '''
+    if discord_thread.is_alive():
+        discord_thread.cancel()
+    '''
     exit_app()
-
-    # Check for Updates or Install Packs
-    # Run auto-update.py to download the latest version of Mjolnir
-    # This will overwrite the current version of Mjolnir with the latest version
-    # This will close the current instance of Mjolnir and open the new one
-    # ! This will not work if Mjolnir is running from a .exe file
-    if online.check_for_updates(CURRENT_VERSION, URL):
-        # check for update script
-        if os.path.isfile(os.path.join(BASE_DIR, 'auto-update.py')):
-            try:
-                Popen([os.path.join(BASE_DIR, 'auto-update.py')])
-                exit_app()
-            except:
-                print('Error updating Mjolnir Please try again!')
-                exit_app()
-        else:
-            # Download auto-update.py
-            print('Downloading auto-update.py...')
-            response = requests.get('https://www.geoffery10.com/auto-update.py')
-            if response.status_code == 200:
-                # Download file
-                with open(os.path.join(BASE_DIR, 'auto-update.py'), 'wb') as f:
-                    f.write(response.content)
-            else:
-                print('Error downloading auto-update.py! Please try again!')
-                exit_app()
-        # Run auto-update.py
-        Popen([sys.executable, os.path.join(BASE_DIR, 'auto-update.py')])
-        exit_app()
-    # Delete auto-update.py
-    if os.path.isfile(os.path.join(BASE_DIR, 'auto-update.py')):
-        try:
-            os.remove(os.path.join(BASE_DIR, 'auto-update.py'))
-        except:
-            print('Error deleting auto-update.py!')
-    
-    
-    # Load Games
-    game = online.get_games(GAMES_URL)
-
-
-    # Load Pack Info
-    modpack = online.get_json(CURRENT_VERSION, game['Mod URL'])
-
-
-    # Download Pack
-    online.download_pack(modpack, BASE_DIR, FILES)
-
-    # Open Core
-    if game['Name'] == 'Minecraft':
-        # Minecraft
-        import core_minecraft
-        valid = core_minecraft.minecraft(modpack, BASE_DIR, APPDATA_PATH, FILES)
-    elif game['Name'] == 'Bonelab':
-        # Bonelab
-        import core_bonelab
-        valid = core_bonelab.bonelab(modpack, BASE_DIR, APPDATA_PATH, FILES)
-    else:
-        print('Error: Invalid Game!')
-        exit_app()
-
-    # Delete Temp Files
-    delete_temp_files(modpack, BASE_DIR)
-
-    # Finished
-    if valid:
-        layout = [
-            [pg.Text("Mjolnir has finished installing your modpack!")],
-            [pg.Text("Thank you for using Mjolnir")],
-            [pg.Text("Please contact me on Discord if you have any issues.")],
-            [pg.Text("Discord: Geoffery10#6969")],
-            [pg.Button("Ok", key="Ok")]]
-        window = pg.Window(f"Mjolnir", layout)
-        while True:
-            event, values = window.read()
-            if event == pg.WIN_CLOSED:
-                exit_app()
-            if event == "Ok":
-                window.close()
-                exit_app()
-    else:
-        layout = [
-            [pg.Text("Mjolnir has encountered an error while installing your modpack!")],
-            [pg.Text("Please contact me on Discord if you have any issues.")],
-            [pg.Text("Discord: Geoffery10#6969")],
-            [pg.Button("Ok", key="Ok")]]
-        window = pg.Window(f"Mjolnir", layout)
-        while True:
-            event, values = window.read()
-            if event == pg.WIN_CLOSED:
-                exit_app()
-            if event == "Ok":
-                window.close()
-                exit_app()
-
