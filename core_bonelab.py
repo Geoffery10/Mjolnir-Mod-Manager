@@ -182,26 +182,59 @@ def bonelabSteamApps(modpack, melon_mods_path):
 
 
 def backup_old_mods(game_path, locallow_path):
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')
     # Backup localLow mods
+    if not os.path.exists(f'{locallow_path}\\backups'):
+        os.mkdir(f'{locallow_path}\\backups')
+    if not os.path.exists(f'{locallow_path}\\backups\\{timestamp}'):
+        os.mkdir(f'{locallow_path}\\backups\\{timestamp}')
+    path = f'{locallow_path}\\backups\\{timestamp}'
     if os.path.exists(f'{locallow_path}\\mods'):
         # Backup with timestamp
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        shutil.copytree(f'{locallow_path}\\mods', f'{locallow_path}\\mods_backup_{timestamp}')
+        shutil.copytree(f'{locallow_path}\\mods',
+                        f'{path}\\mods')
         print(Fore.GREEN + 'Old mods backed up successfully!')
     else:
         print(Fore.RED + 'No mods to backup!')
 
+    if not os.path.exists(f'{game_path}\\backups'):
+        os.mkdir(f'{game_path}\\backups')
+    if not os.path.exists(f'{game_path}\\backups\\{timestamp}'):
+        os.mkdir(f'{game_path}\\backups\\{timestamp}')
+    path = f'{game_path}\\backups\\{timestamp}'
     # Backup game mods
     if os.path.exists(f'{game_path}\\Mods'):
         # Backup with timestamp
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        shutil.copytree(f'{game_path}\\Mods', f'{game_path}\\Mods_backup_{timestamp}')
-        print(Fore.GREEN + 'Old mods backed up successfully!')
+        shutil.copytree(f'{game_path}\\Mods', f'{path}\\Mods')
+        print(Fore.GREEN + 'Old Mods backed up successfully!')
     if os.path.exists(f'{game_path}\\MelonLoader'):
         # Backup with timestamp
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        shutil.copytree(f'{game_path}\\MelonLoader', f'{game_path}\\MelonLoader_backup_{timestamp}')
-        print(Fore.GREEN + 'Old mods backed up successfully!')
+        shutil.copytree(f'{game_path}\\MelonLoader', f'{path}\\MelonLoader')
+        print(Fore.GREEN + 'Old MelonLoader backed up successfully!')
+    if os.path.exists(f'{game_path}\\Plugins'):
+        # Backup with timestamp
+        shutil.copytree(f'{game_path}\\Plugins',
+                        f'{path}\\Plugins')
+        print(Fore.GREEN + 'Old Plugins backed up successfully!')
+    if os.path.exists(f'{game_path}\\UserData'):
+        # Backup with timestamp
+        shutil.copytree(f'{game_path}\\UserData', f'{path}\\UserData')
+        print(Fore.GREEN + 'Old UserData backed up successfully!')
+    if os.path.exists(f'{game_path}\\EditScript'):
+        # Backup with timestamp
+        shutil.copytree(f'{game_path}\\EditorScript', f'{path}\\EditorScript')
+        print(Fore.GREEN + 'Old EditScript backed up successfully!')
+    if os.path.exists(f'{game_path}\\discord_game_sdk.dll'):
+        # Backup with timestamp
+        shutil.copy(f'{game_path}\\discord_game_sdk.dll',
+                    f'{path}\\discord_game_sdk.dll')
+        print(Fore.GREEN + 'Old discord_game_sdk backed up successfully!')
+    if os.path.exists(f'{game_path}\\version.dll'):
+        # Backup with timestamp
+        shutil.copy(f'{game_path}\\version.dll', f'{path}\\version.dll')
+        print(Fore.GREEN + 'Old version backed up successfully!')
+    
+    
 
 # CODED BY Alex Olson (CURRENTLY JUST FOR TESTING)
 def find_file(file_name):

@@ -60,7 +60,7 @@ def initialize_settings(path, APPDATA_PATH):
 def validate_settings(settings):
     # Check if settings are valid
     valid = {'game_path': False}
-    if os.path.exists(settings.game_path):
+    if os.path.exists(settings['game_path']):
         print(Fore.RED + 'Game path not found!')
         valid['game_path'] = True
     return valid
@@ -382,50 +382,13 @@ def back_up_old(PATH):
     print(Fore.CYAN + f'\n{PATH}\n')
     folder_name = os.path.basename(os.path.normpath(PATH))
     if os.path.exists(f'{PATH}'):
-        # Ask user if they want to back up old mods
-        print(Fore.YELLOW +
-                f'Would you like to back up your old {folder_name}? (y/n)')
-        layout = [[pg.Text(f'Would you like to back up your old {folder_name}?')],
-                    [pg.Button('Yes'), pg.Button('No')]]
-        window = pg.Window('ModDude', layout)
-        while True:
-            event, values = window.read()
-            if event in (None, 'Exit'):
-                exit_app()
-            elif event == 'Yes':
-
-                # Backup Minecraft mods to new folder with date
-                current_date = datetime.datetime.now()
-                current_date = current_date.strftime("%m-%d-%Y_%H-%M-%S")
-                print(Fore.GREEN + f'Backing up old {folder_name} to ' + Fore.MAGENTA +
-                        f'{folder_name}_old_{current_date}' + Fore.GREEN + '...')
-                os.rename(f'{PATH}',
-                            f'{PATH}_old_{current_date}')
-                print(Fore.GREEN + 'Backup Complete!')
-                window.close()
-                break
-            elif event == 'No':
-                # Not backing up old files
-                # Only Delete Old Mods
-                if folder_name == 'mods':
-                    try:
-                        shutil.rmtree(f'{PATH}')
-                        print(Fore.GREEN + 'Old folder removed!')
-                    except OSError as e:
-                        ERROR_UI(
-                            'Error', f'Error: {e.filename} - {e.strerror}!', FATAL=True)
-                window.close()
-                return
+        # Backup Minecraft mods to new folder with date
+        current_date = datetime.datetime.now()
+        current_date = current_date.strftime("%m-%d-%Y_%H-%M-%S")
+        print(Fore.GREEN + f'Backing up old {folder_name} to ' + Fore.MAGENTA +
+                f'{folder_name}_old_{current_date}' + Fore.GREEN + '...')
+        shutil.copytree(f'{PATH}',
+                    f'{PATH}_old_{current_date}')
+        print(Fore.GREEN + 'Backup Complete!')
     else:
         print(Fore.GREEN + 'No existing mods found.')
-    
-    layout = [[pg.Text('Files backed up!')],
-              [pg.Button('OK!')]]
-    window = pg.Window('ModDude', layout)
-    while True:
-        event, values = window.read()
-        if event in (None, 'Exit'):
-            exit_app()
-        elif event == 'OK!':
-            window.close()
-            break

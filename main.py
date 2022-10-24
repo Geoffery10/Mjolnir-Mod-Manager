@@ -21,6 +21,8 @@ from ui_menus import exit_app, UI_Setup
 import pack
 from file_manager import backup_old, delete_temp_files, game_settings_initialization, validate_settings, install_app
 from pack import Pack
+import core_bonelab
+import core_minecraft
 
 
 modpack = pack.Pack()
@@ -327,6 +329,16 @@ def modpack_menu(games, game, app):
                 core_bonelab.backup_old_mods(GAME_SETTINGS['game_path'], GAME_SETTINGS['locallow_path'])
                 progress_bar.stop()
                 loading_frame.destroy()
+            messagebox.showinfo('Success', 'Successfully backed up old mods')
+        else:
+            if not all(valid.values()):
+                for key, value in valid.items():
+                    if not value:
+                        messagebox.showerror(
+                            'Missing Settings', f'You are missing the {key} setting')
+                        return
+            
+            
 
     def delete_old_mods_button():
         # TODO: Delete old mods
