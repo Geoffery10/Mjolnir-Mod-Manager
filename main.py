@@ -296,7 +296,7 @@ def modpack_menu(games, game, app):
                 if image_valid:
                     images.append(f'{ROAMING_PATH}\\images\\packs\\{pack["PACK_NAME"]}.png')
                 else:
-                    images.append(f'{ROAMING_PATH}\\images\\packs\\default.png')
+                    images.append(f'{BASE_DIR}\\images\\packs\\default.png')
                     print(f'Failed to download image for {pack["PACK_NAME"]}')
             else:
                 images.append(f'{ROAMING_PATH}\\images\\packs\\{pack["PACK_NAME"]}.png')
@@ -584,6 +584,15 @@ def settings(games, game, app):
     save_button = customtkinter.CTkButton(main_frame, text='Save', text_font=(15), fg_color=medium_purple, bg_color=dark_purple, hover=False, command=lambda: save_settings(game))
     save_button.pack(side='bottom', padx=10, pady=10)
 
+    # Back
+    back_button = customtkinter.CTkButton(main_frame, text='Back', text_font=(
+        15), fg_color=medium_purple, bg_color=dark_purple, hover=False, command=lambda: back(games, game, app))
+    back_button.pack(side='bottom', padx=10, pady=10)
+
+    def back(games, game, app):
+        main_frame.destroy()
+        modpack_menu(app=app, game=game, games=games)
+
     def browse(entry):
         if os.path.exists(entry.get()):
             print(f'Opening file explorer for {entry.get()}')
@@ -594,19 +603,25 @@ def settings(games, game, app):
         entry.insert(0, path)
 
     def save_settings(game):
+        global GAME_SETTINGS
+        valid = False
         if game["Name"] == 'Minecraft':
             if os.path.exists(game_path_entry.get()):
                 with open(settings_path, 'w') as file:
                     json.dump({'game_path': game_path_entry.get()}, file)
                 GAME_SETTINGS = {'game_path': game_path_entry.get()}
+                valid = True
             else:
                 messagebox.showerror('Error', 'Invalid game path')
+                main_frame.destroy()
+                settings(games, game, app)
         elif game["Name"] == 'Bonelab':
             if os.path.exists(game_path_entry.get()):
                 if os.path.exists(locallow_path_entry.get()):
                     with open(settings_path, 'w') as file:
                         json.dump({'game_path': game_path_entry.get(), 'locallow_path': locallow_path_entry.get()}, file)
                     GAME_SETTINGS = {'game_path': game_path_entry.get(), 'locallow_path': locallow_path_entry.get()}
+                    valid = True
                 else:
                     messagebox.showerror('Error', 'Invalid locallow path')
                     main_frame.destroy()
@@ -620,9 +635,10 @@ def settings(games, game, app):
             main_frame.destroy()
             modpack_menu(app=app, game=game, games=games)
         
-        # Return to modpacks
-        main_frame.destroy()
-        modpack_menu(app=app, game=game, games=games)
+        if valid:
+            # Return to modpacks
+            main_frame.destroy()
+            modpack_menu(app=app, game=game, games=games)
 
 if __name__ == '__main__':
     # ! NOT WORKING
