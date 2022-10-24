@@ -1,4 +1,5 @@
 import json
+from telnetlib import RCP
 import time
 import PySimpleGUI as pg
 import os
@@ -36,6 +37,8 @@ FONTS = []
 SELECTED_PACKS = []
 GAME_SETTINGS = ''
 ROAMING_PATH = ''
+
+APP = None
 
 # DISCORD RICH PRESENCE
 rpc_rpc = None
@@ -732,55 +735,37 @@ def settings(games, game, app):
             modpack_menu(app=app, game=game, games=games)
 
 
-if __name__ == '__main__':
-    # ! NOT WORKING
-    '''
-    # Check if currently in Roaming
-    if not 'Roaming' in os.path.basename(os.getcwd()):
-        install_app()
-    '''
+def on_close():
+    global APP
+    APP.destroy()
 
+
+if __name__ == '__main__':
     ROAMING_PATH = install_app()
 
     # Load Initial Variables
     colorama.init(autoreset=True)
     pg.theme('DarkPurple1')
     pg.isAnimated = True
-    CURRENT_VERSION = '2.0.2'
+    CURRENT_VERSION = '2.0.3'
     URL = 'https://www.geoffery10.com/mods.json'
     GAMES_URL = 'https://www.geoffery10.com/games.json'
     SUPPORTED_GAMES = ['Minecraft', 'Bonelab']
 
     # Custom Fonts
-    '''
-    import pyglet
-    try:
-        if os.path.exists(f'{BASE_DIR}\\fonts'):
-            for file in os.listdir(f'{BASE_DIR}\\fonts'):
-                if file.endswith('.ttf'):
-                    pyglet.font.add_directory(f'{BASE_DIR}\\fonts')
-                    file_name = file.split('.')[0]
-                    FONTS.append(file_name)
-    except Exception as e:
-        print(f"Failed to load fonts")
-        FONTS = ['Arial', 'Arial', 'Arial', 'Arial']
-    '''
-
     FONTS = ['Arial', 'Arial', 'Arial', 'Arial']
 
     # Initialize Discord Rich Presence
     # Run in a thread so it doesn't block the main thread and cause the app to freeze
     print('Launching Mod Manager')
     app = new_app()
+    APP = app
     rpc_rpc = discord_rich_presence.connect()
     rpc_start = time.time()
     rpc_small_image = None
     games = online.get_games_list(GAMES_URL)
     main_menu(app, games)
     update_discord(None, 'In the Main Menu', 'Idle')
+    app.protocol("WM_DELETE_WINDOW", on_close)
     app.mainloop()
-    '''
-    if discord_thread.is_alive():
-        discord_thread.cancel()
-    '''
-    exit_app()
+    app.destroy()
