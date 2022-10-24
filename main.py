@@ -525,7 +525,8 @@ def settings(games, game, app):
     global APPDATA_PATH
     global BASE_DIR
     global GAME_SETTINGS
-    settings_path = f'{BASE_DIR}\\GameSettings\\{game["Name"]}_Settings.json'
+    Roaming_Path = os.path.join(APPDATA_PATH, 'Mjolnir Modpack Manager')
+    settings_path = f'{Roaming_Path}\\GameSettings\\{game["Name"]}_Settings.json'
     # Settings window
     main_frame = new_frame(app)
     main_frame.pack(fill='both', expand=True)

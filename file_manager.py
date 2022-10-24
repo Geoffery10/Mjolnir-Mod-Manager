@@ -76,9 +76,13 @@ def create_shortcut():
 
 
 def game_settings_initialization(game, BASE_DIR, APPDATA_PATH):
-    if not os.path.exists(f'{BASE_DIR}\\GameSettings'):
-        os.mkdir(f'{BASE_DIR}\\GameSettings')
-    path = f'{BASE_DIR}\\GameSettings\\{game}_Settings.json'
+    # Store the settings in Roaming
+    if not os.path.exists(os.path.join(APPDATA_PATH, 'Mjolnir Modpack Manager')):
+        os.mkdir(os.path.join(APPDATA_PATH, 'Mjolnir Modpack Manager'))
+    Roaming_Path = os.path.join(APPDATA_PATH, 'Mjolnir Modpack Manager')
+    if not os.path.exists(f'{Roaming_Path}\\GameSettings'):
+        os.mkdir(f'{Roaming_Path}\\GameSettings')
+    path = f'{Roaming_Path}\\GameSettings\\{game}_Settings.json'
     if game == 'Minecraft':
         core_minecraft.initialize_settings(path, APPDATA_PATH)
     elif game == 'Bonelab':
