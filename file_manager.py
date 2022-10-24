@@ -17,62 +17,28 @@ from win32com.client import Dispatch
 
 
 def install_app():
-    # Install in Roaming if possible
+    # Initialize Roaming Storage
     if not os.path.exists(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager')):
-        # Make directory
         os.mkdir(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager'))
 
-    # Copy files (pys or exe)
-    if os.path.exists(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Mjolnir Modpack Manager.exe')):
-        shutil.copy(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Mjolnir Modpack Manager.exe'), os.path.join(
-            os.getenv('APPDATA'), 'Mjolnir Modpack Manager\\Mjolnir Modpack Manager'))
-    else:
-        # Copy all required files
-        required_files = ['main.py', './fonts/', './images/', 'core_bonelab.py',
-                            'core_minecraft.py', 'file_manager.py', 'Mjolnir_Icon.ico', 'online.py', 'pack.py', 'ui_menus.py']
-        shutil.copy(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'main.py'), os.path.join(
-            os.getenv('APPDATA'), 'Mjolnir Modpack Manager\\main.py'))
+    if not os.path.exists(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager', 'images')):
+        os.mkdir(os.path.join(os.getenv('APPDATA'),
+                 'Mjolnir Modpack Manager', 'images'))
 
-    # Add to start menu (Windows only)
-    if os.name == 'nt':
-        create_shortcut()
+    if os.path.exists(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager', 'images', 'packs')):
+        # Delete old packs folder
+        shutil.rmtree(os.path.join(os.getenv('APPDATA'),
+                     'Mjolnir Modpack Manager', 'images', 'packs'))
+        # Create new packs folder
+        os.mkdir(os.path.join(os.getenv('APPDATA'),
+                 'Mjolnir Modpack Manager', 'images', 'packs'))
 
+    if not os.path.exists(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager', 'GameSettings')):
+        os.mkdir(os.path.join(os.getenv('APPDATA'),
+                 'Mjolnir Modpack Manager', 'GameSettings'))
 
-    # Open app in Roaming
-    if os.path.exists(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager', 'Mjolnir Modpack Manager.exe')):
-        os.startfile(os.path.join(os.getenv('APPDATA'),
-                        'Mjolnir Modpack Manager', 'Mjolnir Modpack Manager.exe'))
-    else:
-        os.startfile(os.path.join(os.getenv('APPDATA'),
-                        'Mjolnir Modpack Manager', 'main.py'))
-
-
-def create_shortcut():
-    if not os.path.exists('C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\\Programs\\Mjolnir Modpack Manager'):
-        os.mkdir('C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\\Programs\\Mjolnir Modpack Manager')
-
-    if os.path.exists(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager.exe')):
-        # Create shortcut to exe
-        path = os.path.join("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs", 'Mjolnir Modpack Manager', 'Mjolnir Modpack Manager.lnk')
-        target = os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager', 'Mjolnir Modpack Manager.exe')  # The shortcut target file or folder
-        work_dir = os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager')  # The parent folder of your file
-
-        shell = Dispatch('WScript.Shell')
-        shortcut = shell.CreateShortCut(path)
-        shortcut.Targetpath = target
-        shortcut.WorkingDirectory = work_dir
-        shortcut.save()
-    else:
-        # Create shortcut to python file
-        path = os.path.join("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs", 'Mjolnir Modpack Manager', 'Mjolnir Modpack Manager.lnk')
-        target = os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager', 'main.py')
-        work_dir = os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager')
-
-        shell = Dispatch('WScript.Shell')
-        shortcut = shell.CreateShortCut(path)
-        shortcut.Targetpath = target
-        shortcut.WorkingDirectory = work_dir
-        shortcut.save()
+    return os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager')
+    
 
 
 def game_settings_initialization(game, BASE_DIR, APPDATA_PATH):

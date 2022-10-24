@@ -35,6 +35,7 @@ FILES = []
 FONTS = []
 SELECTED_PACKS = []
 GAME_SETTINGS = ''
+ROAMING_PATH = ''
 
 # Colors
 transparent = '#00000000'
@@ -284,14 +285,23 @@ def modpack_menu(games, game, app):
     images = []
 
     # Download first 4 pack images (or how however many are in the pack) into the images\packs folder using the pack name as the file name
+    global ROAMING_PATH
     for pack in packs:
         if len(images) < 4:
-            image_valid = online.get_image(pack['BANNER_URL'], f'{BASE_DIR}\\images\\packs\\{pack["PACK_NAME"]}.png')
-            if image_valid:
-                images.append(f'{BASE_DIR}\\images\\packs\\{pack["PACK_NAME"]}.png')
+            # Check if the image already exists
+            if not os.path.exists(f'{ROAMING_PATH}\\images\\packs\\{pack["PACK_NAME"]}.png'):
+                image_valid = online.get_image(
+                    pack['BANNER_URL'], f'{ROAMING_PATH}\\images\\packs\\{pack["PACK_NAME"]}.png')
+                print(f'Downloaded {pack["PACK_NAME"]}.png image')
+                if image_valid:
+                    images.append(f'{ROAMING_PATH}\\images\\packs\\{pack["PACK_NAME"]}.png')
+                else:
+                    images.append(f'{ROAMING_PATH}\\images\\packs\\default.png')
+                    print(f'Failed to download image for {pack["PACK_NAME"]}')
             else:
-                images.append(f'{BASE_DIR}\\images\\packs\\default.png')
-                print(f'Failed to download image for {pack["PACK_NAME"]}')
+                images.append(f'{ROAMING_PATH}\\images\\packs\\{pack["PACK_NAME"]}.png')
+                print(f'Image for {pack["PACK_NAME"]}.png already exists')
+                image_valid = True
         else:
             break
 
@@ -525,8 +535,8 @@ def settings(games, game, app):
     global APPDATA_PATH
     global BASE_DIR
     global GAME_SETTINGS
-    Roaming_Path = os.path.join(APPDATA_PATH, 'Mjolnir Modpack Manager')
-    settings_path = f'{Roaming_Path}\\GameSettings\\{game["Name"]}_Settings.json'
+    global ROAMING_PATH
+    settings_path = f'{ROAMING_PATH}\\GameSettings\\{game["Name"]}_Settings.json'
     # Settings window
     main_frame = new_frame(app)
     main_frame.pack(fill='both', expand=True)
@@ -621,6 +631,8 @@ if __name__ == '__main__':
     if not 'Roaming' in os.path.basename(os.getcwd()):
         install_app()
     '''
+
+    ROAMING_PATH = install_app()
 
     # Load Initial Variables
     colorama.init(autoreset=True)
