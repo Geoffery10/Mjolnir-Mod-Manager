@@ -439,9 +439,7 @@ def modpack_menu(games, game, app):
         # Install selected packs
         if len(SELECTED_PACKS) > 0:
             count = 0
-            # Discord Rich Presence
-            global rpc_small_image
-            update_discord(rpc_small_image, game['Name'], f'Downloading {SELECTED_PACKS[count]["PACK_NAME"]}')
+            
             
             modpacks = []
             # Install packs
@@ -465,6 +463,10 @@ def modpack_menu(games, game, app):
                 modpack.size = pack['PACK_SIZE']
                 modpacks.append(modpack)
 
+                # Discord Rich Presence
+                update_discord(
+                    rpc_small_image, game['Name'], f'Downloading {modpack.pack_name}')
+
                 # Download pack
                 print(f'Downloading {modpack.pack_name}...')
                 print(f'Pack Size: {len(modpack.pack_urls)}')
@@ -482,6 +484,7 @@ def modpack_menu(games, game, app):
                 app, main_frame, title_text=f'Installing {SELECTED_PACKS[0]["PACK_NAME"]}', type='Packs', max=len(SELECTED_PACKS))
 
             for pack in modpacks:
+                # Discord Rich Presence
                 # Discord Rich Presence
                 update_discord(
                     rpc_small_image, game['Name'], f'Installing {pack.pack_name}')
