@@ -771,4 +771,3 @@ if __name__ == '__main__':
     update_discord(None, 'In the Main Menu', 'Idle')
     app.protocol("WM_DELETE_WINDOW", on_close)
     app.mainloop()
-    app.destroy()
