@@ -10,33 +10,33 @@ import shutil
 import datetime
 import PySimpleGUI as pg
 from ui_menus import ERROR_UI, exit_app, UI_Setup
+import core_bonelab
+import core_minecraft
 
 def game_settings_initialization(game, BASE_DIR, APPDATA_PATH):
     if not os.path.exists(f'{BASE_DIR}\\GameSettings'):
         os.mkdir(f'{BASE_DIR}\\GameSettings')
     path = f'{BASE_DIR}\\GameSettings\\{game}_Settings.json'
     if game == 'Minecraft':
-        if not os.path.exists(path):
-            if os.path.exists(f'{APPDATA_PATH}\\.minecraft'):
-                with open(path, 'w') as f:
-                    f.write('{"game_path": f"{APPDATA_PATH}\\.minecraft"}')
-            else:
-                with open(path, 'w') as f:
-                    f.write('{"game_path": ""}')
+        core_minecraft.initialize_settings(path, APPDATA_PATH)
     elif game == 'Bonelab':
-        if not os.path.exists(path):
-            # Get LocalLow install path
-            username = os.getlogin()
-            game_path = f"C:\\Program Files (x86)\\Steam\\steamapps\\common\\BONELAB"
-            locallow_path = f"C:\\Users\\{username}\\AppData\\LocalLow\\Stress Level Zero\\BONELAB"
-            with open(path, 'w') as file:
-                json.dump({'game_path': game_path, 'locallow_path': locallow_path}, file)
+        core_bonelab.initialize_settings(path)
 
     # Load settings
     with open(path, 'r') as f:
         settings = eval(f.read())
     
     return settings
+
+def validate_settings(game_name, settings):
+    if game_name == 'Minecraft':
+        valid = core_minecraft.validate_settings(settings)
+    elif game_name == 'Bonelab':
+        valid = core_bonelab.validate_settings(settings)
+
+    return valid
+
+
     
 
 def path_finder(folder, additional_info=""):

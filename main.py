@@ -1,6 +1,5 @@
 import json
 import time
-from tkinter import messagebox, ttk
 import PySimpleGUI as pg
 import os
 import colorama
@@ -11,15 +10,15 @@ import requests
 # Docs at https://github.com/TomSchimansky/CustomTkinter/wiki
 import customtkinter
 import tkinter as tk
+from tkinter import filedialog, messagebox, ttk
 import webbrowser
-import pyglet
 from PIL import ImageTk, Image
 
 # Custom Functions
 import online
 from ui_menus import exit_app, UI_Setup
 import pack
-from file_manager import backup_old, delete_temp_files, game_settings_initialization
+from file_manager import backup_old, delete_temp_files, game_settings_initialization, validate_settings
 from pack import Pack
 
 
@@ -340,6 +339,17 @@ def modpack_menu(games, game, app):
         messagebox.showinfo('Delete Old Mods', 'This feature is not yet implemented')
 
     def install_selected_packs_button(main_frame):
+        # Validate Settings
+        valid = validate_settings(game['Name'], GAME_SETTINGS)
+        # Check if every value in valid is True
+        # If not show what key is missing
+        if not all(valid.values()):
+            for key, value in valid.items():
+                if not value:
+                    messagebox.showerror('Missing Settings', f'You are missing the {key} setting')
+                    return
+
+
         # Install selected packs
         if len(SELECTED_PACKS) > 0:
             modpacks = []
@@ -393,8 +403,8 @@ def modpack_menu(games, game, app):
                     import core_bonelab
                     valid = core_bonelab.bonelab(pack, BASE_DIR, APPDATA_PATH, FILES)
 
-            # ! THIS NEEDS ADDED !
-            # ! THIS NEEDS ADDED !
+            progress_bar.stop()
+            loading_frame.destroy()
 
             # Finished Message
             messagebox.showinfo('Finished', 'Finished installing packs!')
@@ -411,7 +421,7 @@ def loading_bar_popup(app, frame, title_text='', type='', max=0):
     # Open a frame in the middle of the screen with a loading bar
     # Create frame
     loading_frame = tk.Frame(frame, bg=dark_purple)
-    loading_frame.pack(side='top', anchor='center', pady=20)
+    loading_frame.pack(side='top', anchor='center', pady=200)
     # Put a smaller frame in the middle of the screen
     loading_frame2 = tk.Frame(loading_frame, bg=light_purple)
     loading_frame2.pack(side='top', anchor='center', pady=20, padx=20)
@@ -424,8 +434,8 @@ def loading_bar_popup(app, frame, title_text='', type='', max=0):
         loading_frame2, text=f'{type}: 0/{max}', text_font=(30))
     # Progress Bar
     progress_bar = customtkinter.CTkProgressBar(
-        loading_frame2, fg_color=light_purple, bg_color=dark_purple, progress_color=medium_purple)
-    progress_bar.pack(side='top', anchor='center', pady=20)
+        loading_frame2, fg_color=light_purple, bg_color=light_purple, progress_color=medium_purple)
+    progress_bar.pack(side='top', anchor='center', pady=20, padx=20, fill='x', expand=True)
     progress_bar.start()
     app.update()
     return loading_frame, title, of_x, progress_bar
@@ -531,6 +541,10 @@ def settings(games, game, app):
         game_path_entry = tk.Entry(game_path_frame, bg=dark_purple, fg='white', font=(FONTS[3], 15))
         game_path_entry.pack(side='left', padx=10, pady=10, fill='x', expand=True)
         game_path_entry.insert(0, GAME_SETTINGS['game_path'])
+        # Browse button
+        browse_button = tk.Button(game_path_frame, text='Browse', bg=light_purple, fg='white', font=(FONTS[3], 15), command=lambda: browse(game_path_entry))
+        browse_button.pack(side='right', padx=10, pady=10)
+
     elif game["Name"] == 'Bonelab':
         # game path
         game_path_frame = tk.Frame(main_frame, bg=dark_purple)
@@ -540,6 +554,9 @@ def settings(games, game, app):
         game_path_entry = tk.Entry(game_path_frame, bg=dark_purple, fg='white', font=(FONTS[3], 15))
         game_path_entry.pack(side='left', padx=10, pady=10, fill='x', expand=True)
         game_path_entry.insert(0, GAME_SETTINGS['game_path'])
+        # Browse button
+        browse_button = tk.Button(game_path_frame, text='Browse', bg=light_purple, fg='white', font=(FONTS[3], 15), command=lambda: browse(game_path_entry))
+        browse_button.pack(side='right', padx=10, pady=10)
         # locallow path
         locallow_path_frame = tk.Frame(main_frame, bg=dark_purple)
         locallow_path_frame.pack(side='top', fill='x', padx=10, pady=10)
@@ -548,9 +565,21 @@ def settings(games, game, app):
         locallow_path_entry = tk.Entry(locallow_path_frame, bg=dark_purple, fg='white', font=(FONTS[3], 15))
         locallow_path_entry.pack(side='left', padx=10, pady=10, fill='x', expand=True)
         locallow_path_entry.insert(0, GAME_SETTINGS['locallow_path'])
+        # Browse button
+        browse_button = tk.Button(locallow_path_frame, text='Browse', bg=light_purple, fg='white', font=(FONTS[3], 15), command=lambda: browse(locallow_path_entry))
+        browse_button.pack(side='right', padx=10, pady=10)
     # Save
     save_button = customtkinter.CTkButton(main_frame, text='Save', text_font=(15), fg_color=medium_purple, bg_color=dark_purple, hover=False, command=lambda: save_settings(game))
     save_button.pack(side='bottom', padx=10, pady=10)
+
+    def browse(entry):
+        if os.path.exists(entry.get()):
+            print(f'Opening file explorer for {entry.get()}')
+            path = filedialog.askdirectory(initialdir=entry.get())
+        else:
+            path = filedialog.askdirectory()
+        entry.delete(0, 'end')
+        entry.insert(0, path)
 
     def save_settings(game):
         if game["Name"] == 'Minecraft':
@@ -594,6 +623,8 @@ if __name__ == '__main__':
     SUPPORTED_GAMES = ['Minecraft', 'Bonelab']
 
     # Custom Fonts
+    '''
+    import pyglet
     try:
         if os.path.exists(f'{BASE_DIR}\\fonts'):
             for file in os.listdir(f'{BASE_DIR}\\fonts'):
@@ -604,6 +635,9 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"Failed to load fonts")
         FONTS = ['Arial', 'Arial', 'Arial', 'Arial']
+    '''
+
+    FONTS = ['Arial', 'Arial', 'Arial', 'Arial']
 
     app = new_app()
     games = online.get_games_list(GAMES_URL)

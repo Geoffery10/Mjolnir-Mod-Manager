@@ -41,6 +41,27 @@ def minecraft(modpack, BASE_DIR, APPDATA_PATH, FILES):
     return True
 
 
+def initialize_settings(path, APPDATA_PATH):
+    if not os.path.exists(path):
+        if not os.path.exists(path):
+            if os.path.exists(f'{APPDATA_PATH}\\.minecraft'):
+                with open(path, 'w') as f:
+                    f.write('{"game_path": f"{APPDATA_PATH}\\.minecraft"}')
+            else:
+                with open(path, 'w') as f:
+                    f.write('{"game_path": ""}')
+
+
+def validate_settings(settings):
+    # Check if settings are valid
+    valid = {'game_path': False}
+    if os.path.exists(settings.game_path):
+        print(Fore.RED + 'Game path not found!')
+        valid['game_path'] = True
+    return valid
+
+
+
 def check_game_install_location(modpack, APPDATA_PATH):
     found = False
     print(Fore.CYAN + '\nChecking game install location...\n')

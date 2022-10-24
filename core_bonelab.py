@@ -3,6 +3,7 @@
 # MelonLoader Mods that are installed into the game folder
 # Standard Mods are installed into the LocalLow mods folder
 
+import json
 import re
 import shutil
 import subprocess
@@ -27,6 +28,29 @@ def bonelab(modpack, BASE_DIR, APPDATA_PATH, FILES):
     return True
 
 
+def initialize_settings(path):
+    if not os.path.exists(path):
+        # Get LocalLow install path
+        username = os.getlogin()
+        game_path = f"C:\\Program Files (x86)\\Steam\\steamapps\\common\\BONELAB"
+        locallow_path = f"C:\\Users\\{username}\\AppData\\LocalLow\\Stress Level Zero\\BONELAB"
+        with open(path, 'w') as file:
+            json.dump({'game_path': game_path,
+                       'locallow_path': locallow_path}, file)
+
+
+def validate_settings(settings):
+    # Check if settings are valid
+    valid = {'game_path': False, 'locallow_path': False}
+    if os.path.exists(settings['game_path']):
+        print(Fore.RED + 'Game path not found!')
+        valid['game_path'] = True
+    if os.path.exists(settings['locallow_path']):
+        print(Fore.RED + 'LocalLow path not found!')
+        valid['locallow_path'] = True
+    return valid
+
+
 def bonelabLocalLow(mods_path):
     found = False
     # Get LocalLow install path
@@ -46,12 +70,12 @@ def bonelabLocalLow(mods_path):
             # Check if mods folder is empty
             if os.listdir(f'{PATH}\\Mods') == []:
                 print(Fore.GREEN + 'Mods folder is empty!')
-            else:
+            # else:
                 # Check if user wants to backup mods folder
-                file_manager.ask_for_backup(f'{PATH}\\Mods')
+                # file_manager.ask_for_backup(f'{PATH}\\Mods')
 
                 # Check is user wants to delete old mods folder
-                file_manager.ask_for_delete(f'{PATH}\\Mods')
+                # file_manager.ask_for_delete(f'{PATH}\\Mods')
 
         # Copy mods to LocalLow folder
         done = False
