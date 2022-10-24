@@ -10,7 +10,7 @@ start = time.time()
 
 
 
-def rpc_update(RPC, start, large_image="icon", small_image=None, large_text="Mjolnir Mod Manager", details="In the main menu", state="Idle"):
+def rpc_update(RPC, start, large_image="icon", small_image=None, large_text="Mjolnir", details="In the main menu", state="Idle"):
     print("Discord rich presence updated")
     if small_image == None:
         RPC.update(large_image=large_image, large_text=large_text, details=details, state=state, start=start, buttons=[
