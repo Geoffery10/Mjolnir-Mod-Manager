@@ -81,17 +81,6 @@ def main_menu(app, games):
     # FONTS
     global FONTS
 
-    # Main Menu
-    # Page Breakdown:
-    # Logo
-    # App Info
-    # Select Game 
-    # Games List
-    # Footer
-    ## Current Version
-    ## Github Link
-    ## Discord Link
-
     
     # Logo (Image Button that links to website)
     # Logo is 655x98
@@ -175,24 +164,6 @@ def modpack_menu(games, game, app):
     # Create Game Settings.json if it doesn't exist
     GAME_SETTINGS = game_settings_initialization(game['Name'], BASE_DIR, APPDATA_PATH)
 
-
-    # Modpack Menu
-    # Page Breakdown:
-    # Two Columns
-
-    ## Left Column (Width: 506)
-    ## Logo (Small)
-    ## Select Packs
-    ## Pack info
-    ### Select Packs
-    ### Download Size
-    ### Total Mods 
-    ## Extra Options
-    ### Backup Old Mods (Checkbox)
-    ### Delete Old Mods (Checkbox)
-    ## Install Selected Packs
-    ## Back Button
-
     left_frame = tk.Frame(main_frame, bg=dark_purple)
     left_frame.place(x=0, y=0, width=560, height=730)
 
@@ -252,11 +223,10 @@ def modpack_menu(games, game, app):
     extra_options_frame.place(x=79, y=368, width=393, height=120)
     # Options
 
-    bool_back_up_mods = False
     backup_old_mods = customtkinter.CTkButton(extra_options_frame, text='Backup Old Mods', fg_color=medium_purple, 
                                               bg_color=dark_purple, text_font=(18), hover=False, command=lambda: backup_old_mods_button())
     backup_old_mods.pack(side='top', padx=0, pady=10, anchor='w', fill='x', expand=True)
-    bool_delete_old_mods = False
+    
     delete_old_mods = customtkinter.CTkButton(extra_options_frame, text='Delete Old Mods', fg_color=medium_purple,
                                                 bg_color=dark_purple, text_font=(18), hover=False, command=lambda: delete_old_mods_button())
     delete_old_mods.pack(side='top', padx=0, pady=10,
@@ -342,8 +312,21 @@ def modpack_menu(games, game, app):
 
 
     def backup_old_mods_button():
-        # TODO: Backup old mods
-        messagebox.showinfo('Backup Old Mods', 'This feature is not yet implemented')
+        # Backup old mods
+        valid = validate_settings(game['Name'], GAME_SETTINGS)
+        if valid:
+            if game['Name'] == 'Minecraft':
+                loading_frame, title, of_x, progress_bar = loading_bar_popup(
+                    app, main_frame, title_text=f'Backing Up Old Mods', type='Backups', max=1)
+                core_minecraft.backup_old_mods(GAME_SETTINGS['game_path'])
+                progress_bar.stop()
+                loading_frame.destroy()
+            if game['Name'] == 'Bonelab':
+                loading_frame, title, of_x, progress_bar = loading_bar_popup(
+                    app, main_frame, title_text=f'Backing Up Old Mods', type='Backups', max=2)
+                core_bonelab.backup_old_mods(GAME_SETTINGS['game_path'], GAME_SETTINGS['locallow_path'])
+                progress_bar.stop()
+                loading_frame.destroy()
 
     def delete_old_mods_button():
         # TODO: Delete old mods

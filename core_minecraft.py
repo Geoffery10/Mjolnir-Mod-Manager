@@ -41,6 +41,11 @@ def minecraft(modpack, BASE_DIR, APPDATA_PATH, FILES):
     return True
 
 
+def backup_old_mods(PATH):
+    back_up_old(f"{PATH}\\mods")
+    back_up_old(f"{PATH}\\config")
+    back_up_old(f"{PATH}\\shaderpacks")
+
 def initialize_settings(path, APPDATA_PATH):
     if not os.path.exists(path):
         if not os.path.exists(path):
@@ -373,7 +378,7 @@ def check_install_integrity(modpack, PATH, BASE_DIR):
     else:
         ERROR_UI('Error', 'Game not supported!', FATAL=False)
 
-def back_up_old(modpack, PATH):
+def back_up_old(PATH):
     print(Fore.CYAN + f'\n{PATH}\n')
     folder_name = os.path.basename(os.path.normpath(PATH))
     if os.path.exists(f'{PATH}'):

@@ -3,6 +3,7 @@
 # MelonLoader Mods that are installed into the game folder
 # Standard Mods are installed into the LocalLow mods folder
 
+import datetime
 import json
 import re
 import shutil
@@ -179,6 +180,28 @@ def bonelabSteamApps(modpack, melon_mods_path):
 
     return
 
+
+def backup_old_mods(game_path, locallow_path):
+    # Backup localLow mods
+    if os.path.exists(f'{locallow_path}\\mods'):
+        # Backup with timestamp
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        shutil.copytree(f'{locallow_path}\\mods', f'{locallow_path}\\mods_backup_{timestamp}')
+        print(Fore.GREEN + 'Old mods backed up successfully!')
+    else:
+        print(Fore.RED + 'No mods to backup!')
+
+    # Backup game mods
+    if os.path.exists(f'{game_path}\\Mods'):
+        # Backup with timestamp
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        shutil.copytree(f'{game_path}\\Mods', f'{game_path}\\Mods_backup_{timestamp}')
+        print(Fore.GREEN + 'Old mods backed up successfully!')
+    if os.path.exists(f'{game_path}\\MelonLoader'):
+        # Backup with timestamp
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        shutil.copytree(f'{game_path}\\MelonLoader', f'{game_path}\\MelonLoader_backup_{timestamp}')
+        print(Fore.GREEN + 'Old mods backed up successfully!')
 
 # CODED BY Alex Olson (CURRENTLY JUST FOR TESTING)
 def find_file(file_name):
