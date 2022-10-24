@@ -126,6 +126,15 @@ def main_menu(app, games):
     discord_link = customtkinter.CTkButton(footer_frame, text='', fg_color=dark_purple, image=discord_icon,
                                            hover=False, command=lambda: open_website('https://discordapp.com/users/253710834553847808'))
     discord_link.pack(side='right', padx=0, pady=0)
+    # Geoffery10.com
+    geoffery10_icon = Image.open(f'{BASE_DIR}\\images\\geoffery10.png')
+    geoffery10_icon = geoffery10_icon.resize(
+        (70, 70), Image.Resampling.LANCZOS)
+    geoffery10_icon = ImageTk.PhotoImage(geoffery10_icon)
+    geoffery10_link = customtkinter.CTkButton(footer_frame, text='', fg_color=dark_purple, image=discord_icon,
+                                              hover=False, command=lambda: open_website('https://www.geoffery10.com/'))
+    geoffery10_link.pack(side='right', padx=0, pady=0)
+    geoffery10_link.image = geoffery10_icon
 
 
     def game_button(game):
