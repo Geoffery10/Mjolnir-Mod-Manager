@@ -1,6 +1,4 @@
-<p align="center">
-<img align="center" width="100" height="100" src="https://github.com/Geoffery10/minecraft-server/blob/main/images/Yggrasil_02_Round.png?raw=true">
-</p>
+![logo](https://user-images.githubusercontent.com/43981091/197443529-7048d083-6d45-43ed-abe1-d35163e48431.png)
 
 # Mjolnir Mod Manager
 Mjolnir Mod Manager is a simple to use python program for installing game mod packs. It was initially created to streamline mod pack downloads and updates for the Yggdrasil Minecraft Server. 
