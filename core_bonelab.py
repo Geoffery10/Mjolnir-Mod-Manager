@@ -233,6 +233,36 @@ def backup_old_mods(game_path, locallow_path):
         # Backup with timestamp
         shutil.copy(f'{game_path}\\version.dll', f'{path}\\version.dll')
         print(Fore.GREEN + 'Old version backed up successfully!')
+
+
+def delete_old_mods(game_path, locallow_path):
+    # Delete localLow mods
+    if os.path.exists(f'{locallow_path}\\mods'):
+        shutil.rmtree(f'{locallow_path}\\mods')
+        print(Fore.GREEN + 'Old mods deleted successfully!')
+        os.mkdir(f'{locallow_path}\\mods')
+    else:
+        print(Fore.RED + 'No mods to delete!')
+    
+    # Delete game mods
+    if os.path.exists(f'{game_path}\\Mods'):
+        shutil.rmtree(f'{game_path}\\Mods')
+        print(Fore.GREEN + 'Old Mods deleted successfully!')
+    if os.path.exists(f'{game_path}\\MelonLoader'):
+        shutil.rmtree(f'{game_path}\\MelonLoader')
+        print(Fore.GREEN + 'Old MelonLoader deleted successfully!')
+    if os.path.exists(f'{game_path}\\Plugins'):
+        shutil.rmtree(f'{game_path}\\Plugins')
+        print(Fore.GREEN + 'Old Plugins deleted successfully!')
+    if os.path.exists(f'{game_path}\\EditScript'):
+        shutil.rmtree(f'{game_path}\\EditorScript')
+        print(Fore.GREEN + 'Old EditScript deleted successfully!')
+    if os.path.exists(f'{game_path}\\discord_game_sdk.dll'):
+        os.remove(f'{game_path}\\discord_game_sdk.dll')
+        print(Fore.GREEN + 'Old discord_game_sdk deleted successfully!')
+    if os.path.exists(f'{game_path}\\version.dll'):
+        os.remove(f'{game_path}\\version.dll')
+        print(Fore.GREEN + 'Old version deleted successfully!')
     
     
 

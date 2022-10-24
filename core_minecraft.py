@@ -392,3 +392,14 @@ def back_up_old(PATH):
         print(Fore.GREEN + 'Backup Complete!')
     else:
         print(Fore.GREEN + 'No existing mods found.')
+
+
+def delete_old_mods(PATH):
+    folder_name = os.path.basename(os.path.normpath(PATH))
+    if os.path.exists(f'{PATH}'):
+        # Delete old mods
+        print(Fore.GREEN + f'Deleting old {folder_name}...')
+        shutil.rmtree(f'{PATH}')
+        print(Fore.GREEN + f'Old {folder_name} deleted!')
+    else:
+        print(Fore.GREEN + f'No existing {folder_name} found.')

@@ -341,8 +341,34 @@ def modpack_menu(games, game, app):
             
 
     def delete_old_mods_button():
-        # TODO: Delete old mods
-        messagebox.showinfo('Delete Old Mods', 'This feature is not yet implemented')
+        # Delete old mods
+        valid = validate_settings(game['Name'], GAME_SETTINGS)
+        if valid:
+            # Ask user if they are sure
+            sure = messagebox.askyesno(message='Are you sure you would like to delete old mods? This is not reversible', title='Are you sure?')
+            if sure:
+                if game['Name'] == 'Minecraft':
+                    loading_frame, title, of_x, progress_bar = loading_bar_popup(
+                        app, main_frame, title_text=f'Deleting Old Mods', type='Backups', max=1)
+                    core_minecraft.delete_old_mods(f"{GAME_SETTINGS['game_path']}\\mods")
+                    progress_bar.stop()
+                    loading_frame.destroy()
+                if game['Name'] == 'Bonelab':
+                    loading_frame, title, of_x, progress_bar = loading_bar_popup(
+                        app, main_frame, title_text=f'Deleting Old Mods', type='Backups', max=2)
+                    core_bonelab.delete_old_mods(GAME_SETTINGS['game_path'], GAME_SETTINGS['locallow_path'])
+                    progress_bar.stop()
+                    loading_frame.destroy()
+                messagebox.showinfo('Success', 'Successfully deleted old mods')
+            else:
+                return
+        else:
+            if not all(valid.values()):
+                for key, value in valid.items():
+                    if not value:
+                        messagebox.showerror(
+                            'Missing Settings', f'You are missing the {key} setting')
+                        return
 
     def install_selected_packs_button(main_frame):
         # Validate Settings
@@ -394,7 +420,6 @@ def modpack_menu(games, game, app):
             loading_frame.destroy()
 
             # Install mods
-            # * SEE OLD MAIN FOR EXAMPLES
             loading_frame, title, of_x, progress_bar = loading_bar_popup(
                 app, main_frame, title_text=f'Installing {SELECTED_PACKS[0]["PACK_NAME"]}', type='Packs', max=len(SELECTED_PACKS))
 
