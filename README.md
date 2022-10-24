@@ -2,8 +2,8 @@
 <img align="center" width="100" height="100" src="https://github.com/Geoffery10/minecraft-server/blob/main/images/Yggrasil_02_Round.png?raw=true">
 </p>
 
-# ModDude!
-ModDude! is a simple to use python program for installing game mod packs. It was initially created to streamline mod pack downloads and updates for the Yggdrasil Minecraft Server. 
+# Mjolnir Mod Manager
+Mjolnir Mod Manager is a simple to use python program for installing game mod packs. It was initially created to streamline mod pack downloads and updates for the Yggdrasil Minecraft Server. 
 
 ## Table of Contents
 * [Supported Games](#supported-games)
@@ -16,11 +16,12 @@ ModDude! is a simple to use python program for installing game mod packs. It was
 ## Supported Games
 
 * Minecraft (Java)
+* BONELAB
 
 ## Getting Started
 
 * [Download The Latest Release](https://github.com/Geoffery10/ModDude/releases)
-* Run the ModDude.exe
+* Run the Mjolnir Mod Manager.exe
 * Allow through Virus Protection if needed ([Security Concerns](#security-concerns)
 
 #### Reasons your install failed: 
@@ -55,7 +56,7 @@ Interested in contributing? Feel free to reach out to me on my discord! Geoffery
 * Geoffery Powell - [Geoffery10](https://github.com/Geoffery10)
 
 ## License
-ModDude! is protected under [GNU GPLv3](https://github.com/Geoffery10/ModDude/blob/main/LICENSE.md)
+Mjolnir Mod Manager is protected under [GNU GPLv3](https://github.com/Geoffery10/ModDude/blob/main/LICENSE.md)
 
 
 ## Acknowledgments
