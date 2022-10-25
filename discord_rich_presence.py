@@ -2,6 +2,7 @@
 from pypresence import Presence
 import time
 from client_id import CLIENT_ID
+from online import download_pack
 
 start = time.time()
 
@@ -12,10 +13,12 @@ start = time.time()
 
 def rpc_update(RPC, start, large_image="icon", small_image=None, large_text="Mjolnir", details="In the main menu", state="Idle"):
     print("Discord rich presence updated")
+    download_url = "https://www.geoffery10.com/games.html"
     if small_image == None:
-        RPC.update(large_image=large_image, large_text=large_text, details=details, state=state, start=start, buttons=[{"label": "Download Mjolnir", "url": "https://www.geoffery10.com/games.html"}])
+        RPC.update(large_image=large_image, large_text=large_text, details=details, state=state, start=start, buttons=[{"label": "Download Mjolnir", "url": download_url}])
     else:
-        RPC.update(large_image=large_image, small_image=small_image, large_text=large_text, details=details, state=state, start=start, buttons=[{"label": "Download Mjolnir", "url": "https://www.geoffery10.com/games.html"}])
+        RPC.update(large_image=large_image, small_image=small_image, large_text=large_text, details=details,
+                   state=state, start=start, buttons=[{"label": "Download Mjolnir", "url": download_url}])
 
 
 def connect():

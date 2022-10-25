@@ -774,6 +774,8 @@ def settings(games, game, app):
 
 def on_close():
     print('Closing')
+    global rpc_rpc
+    rpc_rpc.close()
     global APP
     try:
         APP.destroy()
