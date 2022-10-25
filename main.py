@@ -214,9 +214,8 @@ def main_menu(app, games):
         # Open github in browser
         webbrowser.open(url, new=2)
 
+
 # Modpack Menu
-
-
 def modpack_menu(games, game, app):
     # Create modpack menu
     app.title(f'Mjolnir - {game["Name"]}')
