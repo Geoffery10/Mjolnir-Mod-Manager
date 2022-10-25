@@ -27,6 +27,7 @@ import discord_rich_presence
 
 modpack = pack.Pack()
 CURRENT_VERSION = ''
+LATEST_VERSION = ''
 URL = ''
 APPDATA_PATH = os.getenv('APPDATA')
 PATH = ''
@@ -84,7 +85,6 @@ def new_app(title='Mjolnir', width=1280, height=720, resizable=False, icon=f'{BA
     app.resizable(resizable, resizable)
     app.config(bg='#380070')
     bg_image = Image.open(f'{BASE_DIR}\\images\\bg_blurred.png')
-    bg_image = bg_image.resize((1280, 720), Image.Resampling.LANCZOS)
     bg_image = ImageTk.PhotoImage(bg_image)
     bg_label = tk.Label(app, image=bg_image)
     bg_label.image = bg_image
@@ -113,6 +113,7 @@ def main_menu(app, games):
     # Colors
     global dark_purple
     global light_purple
+    global medium_purple
     # FONTS
     global FONTS
     # Discord Rich Presence
@@ -172,7 +173,7 @@ def main_menu(app, games):
     # Links on right side
     github_icon = tk.PhotoImage(file=f'{BASE_DIR}\\images\\github.png')
     github_link = customtkinter.CTkButton(footer_right_frame, text='', fg_color=dark_purple, image=github_icon,
-                                          hover=False, command=lambda: open_website('https://github.com/Geoffery10/ModDude'))
+                                          hover=False, command=lambda: open_website('https://github.com/Geoffery10/Mjolnir-Mod-Manager'))
     github_link.pack(side='right', padx=0, pady=0)
 
     discord_icon = tk.PhotoImage(file=f'{BASE_DIR}\\images\\discord.png')
@@ -189,6 +190,12 @@ def main_menu(app, games):
     geoffery10_link.pack(side='right', padx=0, pady=0)
     geoffery10_link.image = geoffery10_icon
 
+    update, version = online.check_for_updates(CURRENT_VERSION, URL)
+    if update:
+        # Add update button to footer by current version
+        update_button = customtkinter.CTkButton(footer_frame, text=f'Update Required', fg_color=medium_purple, border_width=0, text_font=(FONTS[3], 25),
+                                                bg_color=dark_purple, hover=False, command=lambda: open_website('https://github.com/Geoffery10/Mjolnir-Mod-Manager/releases/download/v2.0.0/Mjolnir_Mod_Manager.exe'))
+        update_button.pack(side='left', padx=20, pady=0)
 
     def game_button(game):
         global PACK
@@ -796,7 +803,7 @@ if __name__ == '__main__':
     colorama.init(autoreset=True)
     pg.theme('DarkPurple1')
     pg.isAnimated = True
-    CURRENT_VERSION = '2.0.4'
+    CURRENT_VERSION = '2.1.0'
     URL = 'https://www.geoffery10.com/mods.json'
     GAMES_URL = 'https://www.geoffery10.com/games.json'
     SUPPORTED_GAMES = ['Minecraft', 'Bonelab']

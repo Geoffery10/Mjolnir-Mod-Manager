@@ -26,10 +26,10 @@ def check_for_updates(CURRENT_VERSION, URL):
             # Check if packs are up to date
             if version.parse(CURRENT_VERSION) < version.parse(data['CURRENT_VERSION']):
                 print(Fore.GREEN + 'Update found!')
-                return True
+                return True, data['CURRENT_VERSION']
             else:
                 print(Fore.GREEN + 'No updates found!')
-                return False
+                return False, data['CURRENT_VERSION']
         else:
             ERROR_UI(
                 'Error', 'Error getting packs from internet! Please check your internet connection and try again!', FATAL=True)
