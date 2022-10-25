@@ -11,6 +11,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk, Tk
 import webbrowser
 from PIL import ImageTk, Image
+from pip import main
 
 
 # Custom Functions
@@ -82,12 +83,25 @@ def new_app(title='Mjolnir', width=1280, height=720, resizable=False, icon=f'{BA
     app.iconbitmap(icon)
     app.resizable(resizable, resizable)
     app.config(bg='#380070')
+    bg_image = Image.open(f'{BASE_DIR}\\images\\bg_blurred.png')
+    bg_image = bg_image.resize((1280, 720), Image.Resampling.LANCZOS)
+    bg_image = ImageTk.PhotoImage(bg_image)
+    bg_label = tk.Label(app, image=bg_image)
+    bg_label.image = bg_image
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)
     return app
 
 def new_frame(app):
     # Main Frame
     main_frame = tk.Frame(app, bg=dark_purple)
     main_frame.pack(fill='both', expand=True, padx=28, pady=28)
+    # Main Frame Image
+    main_frame_image = Image.open(f'{BASE_DIR}\\images\\ui\\main_frame.png')
+    main_frame_image = main_frame_image.resize((1224, 664), Image.Resampling.LANCZOS)
+    main_frame_image = ImageTk.PhotoImage(main_frame_image)
+    main_frame_image_label = tk.Label(main_frame, image=main_frame_image)
+    main_frame_image_label.image = main_frame_image
+    main_frame_image_label.place(x=0, y=0, relwidth=1, relheight=1)
     return main_frame
     
 
@@ -109,7 +123,7 @@ def main_menu(app, games):
     
     # Logo (Image Button that links to website)
     # Logo is 655x98
-    logo_image = Image.open(f'{BASE_DIR}\\images\\logo.png')
+    logo_image = Image.open(f'{BASE_DIR}\\images\\logo_main.png')
     logo_image = ImageTk.PhotoImage(logo_image)
     logo_button = customtkinter.CTkButton(app, text='', fg_color=dark_purple, border_width=0, bg_color=dark_purple,
                                           hover=False, image=logo_image, command=lambda: open_website('https://www.geoffery10.com/games.html'))
@@ -125,30 +139,44 @@ def main_menu(app, games):
     select_game.place(x=67, y=265, width=1146, height=100)
 
     # Games List
+    # Games should be centered and spaced evenly
+    # Game icons are 174x236
     game_list_frame = tk.Frame(main_frame, bg=light_purple)
     game_list_frame.place(x=0, y=340, width=1280, height=258)
 
-    # Games in List
+    # Game_Covers frame
     global SUPPORTED_GAMES
+    # width will support all games centered and spaced evenly with 20px padding
+    width = 174 * len(SUPPORTED_GAMES) + 40 * (len(SUPPORTED_GAMES))
+    x_offset = (1280 - width) / 2 - 20
+    game_covers_frame = tk.Frame(game_list_frame, bg=light_purple)
+    game_covers_frame.place(x=x_offset, y=0, width=width, height=258)
+
+    # Games in List
     for game in SUPPORTED_GAMES:
         game_image = tk.PhotoImage(file=f'{BASE_DIR}\\images\\covers\\{game}.png')
-        game_button = customtkinter.CTkButton(game_list_frame, text='', image=game_image, fg_color=light_purple,
+        game_button = customtkinter.CTkButton(game_covers_frame, text='', image=game_image, fg_color=light_purple,
                                               border_width=0, bg_color=light_purple, hover=False, command=lambda game=game: game_button(game))
         game_button.pack(side='left', padx=20, pady=10)
 
     # Footer
     footer_frame = tk.Frame(main_frame, bg=dark_purple)
-    footer_frame.place(x=0, y=598, width=1223, height=70)
+    footer_frame.place(x=48, y=598, width=1130, height=70)
     global CURRENT_VERSION
     current_version = tk.Label(footer_frame, text=f'Current Version: v{CURRENT_VERSION}', bg=dark_purple, fg='white', font=(FONTS[3], 25))
     current_version.pack(side='left', padx=20, pady=0)
+    # Right Side of Footer
+    footer_right_frame = tk.Frame(footer_frame, bg=dark_purple)
+    footer_right_frame.pack(side='right', padx=0, pady=0)
+
     # Links on right side
     github_icon = tk.PhotoImage(file=f'{BASE_DIR}\\images\\github.png')
-    github_link = customtkinter.CTkButton(footer_frame, text='', fg_color=dark_purple, image=github_icon, hover=False, command=lambda: open_website('https://github.com/Geoffery10/ModDude'))
+    github_link = customtkinter.CTkButton(footer_right_frame, text='', fg_color=dark_purple, image=github_icon,
+                                          hover=False, command=lambda: open_website('https://github.com/Geoffery10/ModDude'))
     github_link.pack(side='right', padx=0, pady=0)
 
     discord_icon = tk.PhotoImage(file=f'{BASE_DIR}\\images\\discord.png')
-    discord_link = customtkinter.CTkButton(footer_frame, text='', fg_color=dark_purple, image=discord_icon,
+    discord_link = customtkinter.CTkButton(footer_right_frame, text='', fg_color=dark_purple, image=discord_icon,
                                            hover=False, command=lambda: open_website('https://discordapp.com/users/253710834553847808'))
     discord_link.pack(side='right', padx=0, pady=0)
     # Geoffery10.com
@@ -156,7 +184,7 @@ def main_menu(app, games):
     geoffery10_icon = geoffery10_icon.resize(
         (70, 70), Image.Resampling.LANCZOS)
     geoffery10_icon = ImageTk.PhotoImage(geoffery10_icon)
-    geoffery10_link = customtkinter.CTkButton(footer_frame, text='', fg_color=dark_purple, image=discord_icon,
+    geoffery10_link = customtkinter.CTkButton(footer_right_frame, text='', fg_color=dark_purple, image=discord_icon,
                                               hover=False, command=lambda: open_website('https://www.geoffery10.com/'))
     geoffery10_link.pack(side='right', padx=0, pady=0)
     geoffery10_link.image = geoffery10_icon
@@ -768,7 +796,7 @@ if __name__ == '__main__':
     colorama.init(autoreset=True)
     pg.theme('DarkPurple1')
     pg.isAnimated = True
-    CURRENT_VERSION = '2.0.3'
+    CURRENT_VERSION = '2.0.4'
     URL = 'https://www.geoffery10.com/mods.json'
     GAMES_URL = 'https://www.geoffery10.com/games.json'
     SUPPORTED_GAMES = ['Minecraft', 'Bonelab']
