@@ -8,7 +8,7 @@ from colorama import Fore, Back
 # Docs at https://github.com/TomSchimansky/CustomTkinter/wiki
 import customtkinter
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, messagebox, ttk, Tk
 import webbrowser
 from PIL import ImageTk, Image
 
@@ -44,7 +44,7 @@ APP = None
 rpc_rpc = None
 rpc_start = time.time()
 rpc_large_image = 'icon'
-rpc_large_text = 'Mjolnir Mod Manager'
+rpc_large_text = 'Mjolnir'
 rpc_small_image = None
 
 
@@ -75,13 +75,13 @@ def new_app(title='Mjolnir', width=1280, height=720, resizable=False, icon=f'{BA
     global light_purple
     customtkinter.set_appearance_mode("System")
     customtkinter.set_default_color_theme("blue")
-    app = customtkinter.CTk()
+    app = Tk()
     # Aspect Ratio is 16:9
     app.geometry(f"{width}x{height}")
     app.title(title)
     app.iconbitmap(icon)
     app.resizable(resizable, resizable)
-    app.configure(bg='#380070')
+    app.config(bg='#380070')
     return app
 
 def new_frame(app):
@@ -739,8 +739,26 @@ def settings(games, game, app):
 
 
 def on_close():
+    print('Closing')
     global APP
-    APP.destroy()
+    try:
+        APP.destroy()
+    except:
+        pass
+    try:
+        os._exit(0)
+    except:
+        pass
+    try:
+        quit()
+    except:
+        pass
+    try:
+        import sys
+        sys.exit()
+    except:
+        pass
+    print('Failed to close')
 
 
 if __name__ == '__main__':
@@ -759,7 +777,6 @@ if __name__ == '__main__':
     FONTS = ['Arial', 'Arial', 'Arial', 'Arial']
 
     # Initialize Discord Rich Presence
-    # Run in a thread so it doesn't block the main thread and cause the app to freeze
     print('Launching Mod Manager')
     app = new_app()
     APP = app
