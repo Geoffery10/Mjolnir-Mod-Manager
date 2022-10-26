@@ -287,13 +287,13 @@ def modpack_menu(games, game, app):
     pack_info_background.image = pack_info_background_image
 
     selected_packs = tk.Label(pack_info_frame, text='Selected Packs: 0',
-                              bg=medium_color, fg='white', font=(FONTS[3], 20))
+                              bg=dark_color, fg='white', font=(FONTS[3], 20))
     selected_packs.pack(side='top', padx=0, pady=12)
     download_size = tk.Label(pack_info_frame, text='Download Size: 0 MB',
-                             bg=medium_color, fg='white', font=(FONTS[3], 20))
+                             bg=dark_color, fg='white', font=(FONTS[3], 20))
     download_size.pack(side='top', padx=0, pady=12)
     total_mods = tk.Label(pack_info_frame, text='Total Mods: 0',
-                          bg=medium_color, fg='white', font=(FONTS[3], 20))
+                          bg=dark_color, fg='white', font=(FONTS[3], 20))
     total_mods.pack(side='top', padx=0, pady=12)
 
     # Extra Options
@@ -810,9 +810,9 @@ if __name__ == '__main__':
     GAMES_URL = 'https://www.geoffery10.com/games.json'
     SUPPORTED_GAMES = ['Minecraft', 'Bonelab']
 
-    dark_color = '#5b0079'
-    medium_color = '#813C98'
-    light_color = '#995aae'
+    dark_color = '#2d2d2d'
+    medium_color = '#535353'
+    light_color = '#797979'
 
     # Custom Fonts
     FONTS = ['Arial', 'Arial', 'Arial', 'Arial']
