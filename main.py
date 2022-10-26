@@ -53,9 +53,9 @@ rpc_small_image = None
 
 # Colors
 transparent = '#00000000'
-dark_purple = '#5b0079'
-medium_purple = '#813C98'
-light_purple = '#995aae'
+dark_color = '#5b0079'
+medium_color = '#813C98'
+light_color = '#995aae'
 
 # PAGES 
 # 0 = Main Menu
@@ -73,8 +73,8 @@ def update_discord(small_image, details, state):
 
 
 def new_app(title='Mjolnir', width=1280, height=720, resizable=False, icon=f'{BASE_DIR}\\Mjolnir_Icon.ico'):
-    global dark_purple
-    global light_purple
+    global dark_color
+    global light_color
     customtkinter.set_appearance_mode("System")
     customtkinter.set_default_color_theme("blue")
     app = Tk()
@@ -93,13 +93,14 @@ def new_app(title='Mjolnir', width=1280, height=720, resizable=False, icon=f'{BA
 
 def new_frame(app):
     # Main Frame
-    main_frame = tk.Frame(app, bg=dark_purple)
+    main_frame = tk.Frame(app, bg=dark_color)
     main_frame.pack(fill='both', expand=True, padx=28, pady=28)
     # Main Frame Image
     main_frame_image = Image.open(f'{BASE_DIR}\\images\\ui\\main_frame.png')
     main_frame_image = main_frame_image.resize((1224, 664), Image.Resampling.LANCZOS)
     main_frame_image = ImageTk.PhotoImage(main_frame_image)
-    main_frame_image_label = tk.Label(main_frame, image=main_frame_image)
+    main_frame_image_label = tk.Label(
+        main_frame, image=main_frame_image, bg=dark_color)
     main_frame_image_label.image = main_frame_image
     main_frame_image_label.place(x=0, y=0, relwidth=1, relheight=1)
     return main_frame
@@ -111,9 +112,9 @@ def main_menu(app, games):
     app.title(f'Mjolnir')
     main_frame = new_frame(app)
     # Colors
-    global dark_purple
-    global light_purple
-    global medium_purple
+    global dark_color
+    global light_color
+    global medium_color
     # FONTS
     global FONTS
     # Discord Rich Presence
@@ -126,23 +127,23 @@ def main_menu(app, games):
     # Logo is 655x98
     logo_image = Image.open(f'{BASE_DIR}\\images\\logo_main.png')
     logo_image = ImageTk.PhotoImage(logo_image)
-    logo_button = customtkinter.CTkButton(app, text='', fg_color=dark_purple, border_width=0, bg_color=dark_purple,
+    logo_button = customtkinter.CTkButton(app, text='', fg_color=dark_color, border_width=0, bg_color=dark_color,
                                           hover=False, image=logo_image, command=lambda: open_website('https://www.geoffery10.com/games.html'))
     logo_button.place(x=313, y=47)
     logo_button.image = logo_image
 
     # App Info
-    app_info = tk.Label(app, text='This program was developed by Geoffery10 to help you install mods for your games.\n This app is currently in beta, so please report any bugs to me on Discord.', bg=dark_purple, fg='white', font=(FONTS[3], 20))
+    app_info = tk.Label(app, text='This program was developed by Geoffery10 to help you install mods for your games.\n This app is currently in beta, so please report any bugs to me on Discord.', bg=dark_color, fg='white', font=(FONTS[3], 20))
     app_info.place(x=67, y=182, width=1146, height=100)
 
     # Select Game
-    select_game = tk.Label(app, text='Please Select A Game', bg=dark_purple, fg='white', font=(FONTS[3], 30))
+    select_game = tk.Label(app, text='Please Select A Game', bg=dark_color, fg='white', font=(FONTS[3], 30))
     select_game.place(x=67, y=265, width=1146, height=100)
 
     # Games List
     # Games should be centered and spaced evenly
     # Game icons are 174x236
-    game_list_frame = tk.Frame(main_frame, bg=light_purple)
+    game_list_frame = tk.Frame(main_frame, bg=light_color)
     game_list_frame.place(x=0, y=340, width=1280, height=258)
 
     # Game_Covers frame
@@ -150,34 +151,34 @@ def main_menu(app, games):
     # width will support all games centered and spaced evenly with 20px padding
     width = 174 * len(SUPPORTED_GAMES) + 40 * (len(SUPPORTED_GAMES))
     x_offset = (1280 - width) / 2 - 20
-    game_covers_frame = tk.Frame(game_list_frame, bg=light_purple)
+    game_covers_frame = tk.Frame(game_list_frame, bg=light_color)
     game_covers_frame.place(x=x_offset, y=0, width=width, height=258)
 
     # Games in List
     for game in SUPPORTED_GAMES:
         game_image = tk.PhotoImage(file=f'{BASE_DIR}\\images\\covers\\{game}.png')
-        game_button = customtkinter.CTkButton(game_covers_frame, text='', image=game_image, fg_color=light_purple,
-                                              border_width=0, bg_color=light_purple, hover=False, command=lambda game=game: game_button(game))
+        game_button = customtkinter.CTkButton(game_covers_frame, text='', image=game_image, fg_color=light_color,
+                                              border_width=0, bg_color=light_color, hover=False, command=lambda game=game: game_button(game))
         game_button.pack(side='left', padx=20, pady=10)
 
     # Footer
-    footer_frame = tk.Frame(main_frame, bg=dark_purple)
+    footer_frame = tk.Frame(main_frame, bg=dark_color)
     footer_frame.place(x=48, y=598, width=1130, height=70)
     global CURRENT_VERSION
-    current_version = tk.Label(footer_frame, text=f'Current Version: v{CURRENT_VERSION}', bg=dark_purple, fg='white', font=(FONTS[3], 25))
+    current_version = tk.Label(footer_frame, text=f'Current Version: v{CURRENT_VERSION}', bg=dark_color, fg='white', font=(FONTS[3], 25))
     current_version.pack(side='left', padx=20, pady=0)
     # Right Side of Footer
-    footer_right_frame = tk.Frame(footer_frame, bg=dark_purple)
+    footer_right_frame = tk.Frame(footer_frame, bg=dark_color)
     footer_right_frame.pack(side='right', padx=0, pady=0)
 
     # Links on right side
     github_icon = tk.PhotoImage(file=f'{BASE_DIR}\\images\\github.png')
-    github_link = customtkinter.CTkButton(footer_right_frame, text='', fg_color=dark_purple, image=github_icon,
+    github_link = customtkinter.CTkButton(footer_right_frame, text='', fg_color=dark_color, image=github_icon,
                                           hover=False, command=lambda: open_website('https://github.com/Geoffery10/Mjolnir-Mod-Manager'))
     github_link.pack(side='right', padx=0, pady=0)
 
     discord_icon = tk.PhotoImage(file=f'{BASE_DIR}\\images\\discord.png')
-    discord_link = customtkinter.CTkButton(footer_right_frame, text='', fg_color=dark_purple, image=discord_icon,
+    discord_link = customtkinter.CTkButton(footer_right_frame, text='', fg_color=dark_color, image=discord_icon,
                                            hover=False, command=lambda: open_website('https://discordapp.com/users/253710834553847808'))
     discord_link.pack(side='right', padx=0, pady=0)
     # Geoffery10.com
@@ -185,7 +186,7 @@ def main_menu(app, games):
     geoffery10_icon = geoffery10_icon.resize(
         (70, 70), Image.Resampling.LANCZOS)
     geoffery10_icon = ImageTk.PhotoImage(geoffery10_icon)
-    geoffery10_link = customtkinter.CTkButton(footer_right_frame, text='', fg_color=dark_purple, image=discord_icon,
+    geoffery10_link = customtkinter.CTkButton(footer_right_frame, text='', fg_color=dark_color, image=discord_icon,
                                               hover=False, command=lambda: open_website('https://www.geoffery10.com/'))
     geoffery10_link.pack(side='right', padx=0, pady=0)
     geoffery10_link.image = geoffery10_icon
@@ -193,8 +194,8 @@ def main_menu(app, games):
     update, version = online.check_for_updates(CURRENT_VERSION, URL)
     if update:
         # Add update button to footer by current version
-        update_button = customtkinter.CTkButton(footer_frame, text=f'Update Required', fg_color=medium_purple, border_width=0, text_font=(FONTS[3], 25),
-                                                bg_color=dark_purple, hover=False, command=lambda: open_website('https://github.com/Geoffery10/Mjolnir-Mod-Manager/releases/download/v2.0.0/Mjolnir_Mod_Manager.exe'))
+        update_button = customtkinter.CTkButton(footer_frame, text=f'Update Required', fg_color=medium_color, border_width=0, text_font=(FONTS[3], 25),
+                                                bg_color=dark_color, hover=False, command=lambda: open_website('https://github.com/Geoffery10/Mjolnir-Mod-Manager/releases/download/v2.0.0/Mjolnir_Mod_Manager.exe'))
         update_button.pack(side='left', padx=20, pady=0)
 
     def game_button(game):
@@ -221,9 +222,9 @@ def modpack_menu(games, game, app):
     app.title(f'Mjolnir - {game["Name"]}')
     main_frame = new_frame(app)
     # Colors
-    global dark_purple
-    global light_purple
-    global medium_purple
+    global dark_color
+    global light_color
+    global medium_color
     # FONTS
     global FONTS
     # Discord Rich Presence
@@ -241,7 +242,7 @@ def modpack_menu(games, game, app):
     # Create Game Settings.json if it doesn't exist
     GAME_SETTINGS = game_settings_initialization(game['Name'], BASE_DIR, APPDATA_PATH)
 
-    left_frame = tk.Frame(main_frame, bg=dark_purple)
+    left_frame = tk.Frame(main_frame, bg=dark_color)
     left_frame.place(x=0, y=0, width=560, height=730)
 
 
@@ -251,7 +252,7 @@ def modpack_menu(games, game, app):
         (484, 78), Image.Resampling.LANCZOS)
     logo_image = ImageTk.PhotoImage(logo_image)
     logo = tk.Label(
-        left_frame, image=logo_image, bg=dark_purple)
+        left_frame, image=logo_image, bg=dark_color)
     logo.place(x=0, y=10, width=560, height=98)
     logo.image = logo_image
 
@@ -260,19 +261,19 @@ def modpack_menu(games, game, app):
     settings_icon = settings_icon.resize((30, 30), Image.Resampling.LANCZOS)
     settings_icon = ImageTk.PhotoImage(settings_icon)
     settings_button = customtkinter.CTkButton(
-        left_frame, text='', bg_color=dark_purple, fg_color=dark_purple, image=settings_icon, hover=False, command=lambda: settings_menu(game, app))
+        left_frame, text='', bg_color=dark_color, fg_color=dark_color, image=settings_icon, hover=False, command=lambda: settings_menu(game, app))
     settings_button.place(x=10, y=10, width=30, height=30)
     settings_button.image = settings_icon
 
 
     # Select Packs
-    select_packs = tk.Label(left_frame, text='Please Select Packs to Install', bg=dark_purple, fg='white', font=(FONTS[3], 20))
+    select_packs = tk.Label(left_frame, text='Please Select Packs to Install', bg=dark_color, fg='white', font=(FONTS[3], 20))
     select_packs.place(x=0, y=98, width=560, height=100)
 
     # Pack Info
     pack_info_frame_width = 520
     pack_info_frame_height = 180
-    pack_info_frame = tk.Frame(left_frame, bg=medium_purple)
+    pack_info_frame = tk.Frame(left_frame, bg=medium_color)
     pack_info_frame.place(
         x=20, y=170, width=pack_info_frame_width, height=pack_info_frame_height)
     pack_info_background_image = Image.open(
@@ -281,48 +282,48 @@ def modpack_menu(games, game, app):
         (pack_info_frame_width, pack_info_frame_height), Image.Resampling.LANCZOS)
     pack_info_background_image = ImageTk.PhotoImage(pack_info_background_image)
     pack_info_background = tk.Label(
-        pack_info_frame, image=pack_info_background_image, bg=dark_purple)
+        pack_info_frame, image=pack_info_background_image, bg=dark_color)
     pack_info_background.place(x=0, y=0, width=520, height=180)
     pack_info_background.image = pack_info_background_image
 
     selected_packs = tk.Label(pack_info_frame, text='Selected Packs: 0',
-                              bg=medium_purple, fg='white', font=(FONTS[3], 20))
+                              bg=medium_color, fg='white', font=(FONTS[3], 20))
     selected_packs.pack(side='top', padx=0, pady=12)
     download_size = tk.Label(pack_info_frame, text='Download Size: 0 MB',
-                             bg=medium_purple, fg='white', font=(FONTS[3], 20))
+                             bg=medium_color, fg='white', font=(FONTS[3], 20))
     download_size.pack(side='top', padx=0, pady=12)
     total_mods = tk.Label(pack_info_frame, text='Total Mods: 0',
-                          bg=medium_purple, fg='white', font=(FONTS[3], 20))
+                          bg=medium_color, fg='white', font=(FONTS[3], 20))
     total_mods.pack(side='top', padx=0, pady=12)
 
     # Extra Options
-    extra_options_frame = tk.Frame(left_frame, bg=dark_purple)
+    extra_options_frame = tk.Frame(left_frame, bg=dark_color)
     extra_options_frame.place(x=79, y=368, width=393, height=120)
     # Options
 
-    backup_old_mods = customtkinter.CTkButton(extra_options_frame, text='Backup Old Mods', fg_color=medium_purple, 
-                                              bg_color=dark_purple, text_font=(18), hover=False, command=lambda: backup_old_mods_button())
+    backup_old_mods = customtkinter.CTkButton(extra_options_frame, text='Backup Old Mods', fg_color=medium_color, 
+                                              bg_color=dark_color, text_font=(18), hover=False, command=lambda: backup_old_mods_button())
     backup_old_mods.pack(side='top', padx=0, pady=10, anchor='w', fill='x', expand=True)
     
-    delete_old_mods = customtkinter.CTkButton(extra_options_frame, text='Delete Old Mods', fg_color=medium_purple,
-                                                bg_color=dark_purple, text_font=(18), hover=False, command=lambda: delete_old_mods_button())
+    delete_old_mods = customtkinter.CTkButton(extra_options_frame, text='Delete Old Mods', fg_color=medium_color,
+                                                bg_color=dark_color, text_font=(18), hover=False, command=lambda: delete_old_mods_button())
     delete_old_mods.pack(side='top', padx=0, pady=10,
                          anchor='w', fill='x', expand=True)
 
     # Install Selected Packs
     install_selected_packs = customtkinter.CTkButton(left_frame, text='Install Selected Packs', text_font=(
-        FONTS[3], 20), fg_color=medium_purple, bg_color=dark_purple, hover=False, command=lambda: install_selected_packs_button(main_frame))
+        FONTS[3], 20), fg_color=medium_color, bg_color=dark_color, hover=False, command=lambda: install_selected_packs_button(main_frame))
     install_selected_packs.place(x=79, y=510, width=393, height=80)
 
     # Back Button
     back_button = customtkinter.CTkButton(left_frame, text='Back', text_font=(
-        FONTS[3], 15), fg_color=medium_purple, bg_color=dark_purple, hover=False, command=lambda: back())
+        FONTS[3], 15), fg_color=medium_color, bg_color=dark_color, hover=False, command=lambda: back())
     back_button.place(x=12, y=610, width=80, height=40)
     
 
     ## Right Column (Width 667)
 
-    right_frame = tk.Frame(main_frame, bg=light_purple)
+    right_frame = tk.Frame(main_frame, bg=light_color)
     right_frame.place(x=560, y=0, width=664, height=724)
 
     # Packs List (Pages)
@@ -552,10 +553,10 @@ def modpack_menu(games, game, app):
 def loading_bar_popup(app, frame, title_text='', type='', max=0):
     # Open a frame in the middle of the screen with a loading bar
     # Create frame
-    loading_frame = tk.Frame(frame, bg=dark_purple)
+    loading_frame = tk.Frame(frame, bg=dark_color)
     loading_frame.pack(side='top', anchor='center', pady=200)
     # Put a smaller frame in the middle of the screen
-    loading_frame2 = tk.Frame(loading_frame, bg=light_purple)
+    loading_frame2 = tk.Frame(loading_frame, bg=light_color)
     loading_frame2.pack(side='top', anchor='center', pady=20, padx=20)
     # Title
     title = customtkinter.CTkLabel(
@@ -566,7 +567,7 @@ def loading_bar_popup(app, frame, title_text='', type='', max=0):
         loading_frame2, text=f'{type}: 0/{max}', text_font=(30))
     # Progress Bar
     progress_bar = customtkinter.CTkProgressBar(
-        loading_frame2, fg_color=light_purple, bg_color=light_purple, progress_color=medium_purple)
+        loading_frame2, fg_color=light_color, bg_color=light_color, progress_color=medium_color)
     progress_bar.pack(side='top', anchor='center', pady=20, padx=20, fill='x', expand=True)
     progress_bar.start()
     app.update()
@@ -575,55 +576,55 @@ def loading_bar_popup(app, frame, title_text='', type='', max=0):
 
 def initialize_pack(id, pack, image, height, right_frame, selected_packs, download_size, total_mods):
     TEXT_WRAP = 350
-    pack_frame = tk.Frame(right_frame, bg=light_purple)
+    pack_frame = tk.Frame(right_frame, bg=light_color)
     pack_frame.place(x=0, y=height * (id - 1), width=664, height=height)
     
     # Add to pack button
-    add_to_pack_button = customtkinter.CTkButton(pack_frame, text='Add', text_font=(15), fg_color=medium_purple, bg_color=light_purple, hover=False, command=lambda: add_to_pack(pack))
+    add_to_pack_button = customtkinter.CTkButton(pack_frame, text='Add', text_font=(15), fg_color=medium_color, bg_color=light_color, hover=False, command=lambda: add_to_pack(pack))
     add_to_pack_button.pack(side='right', padx=10, pady=10)
 
     image = Image.open(image)
     image = image.resize(
         (100, 100), Image.Resampling.LANCZOS)
     image = ImageTk.PhotoImage(image)
-    pack_image_label = tk.Label(pack_frame, image=image, bg=light_purple)
+    pack_image_label = tk.Label(pack_frame, image=image, bg=light_color)
     pack_image_label.pack(side='left', padx=10, pady=10)
     pack_image_label.image = image
 
-    pack_details_frame = tk.Frame(pack_frame, bg=light_purple)
+    pack_details_frame = tk.Frame(pack_frame, bg=light_color)
     pack_details_frame.pack(side='left', padx=10, pady=10)
     pack_name = tk.Label(
-        pack_details_frame, text=pack['PACK_NAME'], bg=light_purple, fg='white', font=(FONTS[3], 15), wraplength=TEXT_WRAP, justify='center')
+        pack_details_frame, text=pack['PACK_NAME'], bg=light_color, fg='white', font=(FONTS[3], 15), wraplength=TEXT_WRAP, justify='center')
     pack_name.pack(side='top', padx=0, pady=0)
     pack_description = tk.Label(
-        pack_details_frame, text=pack['PACK_DESCRIPTION'], bg=light_purple, fg='white', font=(FONTS[3], 10), wraplength=TEXT_WRAP, justify='left')
+        pack_details_frame, text=pack['PACK_DESCRIPTION'], bg=light_color, fg='white', font=(FONTS[3], 10), wraplength=TEXT_WRAP, justify='left')
     pack_description.pack(side='top', padx=0, pady=0)
     if pack['PACK_SIZE'] >= 1000:
         pack_size = tk.Label(
-            pack_details_frame, text=f'Size: {round(pack["PACK_SIZE"]/1000, 1)} GB', bg=light_purple, fg='white')
+            pack_details_frame, text=f'Size: {round(pack["PACK_SIZE"]/1000, 1)} GB', bg=light_color, fg='white')
     else:
         pack_size = tk.Label(
-            pack_details_frame, text=f'Size: {round(pack["PACK_SIZE"], 1)} MB', bg=light_purple, fg='white')
+            pack_details_frame, text=f'Size: {round(pack["PACK_SIZE"], 1)} MB', bg=light_color, fg='white')
     pack_size.pack(side='left', padx=10, pady=0)
     if pack['MOD_COUNT'] == 0:
         if len(pack['MODS']) == 0:
             pack_mods = tk.Label(
-                pack_details_frame, text='Mods = 0', bg=light_purple, fg='white')
+                pack_details_frame, text='Mods = 0', bg=light_color, fg='white')
         else:
             pack_mods = tk.Label(
-                pack_details_frame, text=f'Mods = {len(pack["MODS"])}', bg=light_purple, fg='white')
+                pack_details_frame, text=f'Mods = {len(pack["MODS"])}', bg=light_color, fg='white')
             pack['MOD_COUNT'] = len(pack['MODS'])
     else:
         pack_mods = tk.Label(
-            pack_details_frame, text=f'Mods: {pack["MOD_COUNT"]}', bg=light_purple, fg='white')
+            pack_details_frame, text=f'Mods: {pack["MOD_COUNT"]}', bg=light_color, fg='white')
     pack_mods.pack(side='right', padx=10, pady=0)
 
     def add_to_pack(pack):
         print(f'Added {pack["PACK_NAME"]} to install list')
         global SELECTED_PACKS
         SELECTED_PACKS.append(pack)
-        add_to_pack_button.configure(text='Remove', bg_color=light_purple,
-                                     fg_color=dark_purple, command=lambda: remove_from_pack(pack))
+        add_to_pack_button.configure(text='Remove', bg_color=light_color,
+                                     fg_color=dark_color, command=lambda: remove_from_pack(pack))
         selected_packs.configure(text=f'Selected Packs: {len(SELECTED_PACKS)}')
         sum_download_size = sum([pack["PACK_SIZE"] for pack in SELECTED_PACKS])
         if sum_download_size >= 1000:
@@ -640,8 +641,8 @@ def initialize_pack(id, pack, image, height, right_frame, selected_packs, downlo
         print(f'Removed {pack["PACK_NAME"]} from install list')
         global SELECTED_PACKS
         SELECTED_PACKS.remove(pack)
-        add_to_pack_button.configure(text='Add', bg_color=light_purple,
-                                        fg_color=medium_purple, command=lambda: add_to_pack(pack))
+        add_to_pack_button.configure(text='Add', bg_color=light_color,
+                                        fg_color=medium_color, command=lambda: add_to_pack(pack))
         selected_packs.configure(text=f'Selected Packs: {len(SELECTED_PACKS)}')
         sum_download_size = sum([pack["PACK_SIZE"] for pack in SELECTED_PACKS])
         if sum_download_size >= 1000:
@@ -672,52 +673,52 @@ def settings(games, game, app):
     main_frame = new_frame(app)
     main_frame.pack(fill='both', expand=True)
     # Title
-    title = tk.Label(main_frame, text=f'Settings {game["Name"]}', bg=dark_purple, fg='white', font=(FONTS[3], 20))
+    title = tk.Label(main_frame, text=f'Settings {game["Name"]}', bg=dark_color, fg='white', font=(FONTS[3], 20))
     title.pack(side='top', fill='x', padx=10, pady=10)
     # Settings
     if game["Name"] == 'Minecraft':
         # game path
-        game_path_frame = tk.Frame(main_frame, bg=dark_purple)
+        game_path_frame = tk.Frame(main_frame, bg=dark_color)
         game_path_frame.pack(side='top', fill='x', padx=10, pady=10)
-        game_path_label = tk.Label(game_path_frame, text='Game Path:', bg=dark_purple, fg='white', font=(FONTS[3], 15))
+        game_path_label = tk.Label(game_path_frame, text='Game Path:', bg=dark_color, fg='white', font=(FONTS[3], 15))
         game_path_label.pack(side='left', padx=10, pady=10)
-        game_path_entry = tk.Entry(game_path_frame, bg=dark_purple, fg='white', font=(FONTS[3], 15))
+        game_path_entry = tk.Entry(game_path_frame, bg=dark_color, fg='white', font=(FONTS[3], 15))
         game_path_entry.pack(side='left', padx=10, pady=10, fill='x', expand=True)
         game_path_entry.insert(0, GAME_SETTINGS['game_path'])
         # Browse button
-        browse_button = tk.Button(game_path_frame, text='Browse', bg=light_purple, fg='white', font=(FONTS[3], 15), command=lambda: browse(game_path_entry))
+        browse_button = tk.Button(game_path_frame, text='Browse', bg=light_color, fg='white', font=(FONTS[3], 15), command=lambda: browse(game_path_entry))
         browse_button.pack(side='right', padx=10, pady=10)
 
     elif game["Name"] == 'Bonelab':
         # game path
-        game_path_frame = tk.Frame(main_frame, bg=dark_purple)
+        game_path_frame = tk.Frame(main_frame, bg=dark_color)
         game_path_frame.pack(side='top', fill='x', padx=10, pady=10)
-        game_path_label = tk.Label(game_path_frame, text='Game Path:', bg=dark_purple, fg='white', font=(FONTS[3], 15))
+        game_path_label = tk.Label(game_path_frame, text='Game Path:', bg=dark_color, fg='white', font=(FONTS[3], 15))
         game_path_label.pack(side='left', padx=10, pady=10)
-        game_path_entry = tk.Entry(game_path_frame, bg=dark_purple, fg='white', font=(FONTS[3], 15))
+        game_path_entry = tk.Entry(game_path_frame, bg=dark_color, fg='white', font=(FONTS[3], 15))
         game_path_entry.pack(side='left', padx=10, pady=10, fill='x', expand=True)
         game_path_entry.insert(0, GAME_SETTINGS['game_path'])
         # Browse button
-        browse_button = tk.Button(game_path_frame, text='Browse', bg=light_purple, fg='white', font=(FONTS[3], 15), command=lambda: browse(game_path_entry))
+        browse_button = tk.Button(game_path_frame, text='Browse', bg=light_color, fg='white', font=(FONTS[3], 15), command=lambda: browse(game_path_entry))
         browse_button.pack(side='right', padx=10, pady=10)
         # locallow path
-        locallow_path_frame = tk.Frame(main_frame, bg=dark_purple)
+        locallow_path_frame = tk.Frame(main_frame, bg=dark_color)
         locallow_path_frame.pack(side='top', fill='x', padx=10, pady=10)
-        locallow_path_label = tk.Label(locallow_path_frame, text='Locallow Path:', bg=dark_purple, fg='white', font=(FONTS[3], 15))
+        locallow_path_label = tk.Label(locallow_path_frame, text='Locallow Path:', bg=dark_color, fg='white', font=(FONTS[3], 15))
         locallow_path_label.pack(side='left', padx=10, pady=10)
-        locallow_path_entry = tk.Entry(locallow_path_frame, bg=dark_purple, fg='white', font=(FONTS[3], 15))
+        locallow_path_entry = tk.Entry(locallow_path_frame, bg=dark_color, fg='white', font=(FONTS[3], 15))
         locallow_path_entry.pack(side='left', padx=10, pady=10, fill='x', expand=True)
         locallow_path_entry.insert(0, GAME_SETTINGS['locallow_path'])
         # Browse button
-        browse_button = tk.Button(locallow_path_frame, text='Browse', bg=light_purple, fg='white', font=(FONTS[3], 15), command=lambda: browse(locallow_path_entry))
+        browse_button = tk.Button(locallow_path_frame, text='Browse', bg=light_color, fg='white', font=(FONTS[3], 15), command=lambda: browse(locallow_path_entry))
         browse_button.pack(side='right', padx=10, pady=10)
     # Save
-    save_button = customtkinter.CTkButton(main_frame, text='Save', text_font=(15), fg_color=medium_purple, bg_color=dark_purple, hover=False, command=lambda: save_settings(game))
+    save_button = customtkinter.CTkButton(main_frame, text='Save', text_font=(15), fg_color=medium_color, bg_color=dark_color, hover=False, command=lambda: save_settings(game))
     save_button.pack(side='bottom', padx=10, pady=10)
 
     # Back
     back_button = customtkinter.CTkButton(main_frame, text='Back', text_font=(
-        15), fg_color=medium_purple, bg_color=dark_purple, hover=False, command=lambda: back(games, game, app))
+        15), fg_color=medium_color, bg_color=dark_color, hover=False, command=lambda: back(games, game, app))
     back_button.pack(side='bottom', padx=10, pady=10)
 
     def back(games, game, app):
@@ -808,6 +809,10 @@ if __name__ == '__main__':
     URL = 'https://www.geoffery10.com/mods.json'
     GAMES_URL = 'https://www.geoffery10.com/games.json'
     SUPPORTED_GAMES = ['Minecraft', 'Bonelab']
+
+    dark_color = '#5b0079'
+    medium_color = '#813C98'
+    light_color = '#995aae'
 
     # Custom Fonts
     FONTS = ['Arial', 'Arial', 'Arial', 'Arial']
