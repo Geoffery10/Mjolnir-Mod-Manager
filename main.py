@@ -39,6 +39,7 @@ FONTS = []
 SELECTED_PACKS = []
 GAME_SETTINGS = ''
 ROAMING_PATH = ''
+THEMES = []
 
 APP = None
 
@@ -799,7 +800,7 @@ def on_close():
 
 
 if __name__ == '__main__':
-    ROAMING_PATH = install_app()
+    ROAMING_PATH, THEMES = install_app()
 
     # Load Initial Variables
     colorama.init(autoreset=True)
@@ -810,9 +811,13 @@ if __name__ == '__main__':
     GAMES_URL = 'https://www.geoffery10.com/games.json'
     SUPPORTED_GAMES = ['Minecraft', 'Bonelab']
 
-    dark_color = '#2d2d2d'
-    medium_color = '#535353'
-    light_color = '#797979'
+    # Load Settings
+    settings_path = os.path.join(ROAMING_PATH, 'settings.json')
+    for theme in THEMES:
+        if theme['name'] == 'Default':
+            dark_color = theme['dark_color']
+            medium_color = theme['medium_color']
+            light_color = theme['light_color']
 
     # Custom Fonts
     FONTS = ['Arial', 'Arial', 'Arial', 'Arial']

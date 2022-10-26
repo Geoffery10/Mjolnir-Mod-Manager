@@ -37,7 +37,17 @@ def install_app():
         os.mkdir(os.path.join(os.getenv('APPDATA'),
                  'Mjolnir Modpack Manager', 'GameSettings'))
 
-    return os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager')
+    # Add Themes Folder and Default Themes
+    # Create Default Themes (Default, Dark, Light) in Json Format
+    default_theme = {'name': 'Default', 'dark_color': '#5b0079', 'medium_color': '#813C98', 'light_color': '#995aae','waifu_img': ''}
+    dark_theme = {'name': 'Dark', 'dark_color': '#2d2d2d', 'medium_color': '#535353', 'light_color': '#797979','waifu_img': ''}
+
+    themes = [default_theme, dark_theme]
+    if not os.path.exists(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager', 'custom_themes')):
+        os.mkdir(os.path.join(os.getenv('APPDATA'),
+                 'Mjolnir Modpack Manager', 'custom_themes'))
+
+    return os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager'), themes
     
 
 
