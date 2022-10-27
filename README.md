@@ -54,7 +54,7 @@ Interested in contributing? Feel free to reach out to me on my discord! Geoffery
 * Geoffery Powell - [Geoffery10](https://github.com/Geoffery10)
 
 ## License
-Mjolnir Mod Manager is protected under [GNU GPLv3](https://github.com/Geoffery10/ModDude/blob/main/LICENSE.md)
+Mjolnir Mod Manager is protected under [GNU General Public License v3.0](https://github.com/Geoffery10/ModDude/blob/main/LICENSE.md)
 
 
 ## Acknowledgments
