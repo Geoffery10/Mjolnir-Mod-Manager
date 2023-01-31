@@ -18,9 +18,9 @@ def minecraft(modpack, BASE_DIR, APPDATA_PATH, FILES):
     PATH = check_game_install_location(modpack, APPDATA_PATH)
 
     # Backup Files
-    back_up_old(modpack, (f"{PATH}\\mods"))
-    back_up_old(modpack, (f"{PATH}\\config"))
-    back_up_old(modpack, (f"{PATH}\\shaderpacks"))
+    back_up_old(f"{PATH}\\mods")
+    back_up_old(f"{PATH}\\config")
+    back_up_old(f"{PATH}\\shaderpacks")
 
     # Copy Pack Into Game
     copy_pack(modpack, PATH, BASE_DIR)
@@ -138,15 +138,14 @@ def copy_pack(modpack, PATH, BASE_DIR):
 
         for folder in os.listdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}'):
             # Check if it's a folder
-            if os.path.isdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{folder}'):
+            src_folder = f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{folder}'
+            if os.path.isdir(src_folder):
                 print(Fore.GREEN + f'Copying {folder} folder...')
-                for file in os.listdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{folder}'):
-                    shutil.copy(
-                        f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{folder}\\{file}', f'{PATH}\\{folder}')
-                    copied += 1
-                    progress_bar.UpdateBar(copied / MAX_COPY * 100)
+                dst_folder = f'{PATH}\\{folder}'
+                copy_folder_with_subfolders(
+                    src_folder, dst_folder, progress_bar, MAX_COPY, copied)
                 print(Fore.MAGENTA +
-                        f'\tInstalled {copied} files to {folder} folder.\n')
+                    f'\tInstalled {copied} files to {folder} folder.\n')
                 copied = 0
         done = True
         window.close()
@@ -172,6 +171,25 @@ def get_path(PATH, layout):
                 window.close()
                 window = pg.Window('ModDude', error_layout)
     return temp_PATH
+
+
+def copy_folder_with_subfolders(src, dst, progress_bar, MAX_COPY, copied):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            if not os.path.exists(d):
+                os.makedirs(d)
+            copy_folder_with_subfolders(s, d, progress_bar, MAX_COPY, copied)
+        else:
+            try:
+                shutil.copy(s, d)
+                copied += 1
+                progress_bar.UpdateBar(copied / MAX_COPY * 100)
+            except PermissionError:
+                # If file already exists, skip
+                pass
+
 
 def run_mod_loader_installer(modpack, BASE_DIR):
     found = False
