@@ -3,6 +3,8 @@
 # MelonLoader Mods that are installed into the game folder
 # Standard Mods are installed into the LocalLow mods folder
 
+import datetime
+import json
 import re
 import shutil
 import subprocess
@@ -27,6 +29,29 @@ def bonelab(modpack, BASE_DIR, APPDATA_PATH, FILES):
     return True
 
 
+def initialize_settings(path):
+    if not os.path.exists(path):
+        # Get LocalLow install path
+        username = os.getlogin()
+        game_path = f"C:\\Program Files (x86)\\Steam\\steamapps\\common\\BONELAB"
+        locallow_path = f"C:\\Users\\{username}\\AppData\\LocalLow\\Stress Level Zero\\BONELAB"
+        with open(path, 'w') as file:
+            json.dump({'game_path': game_path,
+                       'locallow_path': locallow_path}, file)
+
+
+def validate_settings(settings):
+    # Check if settings are valid
+    valid = {'game_path': False, 'locallow_path': False}
+    if os.path.exists(settings['game_path']):
+        print(Fore.RED + 'Game path not found!')
+        valid['game_path'] = True
+    if os.path.exists(settings['locallow_path']):
+        print(Fore.RED + 'LocalLow path not found!')
+        valid['locallow_path'] = True
+    return valid
+
+
 def bonelabLocalLow(mods_path):
     found = False
     # Get LocalLow install path
@@ -46,12 +71,12 @@ def bonelabLocalLow(mods_path):
             # Check if mods folder is empty
             if os.listdir(f'{PATH}\\Mods') == []:
                 print(Fore.GREEN + 'Mods folder is empty!')
-            else:
+            # else:
                 # Check if user wants to backup mods folder
-                file_manager.ask_for_backup(f'{PATH}\\Mods')
+                # file_manager.ask_for_backup(f'{PATH}\\Mods')
 
                 # Check is user wants to delete old mods folder
-                file_manager.ask_for_delete(f'{PATH}\\Mods')
+                # file_manager.ask_for_delete(f'{PATH}\\Mods')
 
         # Copy mods to LocalLow folder
         done = False
@@ -155,6 +180,91 @@ def bonelabSteamApps(modpack, melon_mods_path):
 
     return
 
+
+def backup_old_mods(game_path, locallow_path):
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')
+    # Backup localLow mods
+    if not os.path.exists(f'{locallow_path}\\backups'):
+        os.mkdir(f'{locallow_path}\\backups')
+    if not os.path.exists(f'{locallow_path}\\backups\\{timestamp}'):
+        os.mkdir(f'{locallow_path}\\backups\\{timestamp}')
+    path = f'{locallow_path}\\backups\\{timestamp}'
+    if os.path.exists(f'{locallow_path}\\mods'):
+        # Backup with timestamp
+        shutil.copytree(f'{locallow_path}\\mods',
+                        f'{path}\\mods')
+        print(Fore.GREEN + 'Old mods backed up successfully!')
+    else:
+        print(Fore.RED + 'No mods to backup!')
+
+    if not os.path.exists(f'{game_path}\\backups'):
+        os.mkdir(f'{game_path}\\backups')
+    if not os.path.exists(f'{game_path}\\backups\\{timestamp}'):
+        os.mkdir(f'{game_path}\\backups\\{timestamp}')
+    path = f'{game_path}\\backups\\{timestamp}'
+    # Backup game mods
+    if os.path.exists(f'{game_path}\\Mods'):
+        # Backup with timestamp
+        shutil.copytree(f'{game_path}\\Mods', f'{path}\\Mods')
+        print(Fore.GREEN + 'Old Mods backed up successfully!')
+    if os.path.exists(f'{game_path}\\MelonLoader'):
+        # Backup with timestamp
+        shutil.copytree(f'{game_path}\\MelonLoader', f'{path}\\MelonLoader')
+        print(Fore.GREEN + 'Old MelonLoader backed up successfully!')
+    if os.path.exists(f'{game_path}\\Plugins'):
+        # Backup with timestamp
+        shutil.copytree(f'{game_path}\\Plugins',
+                        f'{path}\\Plugins')
+        print(Fore.GREEN + 'Old Plugins backed up successfully!')
+    if os.path.exists(f'{game_path}\\UserData'):
+        # Backup with timestamp
+        shutil.copytree(f'{game_path}\\UserData', f'{path}\\UserData')
+        print(Fore.GREEN + 'Old UserData backed up successfully!')
+    if os.path.exists(f'{game_path}\\EditScript'):
+        # Backup with timestamp
+        shutil.copytree(f'{game_path}\\EditorScript', f'{path}\\EditorScript')
+        print(Fore.GREEN + 'Old EditScript backed up successfully!')
+    if os.path.exists(f'{game_path}\\discord_game_sdk.dll'):
+        # Backup with timestamp
+        shutil.copy(f'{game_path}\\discord_game_sdk.dll',
+                    f'{path}\\discord_game_sdk.dll')
+        print(Fore.GREEN + 'Old discord_game_sdk backed up successfully!')
+    if os.path.exists(f'{game_path}\\version.dll'):
+        # Backup with timestamp
+        shutil.copy(f'{game_path}\\version.dll', f'{path}\\version.dll')
+        print(Fore.GREEN + 'Old version backed up successfully!')
+
+
+def delete_old_mods(game_path, locallow_path):
+    # Delete localLow mods
+    if os.path.exists(f'{locallow_path}\\mods'):
+        shutil.rmtree(f'{locallow_path}\\mods')
+        print(Fore.GREEN + 'Old mods deleted successfully!')
+        os.mkdir(f'{locallow_path}\\mods')
+    else:
+        print(Fore.RED + 'No mods to delete!')
+    
+    # Delete game mods
+    if os.path.exists(f'{game_path}\\Mods'):
+        shutil.rmtree(f'{game_path}\\Mods')
+        print(Fore.GREEN + 'Old Mods deleted successfully!')
+    if os.path.exists(f'{game_path}\\MelonLoader'):
+        shutil.rmtree(f'{game_path}\\MelonLoader')
+        print(Fore.GREEN + 'Old MelonLoader deleted successfully!')
+    if os.path.exists(f'{game_path}\\Plugins'):
+        shutil.rmtree(f'{game_path}\\Plugins')
+        print(Fore.GREEN + 'Old Plugins deleted successfully!')
+    if os.path.exists(f'{game_path}\\EditScript'):
+        shutil.rmtree(f'{game_path}\\EditorScript')
+        print(Fore.GREEN + 'Old EditScript deleted successfully!')
+    if os.path.exists(f'{game_path}\\discord_game_sdk.dll'):
+        os.remove(f'{game_path}\\discord_game_sdk.dll')
+        print(Fore.GREEN + 'Old discord_game_sdk deleted successfully!')
+    if os.path.exists(f'{game_path}\\version.dll'):
+        os.remove(f'{game_path}\\version.dll')
+        print(Fore.GREEN + 'Old version deleted successfully!')
+    
+    
 
 # CODED BY Alex Olson (CURRENTLY JUST FOR TESTING)
 def find_file(file_name):

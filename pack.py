@@ -6,6 +6,7 @@
 class Pack:
     url = ""
     pack_name = ""
+    pack_description = ""
     pack_version = ""
     game = ""
     game_version = ""
@@ -14,11 +15,14 @@ class Pack:
     pack_urls = []
     recommended_ram = 0
     mods = []
+    mods_count = 0
     banner_url = ""
+    size = 0 # Size of the pack in MB
 
     def __init__(self):
         self.url = ""
         self.pack_name = ""
+        self.pack_description = ""
         self.pack_version = ""
         self.game = ""
         self.game_version = ""
@@ -27,4 +31,6 @@ class Pack:
         self.pack_urls = []
         self.recommended_ram = 0
         self.mods = []
+        self.mods_count = 0
         self.banner_url = ""
+        self.size = 0

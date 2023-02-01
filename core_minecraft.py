@@ -18,9 +18,9 @@ def minecraft(modpack, BASE_DIR, APPDATA_PATH, FILES):
     PATH = check_game_install_location(modpack, APPDATA_PATH)
 
     # Backup Files
-    back_up_old(modpack, (f"{PATH}\\mods"))
-    back_up_old(modpack, (f"{PATH}\\config"))
-    back_up_old(modpack, (f"{PATH}\\shaderpacks"))
+    back_up_old(f"{PATH}\\mods")
+    back_up_old(f"{PATH}\\config")
+    back_up_old(f"{PATH}\\shaderpacks")
 
     # Copy Pack Into Game
     copy_pack(modpack, PATH, BASE_DIR)
@@ -39,6 +39,32 @@ def minecraft(modpack, BASE_DIR, APPDATA_PATH, FILES):
     check_install_integrity(modpack, PATH, BASE_DIR)
 
     return True
+
+
+def backup_old_mods(PATH):
+    back_up_old(f"{PATH}\\mods")
+    back_up_old(f"{PATH}\\config")
+    back_up_old(f"{PATH}\\shaderpacks")
+
+def initialize_settings(path, APPDATA_PATH):
+    if not os.path.exists(path):
+        if not os.path.exists(path):
+            if os.path.exists(f'{APPDATA_PATH}\\.minecraft'):
+                with open(path, 'w') as f:
+                    f.write('{"game_path": f"{APPDATA_PATH}\\.minecraft"}')
+            else:
+                with open(path, 'w') as f:
+                    f.write('{"game_path": ""}')
+
+
+def validate_settings(settings):
+    # Check if settings are valid
+    valid = {'game_path': False}
+    if os.path.exists(settings['game_path']):
+        print(Fore.RED + 'Game path not found!')
+        valid['game_path'] = True
+    return valid
+
 
 
 def check_game_install_location(modpack, APPDATA_PATH):
@@ -112,15 +138,14 @@ def copy_pack(modpack, PATH, BASE_DIR):
 
         for folder in os.listdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}'):
             # Check if it's a folder
-            if os.path.isdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{folder}'):
+            src_folder = f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{folder}'
+            if os.path.isdir(src_folder):
                 print(Fore.GREEN + f'Copying {folder} folder...')
-                for file in os.listdir(f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{folder}'):
-                    shutil.copy(
-                        f'{BASE_DIR}\\Downloads\\{modpack.pack_name}\\{folder}\\{file}', f'{PATH}\\{folder}')
-                    copied += 1
-                    progress_bar.UpdateBar(copied / MAX_COPY * 100)
+                dst_folder = f'{PATH}\\{folder}'
+                copy_folder_with_subfolders(
+                    src_folder, dst_folder, progress_bar, MAX_COPY, copied)
                 print(Fore.MAGENTA +
-                        f'\tInstalled {copied} files to {folder} folder.\n')
+                    f'\tInstalled {copied} files to {folder} folder.\n')
                 copied = 0
         done = True
         window.close()
@@ -146,6 +171,25 @@ def get_path(PATH, layout):
                 window.close()
                 window = pg.Window('ModDude', error_layout)
     return temp_PATH
+
+
+def copy_folder_with_subfolders(src, dst, progress_bar, MAX_COPY, copied):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            if not os.path.exists(d):
+                os.makedirs(d)
+            copy_folder_with_subfolders(s, d, progress_bar, MAX_COPY, copied)
+        else:
+            try:
+                shutil.copy(s, d)
+                copied += 1
+                progress_bar.UpdateBar(copied / MAX_COPY * 100)
+            except PermissionError:
+                # If file already exists, skip
+                pass
+
 
 def run_mod_loader_installer(modpack, BASE_DIR):
     found = False
@@ -352,54 +396,28 @@ def check_install_integrity(modpack, PATH, BASE_DIR):
     else:
         ERROR_UI('Error', 'Game not supported!', FATAL=False)
 
-def back_up_old(modpack, PATH):
+def back_up_old(PATH):
     print(Fore.CYAN + f'\n{PATH}\n')
     folder_name = os.path.basename(os.path.normpath(PATH))
     if os.path.exists(f'{PATH}'):
-        # Ask user if they want to back up old mods
-        print(Fore.YELLOW +
-                f'Would you like to back up your old {folder_name}? (y/n)')
-        layout = [[pg.Text(f'Would you like to back up your old {folder_name}?')],
-                    [pg.Button('Yes'), pg.Button('No')]]
-        window = pg.Window('ModDude', layout)
-        while True:
-            event, values = window.read()
-            if event in (None, 'Exit'):
-                exit_app()
-            elif event == 'Yes':
-
-                # Backup Minecraft mods to new folder with date
-                current_date = datetime.datetime.now()
-                current_date = current_date.strftime("%m-%d-%Y_%H-%M-%S")
-                print(Fore.GREEN + f'Backing up old {folder_name} to ' + Fore.MAGENTA +
-                        f'{folder_name}_old_{current_date}' + Fore.GREEN + '...')
-                os.rename(f'{PATH}',
-                            f'{PATH}_old_{current_date}')
-                print(Fore.GREEN + 'Backup Complete!')
-                window.close()
-                break
-            elif event == 'No':
-                # Not backing up old files
-                # Only Delete Old Mods
-                if folder_name == 'mods':
-                    try:
-                        shutil.rmtree(f'{PATH}')
-                        print(Fore.GREEN + 'Old folder removed!')
-                    except OSError as e:
-                        ERROR_UI(
-                            'Error', f'Error: {e.filename} - {e.strerror}!', FATAL=True)
-                window.close()
-                return
+        # Backup Minecraft mods to new folder with date
+        current_date = datetime.datetime.now()
+        current_date = current_date.strftime("%m-%d-%Y_%H-%M-%S")
+        print(Fore.GREEN + f'Backing up old {folder_name} to ' + Fore.MAGENTA +
+                f'{folder_name}_old_{current_date}' + Fore.GREEN + '...')
+        shutil.copytree(f'{PATH}',
+                    f'{PATH}_old_{current_date}')
+        print(Fore.GREEN + 'Backup Complete!')
     else:
         print(Fore.GREEN + 'No existing mods found.')
-    
-    layout = [[pg.Text('Files backed up!')],
-              [pg.Button('OK!')]]
-    window = pg.Window('ModDude', layout)
-    while True:
-        event, values = window.read()
-        if event in (None, 'Exit'):
-            exit_app()
-        elif event == 'OK!':
-            window.close()
-            break
+
+
+def delete_old_mods(PATH):
+    folder_name = os.path.basename(os.path.normpath(PATH))
+    if os.path.exists(f'{PATH}'):
+        # Delete old mods
+        print(Fore.GREEN + f'Deleting old {folder_name}...')
+        shutil.rmtree(f'{PATH}')
+        print(Fore.GREEN + f'Old {folder_name} deleted!')
+    else:
+        print(Fore.GREEN + f'No existing {folder_name} found.')

@@ -2,6 +2,7 @@
 # Path: file_manager.py
 
 # Import Modules
+import json
 import subprocess
 from colorama import Fore, Back, Style
 import os
@@ -9,6 +10,76 @@ import shutil
 import datetime
 import PySimpleGUI as pg
 from ui_menus import ERROR_UI, exit_app, UI_Setup
+import core_bonelab
+import core_minecraft
+import os
+from win32com.client import Dispatch
+
+
+def install_app():
+    # Initialize Roaming Storage
+    if not os.path.exists(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager')):
+        os.mkdir(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager'))
+
+    if not os.path.exists(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager', 'images')):
+        os.mkdir(os.path.join(os.getenv('APPDATA'),
+                 'Mjolnir Modpack Manager', 'images'))
+
+    if os.path.exists(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager', 'images', 'packs')):
+        # Delete old packs folder
+        shutil.rmtree(os.path.join(os.getenv('APPDATA'),
+                     'Mjolnir Modpack Manager', 'images', 'packs'))
+    # Create new packs folder
+    os.mkdir(os.path.join(os.getenv('APPDATA'),
+                'Mjolnir Modpack Manager', 'images', 'packs'))
+
+    if not os.path.exists(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager', 'GameSettings')):
+        os.mkdir(os.path.join(os.getenv('APPDATA'),
+                 'Mjolnir Modpack Manager', 'GameSettings'))
+
+    # Add Themes Folder and Default Themes
+    # Create Default Themes (Default, Dark, Light) in Json Format
+    default_theme = {'name': 'Default', 'dark_color': '#5b0079', 'medium_color': '#813C98', 'light_color': '#995aae','waifu_img': ''}
+    dark_theme = {'name': 'Dark', 'dark_color': '#2d2d2d', 'medium_color': '#535353', 'light_color': '#797979','waifu_img': ''}
+
+    themes = [default_theme, dark_theme]
+    if not os.path.exists(os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager', 'custom_themes')):
+        os.mkdir(os.path.join(os.getenv('APPDATA'),
+                 'Mjolnir Modpack Manager', 'custom_themes'))
+
+    return os.path.join(os.getenv('APPDATA'), 'Mjolnir Modpack Manager'), themes
+    
+
+
+def game_settings_initialization(game, BASE_DIR, APPDATA_PATH):
+    # Store the settings in Roaming
+    if not os.path.exists(os.path.join(APPDATA_PATH, 'Mjolnir Modpack Manager')):
+        os.mkdir(os.path.join(APPDATA_PATH, 'Mjolnir Modpack Manager'))
+    Roaming_Path = os.path.join(APPDATA_PATH, 'Mjolnir Modpack Manager')
+    if not os.path.exists(f'{Roaming_Path}\\GameSettings'):
+        os.mkdir(f'{Roaming_Path}\\GameSettings')
+    path = f'{Roaming_Path}\\GameSettings\\{game}_Settings.json'
+    if game == 'Minecraft':
+        core_minecraft.initialize_settings(path, APPDATA_PATH)
+    elif game == 'Bonelab':
+        core_bonelab.initialize_settings(path)
+
+    # Load settings
+    with open(path, 'r') as f:
+        settings = eval(f.read())
+    
+    return settings
+
+def validate_settings(game_name, settings):
+    if game_name == 'Minecraft':
+        valid = core_minecraft.validate_settings(settings)
+    elif game_name == 'Bonelab':
+        valid = core_bonelab.validate_settings(settings)
+
+    return valid
+
+
+    
 
 def path_finder(folder, additional_info=""):
     # This code will ask the user for the correct path to an install folder and check 

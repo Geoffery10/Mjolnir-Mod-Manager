@@ -1,0 +1,5 @@
+colorama==0.4.4
+customtkinter==4.6.3
+packaging==21.3
+pypresence==4.2.1
+PySimpleGUI==4.60.4
