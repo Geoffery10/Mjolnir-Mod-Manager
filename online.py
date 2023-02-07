@@ -207,9 +207,10 @@ def select_pack(packs):
             return modpack
 
 
-def download_pack(modpack, BASE_DIR, FILES, app):
+def download_pack(modpack, BASE_DIR, FILES, app, bonus_text=None):
     extra_steps = 2
     progress = 0
+    count = 1
 
     # Get Step Size for Progress Bar
     step_size = int(100 / (len(modpack.pack_urls) + extra_steps))
@@ -239,6 +240,9 @@ def download_pack(modpack, BASE_DIR, FILES, app):
         file_name = file.split('/')[-1]
         FILES.append(file_name)
         print(Fore.GREEN + f'Downloading {file_name}...')
+        if bonus_text:
+            bonus_text.configure(text=f'{file_name} ({count}/{len(modpack.pack_urls)})')
+        count += 1
         # Start async timer to record download speed
         start = time.time()
         app.update()

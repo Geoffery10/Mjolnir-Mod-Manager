@@ -404,7 +404,7 @@ def modpack_menu(games, game, app):
             update_discord(rpc_small_image, game['Name'],
                            'Backing up old mods')
             if game['Name'] == 'Minecraft':
-                loading_frame, title, of_x, progress_bar = loading_bar_popup(
+                loading_frame, title, of_x, progress_bar, bonus_text = loading_bar_popup(
                     app, main_frame, title_text=f'Backing Up Old Mods', type='Backups', max=1)
                 core_minecraft.backup_old_mods(GAME_SETTINGS['game_path'])
                 progress_bar.stop()
@@ -437,7 +437,7 @@ def modpack_menu(games, game, app):
                 global rpc_small_image
                 update_discord(rpc_small_image, game['Name'], 'Deleting up old mods')
                 if game['Name'] == 'Minecraft':
-                    loading_frame, title, of_x, progress_bar = loading_bar_popup(
+                    loading_frame, title, of_x, progress_bar, bonus_text = loading_bar_popup(
                         app, main_frame, title_text=f'Deleting Old Mods', type='Backups', max=1)
                     core_minecraft.delete_old_mods(f"{GAME_SETTINGS['game_path']}\\mods")
                     progress_bar.stop()
@@ -479,8 +479,10 @@ def modpack_menu(games, game, app):
             
             modpacks = []
             # Install packs
-            loading_frame, title, of_x, progress_bar = loading_bar_popup(
+            loading_frame, title, of_x, progress_bar, bonus_text = loading_bar_popup(
                 app, main_frame, title_text=f'Downloading {SELECTED_PACKS[0]["PACK_NAME"]}', type='Packs', max=len(SELECTED_PACKS))
+            bonus_text.config(text=f'Starting download...')
+            app.update()
             for pack in SELECTED_PACKS:
                 # Parse packs into Pack objects
                 modpack = Pack()
@@ -508,7 +510,8 @@ def modpack_menu(games, game, app):
                 print(f'Pack Size: {len(modpack.pack_urls)}')
                 app.title(f'Downloading {modpack.pack_name}')
                 title.configure(text=f'Downloading {modpack.pack_name}')
-                online.download_pack(modpack=modpack, BASE_DIR=BASE_DIR, FILES=FILES, app=app)
+                online.download_pack(modpack=modpack, BASE_DIR=BASE_DIR, FILES=FILES,
+                                     app=app, bonus_text=bonus_text)
                 count += 1
                 of_x.configure(text=f'Packs: {count}/{len(SELECTED_PACKS)}')
                 app.update()
@@ -516,7 +519,7 @@ def modpack_menu(games, game, app):
             loading_frame.destroy()
 
             # Install mods
-            loading_frame, title, of_x, progress_bar = loading_bar_popup(
+            loading_frame, title, of_x, progress_bar, bonus_text = loading_bar_popup(
                 app, main_frame, title_text=f'Installing {SELECTED_PACKS[0]["PACK_NAME"]}', type='Packs', max=len(SELECTED_PACKS))
 
             for pack in modpacks:
@@ -528,7 +531,7 @@ def modpack_menu(games, game, app):
                 if pack.game == 'Minecraft':
                     # Minecraft
                     import core_minecraft
-                    valid = core_minecraft.minecraft(pack, BASE_DIR, APPDATA_PATH, FILES)
+                    valid = core_minecraft.minecraft(pack, BASE_DIR, APPDATA_PATH, FILES, app, bonus_text)
                 elif pack.game == 'Bonelab':
                     # Bonelab
                     import core_bonelab
@@ -551,7 +554,7 @@ def modpack_menu(games, game, app):
             messagebox.showerror('No Packs Selected', 'Please select a pack to install.', parent=app)
 
 
-def loading_bar_popup(app, frame, title_text='', type='', max=0):
+def loading_bar_popup(app, frame, title_text='', type='', max=0, bonus_text=''):
     # Open a frame in the middle of the screen with a loading bar
     # Create frame
     loading_frame = tk.Frame(frame, bg=dark_color)
@@ -562,7 +565,11 @@ def loading_bar_popup(app, frame, title_text='', type='', max=0):
     # Title
     title = customtkinter.CTkLabel(
         loading_frame2, text=title_text, text_font=(20))
-    title.pack(side='top', anchor='center', pady=40)
+    title.pack(side='top', anchor='center', pady=3, padx=40)
+    # Bonus Text (Optional)
+    bonus = customtkinter.CTkLabel(
+        loading_frame2, text=bonus_text, text_font=(15))
+    bonus.pack(side='top', anchor='center', pady=3, padx=2)
     # Of X
     of_x = customtkinter.CTkLabel(
         loading_frame2, text=f'{type}: 0/{max}', text_font=(30))
@@ -572,7 +579,7 @@ def loading_bar_popup(app, frame, title_text='', type='', max=0):
     progress_bar.pack(side='top', anchor='center', pady=20, padx=20, fill='x', expand=True)
     progress_bar.start()
     app.update()
-    return loading_frame, title, of_x, progress_bar
+    return loading_frame, title, of_x, progress_bar, bonus
 
 
 def initialize_pack(id, pack, image, height, right_frame, selected_packs, download_size, total_mods):
@@ -806,7 +813,7 @@ if __name__ == '__main__':
     colorama.init(autoreset=True)
     pg.theme('DarkPurple1')
     pg.isAnimated = True
-    CURRENT_VERSION = '2.2.0'
+    CURRENT_VERSION = '2.2.1'
     URL = 'https://www.geoffery10.com/mods.json'
     GAMES_URL = 'https://www.geoffery10.com/games.json'
     SUPPORTED_GAMES = ['Minecraft', 'Bonelab']
