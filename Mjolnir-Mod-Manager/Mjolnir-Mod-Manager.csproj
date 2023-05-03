@@ -1,0 +1,65 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <RootNamespace>Mjolnir_Mod_Manager</RootNamespace>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="assets\bg.png" />
+    <None Remove="assets\bg_blurred.png" />
+    <None Remove="assets\covers\Bonelab.png" />
+    <None Remove="assets\covers\Minecraft.png" />
+    <None Remove="assets\discord.png" />
+    <None Remove="assets\geoffery10.png" />
+    <None Remove="assets\github.png" />
+    <None Remove="assets\logo.png" />
+    <None Remove="assets\logo_main.png" />
+    <None Remove="assets\Mjolnir_Icon.ico" />
+    <None Remove="assets\packs\default.png" />
+    <None Remove="assets\settings.png" />
+    <None Remove="assets\SteamGrid.png" />
+    <None Remove="assets\ui\info_window_01.png" />
+    <None Remove="assets\ui\info_window_02.png" />
+    <None Remove="assets\ui\main_frame.png" />
+    <None Remove="assets\ui\Rectangle 2.png" />
+    <None Remove="Bonelab.png" />
+    <None Remove="fonts\SFAlienEncounters-Italic.ttf" />
+    <None Remove="fonts\SFAlienEncounters.ttf" />
+    <None Remove="fonts\SFAlienEncountersSolid-Ital.ttf" />
+    <None Remove="fonts\SFAlienEncountersSolid.ttf" />
+    <None Remove="Minecraft.png" />
+    <None Remove="Rectangle 2.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="assets\bg.png" />
+    <Resource Include="assets\bg_blurred.png" />
+    <Resource Include="assets\covers\Bonelab.png" />
+    <Resource Include="assets\covers\Minecraft.png" />
+    <Resource Include="assets\discord.png" />
+    <Resource Include="assets\geoffery10.png" />
+    <Resource Include="assets\github.png" />
+    <Resource Include="assets\logo.png" />
+    <Resource Include="assets\logo_main.png" />
+    <Resource Include="assets\Mjolnir_Icon.ico" />
+    <Resource Include="assets\packs\default.png" />
+    <Resource Include="assets\settings.png" />
+    <Resource Include="assets\SteamGrid.png" />
+    <Resource Include="assets\ui\info_window_01.png" />
+    <Resource Include="assets\ui\info_window_02.png" />
+    <Resource Include="assets\ui\main_frame.png" />
+    <Resource Include="assets\ui\Rectangle 2.png" />
+    <Resource Include="Bonelab.png" />
+    <Resource Include="fonts\SFAlienEncounters-Italic.ttf" />
+    <Resource Include="fonts\SFAlienEncounters.ttf" />
+    <Resource Include="fonts\SFAlienEncountersSolid-Ital.ttf" />
+    <Resource Include="fonts\SFAlienEncountersSolid.ttf" />
+    <Resource Include="Minecraft.png" />
+    <Resource Include="Rectangle 2.png" />
+  </ItemGroup>
+
+</Project>

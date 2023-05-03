@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33516.290
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mjolnir-Mod-Manager", "Mjolnir-Mod-Manager\Mjolnir-Mod-Manager.csproj", "{8824A568-1353-45BE-AF0B-DBED78A83F6C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8824A568-1353-45BE-AF0B-DBED78A83F6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8824A568-1353-45BE-AF0B-DBED78A83F6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8824A568-1353-45BE-AF0B-DBED78A83F6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8824A568-1353-45BE-AF0B-DBED78A83F6C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1F6750D1-CC55-4673-978D-384E9B30ED29}
+	EndGlobalSection
+EndGlobal
